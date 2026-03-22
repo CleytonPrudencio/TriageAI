@@ -154,4 +154,4 @@ TriageAI/
 
 ## Licenca
 
-Projeto academico - TCC
+MIT License
