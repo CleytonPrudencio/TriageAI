@@ -1,0 +1,21 @@
+import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
+
+export const routes: Routes = [
+  { path: 'login', loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
+  { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
+  {
+    path: '',
+    loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
+    canActivate: [authGuard],
+    children: [
+      { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'tickets', loadComponent: () => import('./tickets/ticket-list/ticket-list.component').then(m => m.TicketListComponent) },
+      { path: 'tickets/new', loadComponent: () => import('./tickets/ticket-form/ticket-form.component').then(m => m.TicketFormComponent) },
+      { path: 'tickets/:id', loadComponent: () => import('./tickets/ticket-detail/ticket-detail.component').then(m => m.TicketDetailComponent) },
+      { path: 'settings/repos', loadComponent: () => import('./settings/repo-config/repo-config.component').then(m => m.RepoConfigComponent) },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    ]
+  },
+  { path: '**', redirectTo: 'login' },
+];

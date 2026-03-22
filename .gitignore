@@ -1,0 +1,26 @@
+# Java
+backend/target/
+*.class
+*.jar
+
+# Python
+ai-service/__pycache__/
+ai-service/model/__pycache__/
+ai-service/saved_model/
+ai-service/data/feedback.csv
+*.pyc
+.venv/
+
+# Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

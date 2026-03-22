@@ -1,0 +1,1001 @@
+text,categoria,prioridade
+"Sistema de login nao esta funcionando, usuarios nao conseguem acessar a plataforma desde esta manha",TECNICO,ALTA
+"Fatura do mes de marco nao foi gerada corretamente, valores incorretos no boleto",FINANCEIRO,ALTA
+"Preciso de informacoes sobre upgrade do plano atual para o plano empresarial",COMERCIAL,MEDIA
+"Solicito criacao de novo usuario para colaborador que iniciou hoje na empresa",ADMINISTRATIVO,BAIXA
+"Duvida geral sobre funcionamento do sistema, primeira vez usando a plataforma",OUTROS,BAIXA
+"Servidor de banco de dados caiu e todas as operacoes estao paradas urgente",TECNICO,ALTA
+"Cobranca duplicada no cartao de credito referente ao mes de fevereiro precisa ser estornada",FINANCEIRO,ALTA
+"Quero cancelar meu contrato atual e migrar para outro fornecedor",COMERCIAL,ALTA
+"Atualizar dados cadastrais do funcionario que mudou de departamento recentemente",ADMINISTRATIVO,BAIXA
+"Sugestao para melhoria da interface do usuario no painel principal do sistema",OUTROS,BAIXA
+"Erro critico no modulo de relatorios impedindo exportacao de dados importantes",TECNICO,ALTA
+"Nota fiscal do servico contratado nao chegou no email cadastrado no sistema",FINANCEIRO,ALTA
+"Solicitar proposta comercial para contratacao de licencas adicionais do software",COMERCIAL,MEDIA
+"Pedido de treinamento para equipe sobre novo modulo implementado na semana passada",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre roadmap de novas funcionalidades previstas para proximo trimestre",OUTROS,BAIXA
+"Rede corporativa com queda de velocidade drastica afetando toda a equipe de producao",TECNICO,ALTA
+"Imposto retido na fonte calculado de forma incorreta no ultimo demonstrativo financeiro",FINANCEIRO,ALTA
+"Negociacao de desconto para renovacao anual do contrato que vence no proximo mes",COMERCIAL,MEDIA
+"Solicitacao de acesso ao sistema para novo gerente que chegou na filial de Sao Paulo",ADMINISTRATIVO,BAIXA
+"Feedback positivo sobre atendimento recebido na semana passada pelo suporte tecnico",OUTROS,BAIXA
+"Aplicativo mobile travando ao tentar sincronizar dados com o servidor central",TECNICO,ALTA
+"Estorno de pagamento realizado em duplicidade no boleto do mes de janeiro",FINANCEIRO,ALTA
+"Interesse em conhecer planos para pequenas empresas com ate 10 usuarios",COMERCIAL,BAIXA
+"Documento de politica interna desatualizado precisa ser revisado e publicado novamente",ADMINISTRATIVO,BAIXA
+"Pergunta sobre compatibilidade do sistema com navegador Safari mais recente",OUTROS,BAIXA
+"Impressora de rede parou de funcionar apos atualizacao do driver realizada ontem",TECNICO,ALTA
+"Relatorio financeiro mensal com dados incorretos comprometendo fechamento contabil",FINANCEIRO,ALTA
+"Proposta de parceria estrategica entre nossas empresas para atender mercado conjunto",COMERCIAL,MEDIA
+"Compliance precisa de documentacao atualizada para auditoria marcada para proxima semana",ADMINISTRATIVO,ALTA
+"Indicacao de um colega que tambem precisa do sistema para sua empresa",OUTROS,BAIXA
+"VPN corporativa nao conecta apos atualizacao do sistema operacional Windows 11",TECNICO,ALTA
+"Contestacao de cobranca indevida referente a servico que foi cancelado ha tres meses",FINANCEIRO,ALTA
+"Renovacao automatica do contrato foi efetuada sem autorizacao previa necessita revisao",COMERCIAL,ALTA
+"Cadastro de novo fornecedor no sistema financeiro para pagamento de servicos contratados",ADMINISTRATIVO,BAIXA
+"Comentario sobre experiencia de uso do sistema nos ultimos seis meses de utilizacao",OUTROS,BAIXA
+"Banco de dados com lentidao extrema causando timeout em todas as consultas do sistema",TECNICO,ALTA
+"Desconto prometido pelo vendedor nao foi aplicado na fatura do mes corrente",FINANCEIRO,ALTA
+"Solicitacao de contrato personalizado com clausulas especificas para nosso segmento",COMERCIAL,MEDIA
+"Atualizacao de assinatura digital de gestor que saiu da empresa no mes passado",ADMINISTRATIVO,BAIXA
+"Quero saber se ha previsao de integracao com sistema de terceiros que utilizo",OUTROS,BAIXA
+"Falha no processo de backup automatico ha tres dias colocando dados em risco",TECNICO,ALTA
+"Nota de credito nao foi emitida apos cancelamento do servico realizado em dezembro",FINANCEIRO,ALTA
+"Interesse em adicionar modulo de gestao de projetos ao contrato vigente atualmente",COMERCIAL,MEDIA
+"Solicitacao de certificado de treinamento para funcionarios que concluiram o curso",ADMINISTRATIVO,BAIXA
+"Duvida sobre politica de privacidade e uso de dados pessoais na plataforma",OUTROS,BAIXA
+"Integracao com ERP da empresa quebrou apos ultima atualizacao do sistema publicada",TECNICO,ALTA
+"Parcelamento de fatura em atraso para regularizar situacao financeira da conta",FINANCEIRO,ALTA
+"Upgrade urgente do plano necessario devido ao crescimento da equipe este trimestre",COMERCIAL,ALTA
+"Permissao de acesso ao modulo financeiro para novo contador recem contratado",ADMINISTRATIVO,BAIXA
+"Relato de experiencia durante evento de treinamento realizado na empresa na semana",OUTROS,BAIXA
+"Servidor web retornando erro 500 em todas as requisicoes feitas pelos usuarios",TECNICO,ALTA
+"Reembolso de valor pago a mais na ultima fatura precisa ser processado urgente",FINANCEIRO,ALTA
+"Negociacao de contrato plurianual com condicoes especiais para grande volume de uso",COMERCIAL,MEDIA
+"Desativacao de usuarios que sairam da empresa no processo de reducao de equipe",ADMINISTRATIVO,BAIXA
+"Sugestao de nova funcionalidade para o modulo de relatorios do sistema atual",OUTROS,BAIXA
+"CPU do servidor de producao em 100% causando instabilidade em todos os servicos",TECNICO,ALTA
+"Boleto bancario com data de vencimento incorreta emitido para empresa no sistema",FINANCEIRO,ALTA
+"Comparativo de planos para decidir qual melhor se adequa as necessidades atuais",COMERCIAL,BAIXA
+"Solicitacao de mudanca de gestor responsavel pela conta na plataforma corporativa",ADMINISTRATIVO,BAIXA
+"Pergunta sobre SLA de atendimento e tempo medio de resolucao de chamados abertos",OUTROS,BAIXA
+"Falha de seguranca identificada na autenticacao do sistema de acesso dos usuarios",TECNICO,ALTA
+"Imposto sobre servico calculado incorretamente na nota fiscal emitida neste mes",FINANCEIRO,ALTA
+"Proposta de distribuicao e revenda do produto para nossa rede de parceiros regionais",COMERCIAL,MEDIA
+"Atualizacao de contato de emergencia e dados pessoais no cadastro da empresa",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre como funciona o algoritmo de sugestoes do sistema de recomendacao",OUTROS,BAIXA
+"Microservico de autenticacao falhando intermitentemente causando logouts involuntarios",TECNICO,ALTA
+"Cheque devolvido pelo banco necessita de esclarecimento sobre proximo passo a seguir",FINANCEIRO,ALTA
+"Solicitacao de demonstracao do produto para time de vendas avaliar antes de contratar",COMERCIAL,BAIXA
+"Registro de falta e justificativa de ausencia no sistema de ponto eletronico da empresa",ADMINISTRATIVO,BAIXA
+"Agradecimento pela rapida resolucao do chamado aberto na semana anterior pelo time",OUTROS,BAIXA
+"Monitor do desenvolvedor com linhas horizontais apos queda de energia no escritorio",TECNICO,ALTA
+"Solicitacao de nota fiscal complementar para corrigir erro no CNPJ do tomador",FINANCEIRO,ALTA
+"Contrato atual nao atende mais as necessidades sendo necessaria uma revisao urgente",COMERCIAL,MEDIA
+"Documentacao para processo seletivo interno de promocao de cargo na empresa",ADMINISTRATIVO,BAIXA
+"Duvida sobre como exportar relatorio em formato especifico para apresentacao gerencial",OUTROS,BAIXA
+"Sistema de email corporativo com falha no envio de mensagens desde a madrugada",TECNICO,ALTA
+"Credito disponivel na conta nao esta sendo abatido nas faturas mais recentes",FINANCEIRO,ALTA
+"Solicitacao de white label do produto para oferecer com a nossa propria marca",COMERCIAL,MEDIA
+"Licenca de software expirada para computador do setor de contabilidade da empresa",ADMINISTRATIVO,BAIXA
+"Consulta sobre disponibilidade de API para integracao com nosso sistema proprio",OUTROS,BAIXA
+"Firewall bloqueando acesso a sistema critico de producao apos reconfiguracoes feitas",TECNICO,ALTA
+"Plano de pagamento anual foi cobrado mensalmente causando divergencia financeira",FINANCEIRO,ALTA
+"Renovacao de contrato com ajuste de escopo para incluir novos modulos necessarios",COMERCIAL,MEDIA
+"Solicitacao de atestado de capacidade tecnica para licitacao publica que participa",ADMINISTRATIVO,BAIXA
+"Pedido de material de apoio e tutoriais para uso basico do sistema pelos funcionarios",OUTROS,BAIXA
+"Certificado SSL expirado causando alertas de seguranca nos navegadores dos usuarios",TECNICO,ALTA
+"Divergencia entre valor cobrado e valor contratado precisa de analise urgente financeira",FINANCEIRO,ALTA
+"Plano basico limitando crescimento da empresa precisamos discutir opcoes de expansao",COMERCIAL,MEDIA
+"Revisao de politica de uso aceitavel para novos colaboradores que entram na empresa",ADMINISTRATIVO,BAIXA
+"Feedback sobre funcionalidade de busca que poderia ser melhorada no sistema atual",OUTROS,BAIXA
+"Deploy em producao falhou e sistema esta fora do ar para todos os clientes ativos",TECNICO,ALTA
+"Fatura com desconto comercial nao foi aplicado conforme acordado com o representante",FINANCEIRO,ALTA
+"Solicitacao de proposta para contratacao de modulo adicional de analytics avancado",COMERCIAL,MEDIA
+"Gestao de ferias e licencas dos colaboradores precisa ser cadastrada no sistema",ADMINISTRATIVO,BAIXA
+"Indicacao de melhoria no processo de onboarding para novos usuarios da plataforma",OUTROS,BAIXA
+"Disco rigido do servidor chegando ao limite de capacidade risco de parada iminente",TECNICO,ALTA
+"Solicitacao de demonstrativo financeiro anual para declaracao de imposto de renda",FINANCEIRO,ALTA
+"Parceria para co-marketing e divulgacao conjunta dos produtos para base de clientes",COMERCIAL,MEDIA
+"Atualizacao de endereco da empresa no cadastro do sistema apos mudanca de sede",ADMINISTRATIVO,BAIXA
+"Como funciona o processo de migracao de dados de outro sistema para esta plataforma",OUTROS,BAIXA
+"API de integracao retornando erro 403 apos rotacao de credenciais de autenticacao",TECNICO,ALTA
+"Boleto para pagamento de multa rescisoria calculada de forma incorreta pelo sistema",FINANCEIRO,ALTA
+"Negociacao de SLA personalizado com garantias maiores de disponibilidade do servico",COMERCIAL,MEDIA
+"Criacao de grupo de usuarios com permissoes especificas para filial de outra cidade",ADMINISTRATIVO,BAIXA
+"Pergunta sobre capacidade de armazenamento disponivel no plano contratado atualmente",OUTROS,BAIXA
+"Lentidao no carregamento das paginas do sistema durante horario de pico comercial",TECNICO,ALTA
+"Declaracao de servicos tomados precisa ser emitida para fins de auditoria fiscal",FINANCEIRO,ALTA
+"Alteracao de titularidade do contrato apos aquisicao da empresa por outro grupo",COMERCIAL,ALTA
+"Solicitacao de cracha de acesso para visitante que precisa de acesso temporario",ADMINISTRATIVO,BAIXA
+"Duvida sobre as diferencas entre os planos disponiveis e qual melhor se encaixa",OUTROS,BAIXA
+"Atualizacao critica de seguranca precisa ser aplicada urgente no servidor de aplicacao",TECNICO,ALTA
+"Imposto de renda retido na fonte sobre servicos prestados com percentual incorreto",FINANCEIRO,ALTA
+"Solicitacao de extensao de periodo de trial para melhor avaliacao do sistema completo",COMERCIAL,BAIXA
+"Formalizacao de acordo de nivel de servico interno entre departamentos da empresa",ADMINISTRATIVO,BAIXA
+"Sugestao para adicionar modo escuro na interface do sistema para reduzir fadiga visual",OUTROS,BAIXA
+"Memoria RAM do servidor insuficiente causando swap excessivo e lentidao critica",TECNICO,ALTA
+"Recibo de pagamento nao foi enviado para email apos confirmacao da transacao bancaria",FINANCEIRO,BAIXA
+"Interesse em contrato de suporte tecnico dedicado com atendimento prioritario especial",COMERCIAL,MEDIA
+"Treinamento de compliance para todos os funcionarios precisa ser agendado urgente",ADMINISTRATIVO,BAIXA
+"Comentario sobre usabilidade do sistema sendo muito intuitivo e facil de aprender",OUTROS,BAIXA
+"Pipeline de CI/CD quebrou apos merge na branch principal impedindo novos deploys",TECNICO,ALTA
+"Analise de viabilidade financeira para expansao do contrato atual para mais usuarios",FINANCEIRO,ALTA
+"Condicoes comerciais especiais para projeto piloto com possibilidade de expansao futura",COMERCIAL,MEDIA
+"Documentacao tecnica necessaria para processo de homologacao junto ao orgao regulador",ADMINISTRATIVO,BAIXA
+"Pergunta sobre historico de incidentes e disponibilidade do sistema nos ultimos meses",OUTROS,BAIXA
+"Falha na replicacao de banco de dados entre datacenter primario e secundario urgente",TECNICO,ALTA
+"Pagamento via PIX nao reconhecido pelo sistema permanecendo como pendente ha dias",FINANCEIRO,ALTA
+"Revisao de contrato antes do prazo de renovacao para negociar melhores condicoes",COMERCIAL,MEDIA
+"Solicitacao de historico de acesso ao sistema para auditoria interna de seguranca",ADMINISTRATIVO,BAIXA
+"Duvida sobre politica de reembolso caso o sistema nao atenda as expectativas",OUTROS,BAIXA
+"Servidor de arquivos inacessivel impedindo acesso a documentos criticos da empresa",TECNICO,ALTA
+"Fatura com CNPJ incorreto precisa ser cancelada e reemitida com dados corretos",FINANCEIRO,ALTA
+"Upgrade de plano individual para plano empresarial com migracao dos dados existentes",COMERCIAL,MEDIA
+"Inclusao de novo departamento no organograma refletindo reestruturacao organizacional",ADMINISTRATIVO,BAIXA
+"Feedback sobre processo de suporte sendo muito demorado para resolver problemas simples",OUTROS,BAIXA
+"Container Docker falhando ao inicializar devido a problema de configuracao de variaveis",TECNICO,ALTA
+"Solicitacao de segunda via de nota fiscal do ultimo servico contratado pela empresa",FINANCEIRO,BAIXA
+"Proposta de contrato de exclusividade para distribuicao em determinada regiao geografica",COMERCIAL,MEDIA
+"Reativacao de usuario que estava inativo e retornou apos periodo de licenca medica",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre tecnologias utilizadas no desenvolvimento da plataforma atual",OUTROS,BAIXA
+"Erro de permissao ao tentar acessar modulo especifico do sistema sem motivo aparente",TECNICO,ALTA
+"Devolucao de equipamento locado precisa ser agendada e processada no sistema",FINANCEIRO,ALTA
+"Negociacao de prazo de pagamento diferenciado para periodo de baixa temporada",COMERCIAL,MEDIA
+"Registro de ocorrencia de assedio no ambiente de trabalho para RH investigar",ADMINISTRATIVO,ALTA
+"Sugestao de integracao com plataforma popular de gestao que varios clientes utilizam",OUTROS,BAIXA
+"Servico de monitoramento de infraestrutura gerando falsos positivos em excesso",TECNICO,ALTA
+"Relatorio de inadimplencia precisa ser gerado com dados do ultimo trimestre fiscal",FINANCEIRO,ALTA
+"Solicitacao de visita tecnica comercial para apresentar solucao ao board de diretores",COMERCIAL,MEDIA
+"Atualizacao de contrato social da empresa no cadastro do sistema apos alteracao",ADMINISTRATIVO,BAIXA
+"Pergunta sobre disponibilidade de suporte em horario estendido e fins de semana",OUTROS,BAIXA
+"Queda de conexao com datacenter remoto afetando filiais que dependem do sistema",TECNICO,ALTA
+"Valor de mensalidade aumentou sem notificacao previa contrariando contrato vigente",FINANCEIRO,ALTA
+"Interesse em modulo de inteligencia artificial para automatizacao de processos internos",COMERCIAL,MEDIA
+"Solicitacao de segunda via de contrato assinado para arquivo interno da empresa",ADMINISTRATIVO,BAIXA
+"Duvida sobre como configurar notificacoes por email para alertas do sistema",OUTROS,BAIXA
+"Ataque de ransomware detectado na rede corporativa necessidade de isolamento urgente",TECNICO,ALTA
+"Contestacao de juros cobrados sobre fatura que foi paga dentro do prazo acordado",FINANCEIRO,ALTA
+"Proposta de projeto especial com desenvolvimento customizado para necessidade especifica",COMERCIAL,MEDIA
+"Politica de seguranca da informacao precisa ser revisada e distribuida para todos",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre programa de indicacoes e beneficios para clientes que recomendam",OUTROS,BAIXA
+"Load balancer mal configurado causando distribuicao desigual de carga nos servidores",TECNICO,ALTA
+"Acordo de parcelamento para divida em aberto com vencimento de prazo iminente",FINANCEIRO,ALTA
+"Cancelamento de modulo adicional que nao esta sendo utilizado pela equipe atual",COMERCIAL,MEDIA
+"Documentacao para certificacao ISO que precisa incluir processos do sistema",ADMINISTRATIVO,BAIXA
+"Sugestao de melhoria no processo de abertura de chamados para ser mais eficiente",OUTROS,BAIXA
+"Erro na sincronizacao de dados entre sistema legado e nova plataforma implementada",TECNICO,ALTA
+"Isencao de multa por cancelamento solicitada devido a motivo de forca maior",FINANCEIRO,ALTA
+"Avaliacao de solucao para substituir sistema atual que nao atende mais as demandas",COMERCIAL,MEDIA
+"Atualizacao de poderes do responsavel legal da empresa no sistema juridico",ADMINISTRATIVO,BAIXA
+"Pergunta sobre prazo de retencao de dados apos encerramento do contrato vigente",OUTROS,BAIXA
+"Servico de CDN com alta latencia prejudicando experiencia dos usuarios finais",TECNICO,ALTA
+"Pagamento recusado pela operadora de cartao sem justificativa clara para cliente",FINANCEIRO,ALTA
+"Solicitacao de contrato de confidencialidade NDA antes de iniciar negociacao formal",COMERCIAL,BAIXA
+"Inclusao de clausula adicional no contrato vigente para atender requisito regulatorio",ADMINISTRATIVO,BAIXA
+"Duvida sobre compatibilidade do sistema com diferentes versoes de sistemas operacionais",OUTROS,BAIXA
+"Falha critica no processo de autenticacao permitindo acesso sem credenciais validas",TECNICO,ALTA
+"Reducao de cobranca solicitada apos termino de periodo contratual de fidelidade",FINANCEIRO,ALTA
+"Negociacao de contrato de servicos gerenciados com suporte 24x7 incluido no pacote",COMERCIAL,MEDIA
+"Revisao de politica de home office e necessidade de atualizacao nos cadastros",ADMINISTRATIVO,BAIXA
+"Feedback excelente sobre nova versao do sistema lancada no mes passado pela empresa",OUTROS,BAIXA
+"Banco de dados corrompido apos falha de energia necessitando recuperacao urgente",TECNICO,ALTA
+"Reembolso de taxa de instalacao cobrada indevidamente no primeiro mes de servico",FINANCEIRO,ALTA
+"Proposta para programa de parceiros com beneficios exclusivos para revendas certificadas",COMERCIAL,MEDIA
+"Gestao de inventario de equipamentos de TI precisa ser cadastrada no sistema",ADMINISTRATIVO,BAIXA
+"Pergunta sobre processo de migracao para plano superior sem perda de dados",OUTROS,BAIXA
+"Certificado de autenticidade de software nao foi entregue apos pagamento realizado",TECNICO,ALTA
+"Credito de servicos nao utilizados no mes anterior para abatimento em proxima fatura",FINANCEIRO,ALTA
+"Solicitacao de proposta para implantacao em ambiente de nuvem privada da empresa",COMERCIAL,MEDIA
+"Atualizacao de dados bancarios para recebimento de reembolsos futuros da empresa",ADMINISTRATIVO,BAIXA
+"Como posso integrar o sistema com ferramentas de produtividade que ja utilizamos",OUTROS,BAIXA
+"Servidor de email enviando mensagens para spam devido a configuracao incorreta SPF",TECNICO,ALTA
+"Plano cancelado erroneamente pelo sistema sem solicitacao do cliente cadastrado",FINANCEIRO,ALTA
+"Interesse em licenca corporativa com desconto por volume para toda a organizacao",COMERCIAL,MEDIA
+"Solicitacao de treinamento presencial para equipe de gestores da empresa regional",ADMINISTRATIVO,BAIXA
+"Sugestao para criar dashboard executivo com indicadores principais do negocio",OUTROS,BAIXA
+"Script de migracao de dados falhou na metade causando inconsistencia no banco",TECNICO,ALTA
+"Nota fiscal servico tomado precisando de correcao no codigo de servico informado",FINANCEIRO,ALTA
+"Proposta de contrato de longo prazo com garantia de preco fixo por tres anos",COMERCIAL,MEDIA
+"Processo de offboarding de colaborador que sera desligado da empresa amanha",ADMINISTRATIVO,BAIXA
+"Duvida sobre como funciona o processo de renovacao automatica do plano contratado",OUTROS,BAIXA
+"Sistema de pagamento online recusando transacoes validas sem motivo identificado",TECNICO,ALTA
+"Multa contratual aplicada indevidamente por suposto descumprimento de clausula",FINANCEIRO,ALTA
+"Renovacao de contrato anual com solicitacao de melhores condicoes comerciais",COMERCIAL,MEDIA
+"Documentacao de processo mapeado precisa ser registrada no sistema de qualidade",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre historico da empresa e quantos anos de mercado tem a solucao",OUTROS,BAIXA
+"Cluster de alta disponibilidade com split brain causando inconsistencia de dados",TECNICO,ALTA
+"Solicitacao de planilha com historico de pagamentos dos ultimos doze meses",FINANCEIRO,BAIXA
+"Contrato de suporte anual precisa ser renovado antes do vencimento no mes que vem",COMERCIAL,MEDIA
+"Inclusao de representante legal adicional com poderes no contrato da empresa",ADMINISTRATIVO,BAIXA
+"Pergunta sobre quais certificacoes de seguranca o sistema possui atualmente",OUTROS,BAIXA
+"Driver de dispositivo incompativel causando tela azul da morte nos computadores",TECNICO,ALTA
+"Diferenca entre valor pago e valor recebido na transferencia bancaria realizada",FINANCEIRO,ALTA
+"Demonstracao tecnica do produto para equipe de TI antes de decidir pela contratacao",COMERCIAL,BAIXA
+"Politica de desconto para associacoes sem fins lucrativos e organizacoes sociais",COMERCIAL,BAIXA
+"Atualizacao de versao do sistema operacional nos servidores de producao agendada",TECNICO,ALTA
+"Isencao de IOF sobre pagamentos internacionais para servico prestado no exterior",FINANCEIRO,ALTA
+"Proposta de contrato com clausula de saida sem multa apos periodo minimo garantido",COMERCIAL,MEDIA
+"Treinamento de seguranca da informacao obrigatorio para todos os funcionarios",ADMINISTRATIVO,BAIXA
+"Sugestao para melhorar a performance de carregamento dos relatorios do sistema",OUTROS,BAIXA
+"Problema de conectividade com servidor de autenticacao externo Single Sign On",TECNICO,ALTA
+"Fatura com vencimento no feriado precisa ter data corrigida para dia util anterior",FINANCEIRO,BAIXA
+"Upgrade de suporte basico para suporte premium para projeto critico em andamento",COMERCIAL,MEDIA
+"Renovacao de certificado digital da empresa para assinatura de documentos eletronicos",ADMINISTRATIVO,BAIXA
+"Como funciona o processo de backup dos dados armazenados na plataforma em nuvem",OUTROS,BAIXA
+"Mensagens de erro no log do sistema sem impacto visivel mas precisam investigacao",TECNICO,BAIXA
+"Solicitacao de reducao de plano devido a reducao da equipe por reestruturacao",FINANCEIRO,ALTA
+"Parceria para revenda do produto em outro estado com suporte tecnico local",COMERCIAL,MEDIA
+"Documentacao para auditoria trabalhista sobre jornada de trabalho dos colaboradores",ADMINISTRATIVO,BAIXA
+"Duvida sobre quais formatos de arquivo sao suportados para importacao de dados",OUTROS,BAIXA
+"Servidor de aplicacao com alto consumo de memoria causando degradacao de performance",TECNICO,ALTA
+"Nota fiscal eletronica rejeitada pela prefeitura com codigo de erro nao identificado",FINANCEIRO,ALTA
+"Condicoes especiais para setor publico e orgaos governamentais na contratacao",COMERCIAL,BAIXA
+"Reativacao de conta suspensa por inadimplencia apos regularizacao do pagamento",ADMINISTRATIVO,BAIXA
+"Pergunta sobre processo de auditoria de seguranca que a empresa realiza periodicamente",OUTROS,BAIXA
+"Falha no processo de autorizacao de pagamentos via gateway externo integrado",TECNICO,ALTA
+"Reajuste anual de contrato acima do indice contratual precisa de justificativa",FINANCEIRO,ALTA
+"Solicitacao de orcamento para projeto de implantacao em ambiente multi-empresa",COMERCIAL,MEDIA
+"Inclusao de politica de uso de dispositivos pessoais no trabalho BYOD na empresa",ADMINISTRATIVO,BAIXA
+"Sugestao de recurso para gestao de tarefas integrado ao sistema principal",OUTROS,BAIXA
+"Erro ao processar arquivo de importacao em lote com mais de mil registros",TECNICO,ALTA
+"Pagamento por boleto nao sendo reconhecido apos tres dias uteis da compensacao",FINANCEIRO,ALTA
+"Negociacao de prazo de implantacao mais rapido para atender deadline do projeto",COMERCIAL,MEDIA
+"Solicitacao de licenca nao remunerada precisa ser formalizada e aprovada no sistema",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre planos futuros de expansao do produto para mercado internacional",OUTROS,BAIXA
+"Atualizacao do firmware do roteador corporativo causou queda na conectividade geral",TECNICO,ALTA
+"Cobranças retroativas de tres meses sendo lancadas de uma vez na fatura atual",FINANCEIRO,ALTA
+"Avaliacao de contrato de outsourcing para gestao completa da infraestrutura de TI",COMERCIAL,MEDIA
+"Documentacao de procedimentos de seguranca precisa ser atualizada para conformidade",ADMINISTRATIVO,BAIXA
+"Pergunta sobre disponibilidade de versao em ingles do sistema para filial no exterior",OUTROS,BAIXA
+"Sistema de monitoramento de infraestrutura nao esta gerando alertas quando deveria",TECNICO,ALTA
+"Analise de credito negada sem justificativa para contratacao de servico solicitado",FINANCEIRO,ALTA
+"Proposta de co-desenvolvimento de funcionalidade especifica para ambas as empresas",COMERCIAL,MEDIA
+"Atualizacao de contato de faturamento para nova responsavel financeira da empresa",ADMINISTRATIVO,BAIXA
+"Como posso verificar o status atual dos servidores e disponibilidade do sistema",OUTROS,BAIXA
+"Processo de restore de backup falhou deixando sistema com dados desatualizados",TECNICO,ALTA
+"Solicitacao de extrato detalhado de cobrancas para reconciliacao financeira mensal",FINANCEIRO,BAIXA
+"Interesse em plano especifico para startups com preco diferenciado nos primeiros meses",COMERCIAL,BAIXA
+"Formalizacao de acordo entre departamentos para uso compartilhado de licencas",ADMINISTRATIVO,BAIXA
+"Feedback sobre documentacao tecnica que poderia ser mais detalhada e completa",OUTROS,BAIXA
+"Servidor DNS com problemas causando falhas de resolucao de nomes intermitentes",TECNICO,ALTA
+"Nota fiscal de servico com aliquota de ISS incorreta para municipio onde foi prestado",FINANCEIRO,ALTA
+"Contrato de desenvolvimento customizado para modulo especifico da plataforma",COMERCIAL,MEDIA
+"Criacao de perfil de acesso especifico para auditores externos com permissoes limitadas",ADMINISTRATIVO,BAIXA
+"Duvida sobre como configurar relatorios automaticos para envio semanal por email",OUTROS,BAIXA
+"Erro de codificacao de caracteres especiais causando corrupcao em relatorios gerados",TECNICO,ALTA
+"Desconto negociado na renovacao nao apareceu na fatura gerada automaticamente",FINANCEIRO,ALTA
+"Proposta de bundle com outros produtos do portfolio para reducao de custos totais",COMERCIAL,MEDIA
+"Revisao anual de permissoes de acesso de todos os usuarios ativos no sistema",ADMINISTRATIVO,BAIXA
+"Sugestao para adicionar funcionalidade de comentarios em tarefas do sistema",OUTROS,BAIXA
+"Falha na sincronizacao entre ambiente de homologacao e producao apos deploy recente",TECNICO,ALTA
+"Cobranças de servicos adicionais nao contratados aparecendo na ultima fatura mensal",FINANCEIRO,ALTA
+"Negociacao de desconto progressivo baseado em volume de uso mensal da plataforma",COMERCIAL,MEDIA
+"Processo de aprovacao de despesas precisa ser digitalizado e integrado ao sistema",ADMINISTRATIVO,BAIXA
+"Pergunta sobre como funciona a precificacao dinamica e quando ela e aplicada",OUTROS,BAIXA
+"Antivirus corporativo quarentenou arquivo legitimo do sistema impedindo seu funcionamento",TECNICO,ALTA
+"Solicitacao de nota de debito para registrar credito a favor da empresa no sistema",FINANCEIRO,ALTA
+"Contrato com clausula de benchmarking para garantir preco de mercado competitivo",COMERCIAL,BAIXA
+"Atualizacao do responsavel tecnico pelo sistema junto ao orgao regulador competente",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre quantos clientes ativos utilizam a plataforma atualmente no Brasil",OUTROS,BAIXA
+"Vulnerabilidade critica CVE identificada no componente usado pela aplicacao urgente",TECNICO,ALTA
+"Fatura com erro no periodo de competencia referente a servico de outro mes",FINANCEIRO,ALTA
+"Solicitacao de proposta para projeto de consultoria de implementacao e treinamento",COMERCIAL,MEDIA
+"Inclusao de novo local de atendimento no contrato de suporte tecnico vigente",ADMINISTRATIVO,BAIXA
+"Como faco para migrar todos os meus dados para o sistema antes de cancelar o atual",OUTROS,BAIXA
+"Sistema de autenticacao multifator nao enviando codigo SMS para usuarios cadastrados",TECNICO,ALTA
+"Diferenca entre moeda de faturamento e moeda de pagamento causando variacao cambial",FINANCEIRO,ALTA
+"Interesse em adquirir licencas adicionais para expansao do time de desenvolvimento",COMERCIAL,MEDIA
+"Solicitacao de declaracao de conformidade com LGPD para parceiro que esta exigindo",ADMINISTRATIVO,BAIXA
+"Duvida sobre processo de cancelamento e quais dados podem ser exportados antes",OUTROS,BAIXA
+"Proxy reverso mal configurado causando loop de redirecionamento nos acessos",TECNICO,ALTA
+"Pagamento em excesso realizado por engano precisa ser estornado o mais rapido",FINANCEIRO,ALTA
+"Proposta de patrocinio de evento do setor para visibilidade da marca e geracao leads",COMERCIAL,BAIXA
+"Documentacao de procedimento de contingencia para falhas criticas do sistema",ADMINISTRATIVO,BAIXA
+"Pergunta sobre quais idiomas estao disponiveis na interface do sistema atualmente",OUTROS,BAIXA
+"Falha total no ambiente de disaster recovery testado durante janela de manutencao",TECNICO,ALTA
+"Solicitacao de parcelamento especial para quitacao de divida acumulada em atraso",FINANCEIRO,ALTA
+"Upgrade de plano para incluir usuarios ilimitados conforme crescimento da empresa",COMERCIAL,MEDIA
+"Treinamento de novos colaboradores no uso correto das ferramentas do sistema",ADMINISTRATIVO,MEDIA
+"Sugestao para melhorar a experiencia de onboarding de novos usuarios da plataforma",OUTROS,BAIXA
+"Cache do servidor desatualizado causando usuarios a verem versao antiga do sistema",TECNICO,ALTA
+"Fatura emitida para CNPJ errado precisa ser cancelada e reemitida urgentemente",FINANCEIRO,ALTA
+"Negociacao de contrato para uso em periodo de alta demanda sazonal da empresa",COMERCIAL,MEDIA
+"Atualizacao de dados de contato do representante legal no contrato social",ADMINISTRATIVO,BAIXA
+"Como posso obter relatorio de uso detalhado para apresentar para a diretoria",OUTROS,BAIXA
+"Erro critico de banco de dados causando perda de transacoes em horario de pico",TECNICO,ALTA
+"Analise de debitos vencidos e negociacao para regularizacao da situacao financeira",FINANCEIRO,ALTA
+"Contrato de servico especifico para projeto com escopo e prazo bem definidos",COMERCIAL,MEDIA
+"Revisao de acordo de confidencialidade com fornecedor antes da assinatura formal",ADMINISTRATIVO,MEDIA
+"Duvida sobre responsabilidade em caso de falha do sistema e impacto no negocio",OUTROS,BAIXA
+"Falha no modulo de exportacao de PDF impedindo geracao de relatorios formatados",TECNICO,ALTA
+"Solicitacao de isencao de multa por cancelamento antecipado por motivo de forca maior",FINANCEIRO,ALTA
+"Proposta de contrato anual com clausula de revisao semestral de funcionalidades",COMERCIAL,MEDIA
+"Gestao de acesso a instalacoes fisicas e vinculacao com credenciais do sistema",ADMINISTRATIVO,BAIXA
+"Pergunta sobre como funciona a precificacao para uso em multiplos ambientes",OUTROS,BAIXA
+"Servico de notificacoes em tempo real nao esta funcionando para usuarios especificos",TECNICO,ALTA
+"Cobranças indevidas de periodo apos cancelamento solicitado precisam ser revertidas",FINANCEIRO,ALTA
+"Parceria para desenvolver solucao white label para mercado vertical especifico",COMERCIAL,MEDIA
+"Inclusao de nivel de hierarquia adicional no organograma do sistema de aprovacoes",ADMINISTRATIVO,MEDIA
+"Sugestao para o sistema enviar alertas proativos sobre uso proximo do limite",OUTROS,BAIXA
+"Problema de incompatibilidade entre versao do cliente e servidor apos atualizacao",TECNICO,ALTA
+"Nota fiscal com codigo de barras ilegivel impossibilitando pagamento pelo banco",FINANCEIRO,ALTA
+"Solicitacao de visita comercial para discutir expansao do relacionamento existente",COMERCIAL,BAIXA
+"Documentacao de processos internos para auditoria de qualidade ISO 9001",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre como o sistema lida com picos de acesso e escalabilidade",OUTROS,BAIXA
+"Erro de timeout em operacoes pesadas no banco de dados durante horario comercial",TECNICO,ALTA
+"Divergencia de centavos entre nota fiscal e boleto emitidos para o mesmo servico",FINANCEIRO,BAIXA
+"Contrato de cessao de direitos de uso do sistema para subsidiaria no exterior",COMERCIAL,MEDIA
+"Revisao do plano de continuidade de negocios com atualizacao dos responsaveis",ADMINISTRATIVO,MEDIA
+"Feedback sobre a qualidade dos treinamentos oferecidos pela empresa parceira",OUTROS,BAIXA
+"Rotinas de manutencao do banco de dados falhando causando degradacao de performance",TECNICO,ALTA
+"Reembolso de valores pagos em periodo de inatividade do sistema por falha tecnica",FINANCEIRO,ALTA
+"Negociacao de migracao de contrato de competidor com preservacao de dados historicos",COMERCIAL,MEDIA
+"Solicitacao de segunda via de certificado de habilitacao tecnica para licitacao",ADMINISTRATIVO,MEDIA
+"Como posso solicitar ajuda para configurar integracao com sistema de terceiros",OUTROS,BAIXA
+"Processo ETL de importacao de dados falhou corrompendo base de dados de producao",TECNICO,ALTA
+"Solicitacao de balancete financeiro para submissao ao banco em processo de credito",FINANCEIRO,MEDIA
+"Proposta de contrato especial para empresa do grupo com condicoes diferenciadas",COMERCIAL,MEDIA
+"Atualizacao de quadro societario da empresa apos entrada de novo socio investidor",ADMINISTRATIVO,MEDIA
+"Pergunta sobre como funciona a politica de backup e recuperacao de dados do sistema",OUTROS,BAIXA
+"Servidor de aplicacao sem espaco em disco causando falhas nas gravacoes de logs",TECNICO,ALTA
+"Parcelamento de fatura de alto valor para preservar fluxo de caixa da empresa",FINANCEIRO,MEDIA
+"Interesse em programa de fidelidade para clientes de longo prazo com beneficios",COMERCIAL,BAIXA
+"Documentacao para renovacao de licenca de funcionamento exigida pelo municipio",ADMINISTRATIVO,MEDIA
+"Duvida sobre como o suporte funciona fora do horario comercial em emergencias",OUTROS,BAIXA
+"Sistema legado nao consegue se comunicar com nova API versao 2 do sistema",TECNICO,MEDIA
+"Analise de credito aprovada mas sistema nao permitindo ativacao do servico contratado",FINANCEIRO,MEDIA
+"Proposta comercial com implementacao gradual por fases para reducao de riscos",COMERCIAL,MEDIA
+"Solicitacao de aprovacao para compra de equipamento acima do limite de autonomia",ADMINISTRATIVO,MEDIA
+"Sugestao de melhoria no relatorio de desempenho do sistema para tomada de decisao",OUTROS,BAIXA
+"Job de processamento em batch travado ha mais de 24 horas sem conclusao",TECNICO,ALTA
+"Carta de anuencia bancaria necessaria para operacao financeira da empresa",FINANCEIRO,MEDIA
+"Interesse em contrato de servicos profissionais para customizacoes especificas",COMERCIAL,MEDIA
+"Revisao de politica de despesas e adiantamentos para alinhamento com nova diretriz",ADMINISTRATIVO,BAIXA
+"Pergunta sobre cobertura geografica e disponibilidade em regioes especificas do Brasil",OUTROS,BAIXA
+"Falha no processo de atualizacao automatica deixando sistema em versao desatualizada",TECNICO,MEDIA
+"Contestacao de cobranca por servico descontinuado que continua sendo faturado",FINANCEIRO,MEDIA
+"Contrato de desenvolvimento de API personalizada para integracao com sistema proprio",COMERCIAL,MEDIA
+"Inclusao de novo cargo na tabela de permissoes do sistema de gestao empresarial",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre disponibilidade de modulo de assinatura digital no sistema",OUTROS,BAIXA
+"Erro de validacao de dados no formulario de cadastro impedindo criacao de registros",TECNICO,MEDIA
+"Reembolso de taxa de setup cobrada mas servico nunca foi efetivamente ativado",FINANCEIRO,MEDIA
+"Proposta de contrato de suporte tecnico com gestor de conta dedicado exclusivo",COMERCIAL,MEDIA
+"Treinamento de lideranca e uso de sistema para novos gestores promovidos internamente",ADMINISTRATIVO,MEDIA
+"Feedback sobre nova funcionalidade lancada sendo muito util para operacao diaria",OUTROS,BAIXA
+"Aplicacao com vazamento de memoria causando reinicializacoes espontaneas periodicas",TECNICO,ALTA
+"Fatura com periodo de competencia incorreto emitida para trimestre ja encerrado",FINANCEIRO,MEDIA
+"Renovacao antecipada de contrato com bonificacao por antecipacao de compromisso",COMERCIAL,MEDIA
+"Documentacao para processo de certificacao CMMI que empresa esta obtendo atualmente",ADMINISTRATIVO,MEDIA
+"Duvida sobre como funciona o processo de escalonamento de chamados criticos",OUTROS,BAIXA
+"Problema de performance em query critica causando lentidao em toda a aplicacao",TECNICO,ALTA
+"Nota de credito para compensar periodo de indisponibilidade do sistema no mes",FINANCEIRO,MEDIA
+"Solicitacao de orcamento para projeto especial fora do escopo do contrato vigente",COMERCIAL,MEDIA
+"Revisao de politica de acesso remoto para trabalho hibrido dos colaboradores",ADMINISTRATIVO,MEDIA
+"Sugestao para implementar dark mode na versao mobile do sistema para melhor uso",OUTROS,BAIXA
+"Servidores de aplicacao em producao reiniciando automaticamente sem causa aparente",TECNICO,ALTA
+"Cobranças de licencas para usuarios que ja foram removidos do sistema ha meses",FINANCEIRO,MEDIA
+"Negociacao de contrato global para todas as filiais da empresa no Brasil e exterior",COMERCIAL,ALTA
+"Atualizacao de contrato de confidencialidade com clausulas atualizadas da legislacao",ADMINISTRATIVO,MEDIA
+"Pergunta sobre quais metricas de desempenho do sistema sao monitoradas pela equipe",OUTROS,BAIXA
+"Script de atualizacao de banco de dados falhou deixando schema em estado inconsistente",TECNICO,ALTA
+"Solicitacao de credito referente a indisponibilidade do sistema superior ao SLA",FINANCEIRO,ALTA
+"Proposta de contrato com modelo de precificacao baseado em resultados mensuraveis",COMERCIAL,MEDIA
+"Documentacao de procedimentos operacionais padrao para compliance regulatorio",ADMINISTRATIVO,MEDIA
+"Como posso acompanhar o progresso do chamado aberto anteriormente no sistema",OUTROS,BAIXA
+"Firewall de aplicacao web WAF bloqueando requisicoes legitimas dos usuarios",TECNICO,MEDIA
+"Fatura com descricao de servico incorreta necessitando correcao para fins contabeis",FINANCEIRO,BAIXA
+"Interesse em licencas educacionais com desconto para treinamento interno da equipe",COMERCIAL,BAIXA
+"Solicitacao de atestado de regularidade fiscal para participacao em licitacao publica",ADMINISTRATIVO,MEDIA
+"Duvida sobre quais dados sao compartilhados com terceiros e como sao protegidos",OUTROS,BAIXA
+"Falha no processo de pagamento online causando transacoes duplicadas nos clientes",TECNICO,ALTA
+"Analise de contrato para identificar cobranças nao autorizadas nos ultimos meses",FINANCEIRO,MEDIA
+"Proposta de contrato de manutencao preventiva e corretiva para toda infraestrutura",COMERCIAL,MEDIA
+"Revisao anual obrigatoria de conformidade com politicas internas de seguranca",ADMINISTRATIVO,MEDIA
+"Sugestao para melhorar a visualizacao de graficos no dashboard do sistema atual",OUTROS,BAIXA
+"Erro de regressao apos ultimo deploy causando falha em funcionalidade antes correta",TECNICO,ALTA
+"Pagamento via transferencia internacional com taxa cambial divergente do contratado",FINANCEIRO,MEDIA
+"Solicitacao de contrato de suporte tecnico especializado para sistema critico",COMERCIAL,MEDIA
+"Inclusao de novo centro de custo no sistema financeiro para novo projeto aprovado",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de versao para dispositivos iOS e compatibilidade",OUTROS,BAIXA
+"Servidor NTP com hora incorreta causando problemas de autenticacao e logs errados",TECNICO,MEDIA
+"Solicitacao de reducao de valor de multa rescisoria baseada em jurisprudencia recente",FINANCEIRO,MEDIA
+"Proposta de contrato para fornecimento de servicos em regime de dedicacao exclusiva",COMERCIAL,MEDIA
+"Documentacao necessaria para auditoria de sustentabilidade e responsabilidade social",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre programa de beta testers para novas funcionalidades do sistema",OUTROS,BAIXA
+"Inconsistencia nos dados de relatorio de usuario comparado com banco de dados real",TECNICO,MEDIA
+"Estorno de taxa de adesao cobrada quando foi prometido periodo de isencao inicial",FINANCEIRO,MEDIA
+"Negociacao de contrato para uso em evento especifico com prazo determinado curto",COMERCIAL,BAIXA
+"Atualizacao de responsavel pelo pagamento apos mudanca na equipe financeira",ADMINISTRATIVO,BAIXA
+"Feedback sobre atendimento cordial e profissional recebido no ultimo chamado",OUTROS,BAIXA
+"Falha na integracao de webhook causando perda de eventos importantes da aplicacao",TECNICO,ALTA
+"Cobranças por funcionalidades premium que nunca foram ativadas ou utilizadas",FINANCEIRO,MEDIA
+"Avaliacao de upgrade para plano enterprise com recursos avancados de seguranca",COMERCIAL,MEDIA
+"Solicitacao de carta de recomendacao para fornecedor que esta participando de licitacao",ADMINISTRATIVO,BAIXA
+"Duvida sobre como funciona a politica de atualizacoes e manutencoes programadas",OUTROS,BAIXA
+"Sistema de monitoramento alerta de disco cheio em servidor de logs de producao",TECNICO,MEDIA
+"Nota fiscal com CFOP incorreto causando problemas na escrituracao fiscal da empresa",FINANCEIRO,MEDIA
+"Proposta de joint venture para desenvolvimento de solucao inovadora no mercado",COMERCIAL,MEDIA
+"Revisao de politica de seguranca de dados para atender nova regulamentacao setorial",ADMINISTRATIVO,MEDIA
+"Sugestao de melhoria no modulo de gestao de usuarios para ser mais intuitivo",OUTROS,BAIXA
+"Job scheduler nao executando tarefas agendadas desde ultima atualizacao do servidor",TECNICO,ALTA
+"Solicitacao de reducao do valor mensal apos reducao do escopo de uso do servico",FINANCEIRO,MEDIA
+"Contrato de licenciamento de software para redistribuicao em produto proprio",COMERCIAL,MEDIA
+"Inclusao de aprovador adicional no fluxo de autorizacao de compras da empresa",ADMINISTRATIVO,MEDIA
+"Como funciona o suporte ao cliente e quais canais estao disponiveis para contato",OUTROS,BAIXA
+"Erro SSL no certificado de cliente causando falha em integracao B2B importante",TECNICO,ALTA
+"Fatura gerada com CNPJ de filial incorreta necessitando cancelamento e reemissao",FINANCEIRO,MEDIA
+"Solicitacao de demonstracao do modulo avancado de analytics para avaliacao",COMERCIAL,BAIXA
+"Documentacao para habilitacao em cadastro de fornecedores de empresa estatal",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de suporte tecnico em idioma espanhol para filial",OUTROS,BAIXA
+"Falha de autorizacao causando usuario com permissao baixa acessando dados restritos",TECNICO,ALTA
+"Cobranças indevidas por adicionar e remover usuarios no mesmo mes de faturamento",FINANCEIRO,MEDIA
+"Negociacao de desconto para pagamento a vista de contrato anual inteiro",COMERCIAL,MEDIA
+"Revisao de fluxo de aprovacao de documentos para agilizar processo burocratico",ADMINISTRATIVO,MEDIA
+"Sugestao para o sistema enviar resumo semanal automatico de atividades por email",OUTROS,BAIXA
+"Erro de encoding no arquivo de configuracao causando falha no startup da aplicacao",TECNICO,MEDIA
+"Analise de faturamento dos ultimos 12 meses para planejamento orcamentario anual",FINANCEIRO,MEDIA
+"Proposta de contrato de resultado com pagamento vinculado a metricas de performance",COMERCIAL,MEDIA
+"Atualizacao de politica de retencao de documentos conforme nova legislacao trabalhista",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre como a empresa trata questoes de privacidade e protecao de dados",OUTROS,BAIXA
+"Servico de queue de mensagens sobrecarregado causando atrasos no processamento",TECNICO,ALTA
+"Solicitacao de nota fiscal de servico antecipada para encerramento contabil do ano",FINANCEIRO,MEDIA
+"Interesse em contrato especifico para setor de saude com requisitos de compliance",COMERCIAL,MEDIA
+"Solicitacao de aprovacao de viagem corporativa para participar de evento do setor",ADMINISTRATIVO,MEDIA
+"Duvida sobre recursos de colaboracao disponiveis no plano atual contratado",OUTROS,BAIXA
+"Crash recorrente da aplicacao toda segunda-feira ao processar relatorio semanal",TECNICO,ALTA
+"Desconto de fidelidade nao foi aplicado automaticamente apos dois anos de contrato",FINANCEIRO,MEDIA
+"Proposta de licenciamento por usuario ativo ao inves de usuarios cadastrados total",COMERCIAL,MEDIA
+"Documentacao para processo de auditoria de acessibilidade digital exigida por lei",ADMINISTRATIVO,MEDIA
+"Pergunta sobre roadmap de integracoes futuras planejadas para o proximo semestre",OUTROS,BAIXA
+"Problema de caracteres especiais sendo corrompidos em exportacao de dados CSV",TECNICO,MEDIA
+"Reembolso de taxa cobrada por exceder limite quando o limite era maior no contrato",FINANCEIRO,MEDIA
+"Solicitacao de orcamento para implantacao em empresa com sede em multiplos estados",COMERCIAL,MEDIA
+"Revisao de politica de uso de equipamentos corporativos em viagens internacionais",ADMINISTRATIVO,BAIXA
+"Feedback sobre velocidade do sistema que melhorou muito apos ultima atualizacao",OUTROS,BAIXA
+"Indisponibilidade total do sistema por mais de quatro horas afetando toda operacao",TECNICO,ALTA
+"Cobranças de suporte premium que o cliente afirma nunca ter contratado formalmente",FINANCEIRO,ALTA
+"Avaliacao de migrar todo o ambiente para nova versao com novo modelo de licenciamento",COMERCIAL,MEDIA
+"Treinamento especifico para equipe de auditores internos no uso do modulo financeiro",ADMINISTRATIVO,MEDIA
+"Sugestao para implementar funcao de busca mais avancada com filtros configuráveis",OUTROS,BAIXA
+"Modulo de relatorios com dados defasados por problema no processo de atualizacao",TECNICO,MEDIA
+"Nota fiscal complementar necessaria para ajuste de valor apos aditivo contratual",FINANCEIRO,MEDIA
+"Solicitacao de referencia comercial para cliente que esta avaliando a contratacao",COMERCIAL,BAIXA
+"Documentacao de processos de TI para certificacao de seguranca da informacao",ADMINISTRATIVO,MEDIA
+"Como faco para solicitar uma copia dos meus dados armazenados na plataforma",OUTROS,BAIXA
+"Banco de dados sem indices adequados causando consultas extremamente lentas",TECNICO,MEDIA
+"Fatura com periodo de vigencia de servico incorreto prejudicando reconciliacao",FINANCEIRO,MEDIA
+"Proposta de contrato para implementacao de piloto em area especifica da empresa",COMERCIAL,BAIXA
+"Revisao de fluxo de aprovacao de contratos para incluir novo nivel de hierarquia",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre como o sistema se compara com principais concorrentes do mercado",OUTROS,BAIXA
+"Sistema de logging centralizado nao coletando eventos de servicos de microservicos",TECNICO,MEDIA
+"Solicitacao de reducao de multa rescisoria baseado em clausula de renegociacao",FINANCEIRO,MEDIA
+"Interesse em contrato anual com possibilidade de escalar usuarios de forma flexivel",COMERCIAL,MEDIA
+"Atualizacao de politica de privacidade interna conforme exigencias da LGPD vigente",ADMINISTRATIVO,MEDIA
+"Duvida sobre como e feita a separacao de dados entre diferentes clientes no sistema",OUTROS,BAIXA
+"Erro de concorrencia causando dados duplicados em tabela critica da aplicacao",TECNICO,ALTA
+"Analise de credito recusada para expansao de contrato sem motivo adequado informado",FINANCEIRO,MEDIA
+"Proposta de contrato de longo prazo com revisoes periodicas de escopo e preco",COMERCIAL,MEDIA
+"Inclusao de processo de gestao de mudancas no manual de procedimentos operacionais",ADMINISTRATIVO,MEDIA
+"Sugestao para adicionar integracao nativa com ferramenta de comunicacao interna",OUTROS,BAIXA
+"Falha no servico de autenticacao OAuth impedindo login via provedor externo",TECNICO,ALTA
+"Cobranças por usuarios inativos que deveriam ter sido removidos automaticamente",FINANCEIRO,MEDIA
+"Negociacao de contrato de servicos com garantia de preco por periodo de tres anos",COMERCIAL,MEDIA
+"Solicitacao de declaracao de que sistema atende requisitos de acessibilidade digital",ADMINISTRATIVO,MEDIA
+"Pergunta sobre como e gerenciado o processo de atualizacoes de versao do sistema",OUTROS,BAIXA
+"Processo de compactacao de logs desabilitado enchendo disco do servidor rapidamente",TECNICO,MEDIA
+"Fatura enviada para email incorreto e prazo venceu gerando multa desnecessaria",FINANCEIRO,MEDIA
+"Proposta de parceria tecnologica para desenvolvimento de novo produto conjunto",COMERCIAL,MEDIA
+"Revisao e atualizacao do plano de resposta a incidentes de seguranca da empresa",ADMINISTRATIVO,MEDIA
+"Feedback sobre integracao com ferramenta terceira que funcionou perfeitamente",OUTROS,BAIXA
+"Servico de balanceamento de carga falhando causando sobrecarga em um servidor",TECNICO,ALTA
+"Reembolso de pagamento adiantado para servico que foi cancelado antes de iniciar",FINANCEIRO,MEDIA
+"Solicitacao de contrato de transicao para migrar gradualmente para novo sistema",COMERCIAL,MEDIA
+"Documentacao necessaria para processo de certificacao de fornecedor corporativo",ADMINISTRATIVO,MEDIA
+"Duvida sobre como funcionam as restricoes de acesso por horario no sistema",OUTROS,BAIXA
+"Falha na sincronizacao de dados em tempo real entre instancias distribuidas",TECNICO,ALTA
+"Parcelamento de investimento inicial em maior numero de parcelas para viabilizar",FINANCEIRO,MEDIA
+"Interesse em programa de parceiros Gold com beneficios exclusivos de revendas",COMERCIAL,MEDIA
+"Atualizacao de contato responsavel pelo chamado tecnico urgente que saiu da empresa",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre casos de sucesso de empresas do mesmo setor usando o sistema",OUTROS,BAIXA
+"Problema de CORS bloqueando requisicoes de frontend para backend em producao",TECNICO,MEDIA
+"Nota fiscal com municipio de prestacao de servico incorreto causando recolhimento ISS",FINANCEIRO,MEDIA
+"Proposta de contrato especifico para temporada de alto volume e black friday",COMERCIAL,MEDIA
+"Solicitacao de badge de acesso temporario para prestadores de servico externos",ADMINISTRATIVO,BAIXA
+"Sugestao de melhoria na notificacao de vencimento de contratos e alertas automaticos",OUTROS,BAIXA
+"Erro critico no modulo de autorizacao bloqueando todas as transacoes financeiras",TECNICO,ALTA
+"Estorno de cobranças duplicadas identificadas na conciliacao bancaria do mes",FINANCEIRO,ALTA
+"Avaliacao de custo beneficio para contratacao de modulos adicionais ao plano atual",COMERCIAL,MEDIA
+"Treinamento de boas praticas de seguranca para todos os funcionarios da empresa",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de modulo de gestao de contratos na plataforma",OUTROS,BAIXA
+"Servico de cache Redis com falha causando degradacao severa de performance",TECNICO,ALTA
+"Solicitacao de reducao proporcional do valor mensal durante periodo de restricao",FINANCEIRO,MEDIA
+"Negociacao de contrato com clausula de ajuste de preco por produtividade",COMERCIAL,MEDIA
+"Revisao de politica de gestao de terceiros para adequacao a normas regulatorias",ADMINISTRATIVO,MEDIA
+"Duvida sobre como funciona o processo de renovacao automatica e como desativar",OUTROS,BAIXA
+"Modulo de importacao de dados com bug causando inversao de campos no resultado",TECNICO,MEDIA
+"Cobranças de funcionalidades bloqueadas antes de serem disponibilizadas ao cliente",FINANCEIRO,MEDIA
+"Proposta de contrato para fornecimento de servicos em regime de banco de horas",COMERCIAL,MEDIA
+"Documentacao para adequacao ao codigo de defesa do consumidor em servicos digitais",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre planos de expansao para mercados da America Latina no futuro",OUTROS,BAIXA
+"Falha de hardware no servidor causando perda de dados de operacoes do dia",TECNICO,ALTA
+"Reembolso de servico nao entregue dentro do prazo acordado no contrato assinado",FINANCEIRO,ALTA
+"Solicitacao de proposta comercial para projeto de transformacao digital completa",COMERCIAL,MEDIA
+"Inclusao de processo de gestao de riscos na documentacao interna da empresa",ADMINISTRATIVO,MEDIA
+"Como posso sugerir melhorias ou novas funcionalidades para a equipe de produto",OUTROS,BAIXA
+"Erro de decodificacao de token JWT causando falha de autenticacao nos usuarios",TECNICO,ALTA
+"Fatura com valor maior que o previsto sem justificativa de ajuste ou aditivo",FINANCEIRO,MEDIA
+"Interesse em contrato de licenciamento global para todas as subsidiarias do grupo",COMERCIAL,ALTA
+"Atualizacao de politica de controle de acesso fisico as instalacoes da empresa",ADMINISTRATIVO,MEDIA
+"Duvida sobre quais tipos de arquivos podem ser armazenados e tamanho maximo",OUTROS,BAIXA
+"Processo de geracao de relatorio diario travando servidor com alta carga de CPU",TECNICO,ALTA
+"Desconto de pontualidade prometido nao sendo aplicado apesar de historico perfeito",FINANCEIRO,MEDIA
+"Proposta de contrato com modelo freemium para avaliacao antes de comprometimento",COMERCIAL,BAIXA
+"Revisao de politica de seguranca de senhas para atender requisitos de auditoria",ADMINISTRATIVO,MEDIA
+"Sugestao para criar alerta automatico quando usuario nao acessa sistema por tempo",OUTROS,BAIXA
+"Falha no processo de criptografia de dados sensiveis armazenados no banco de dados",TECNICO,ALTA
+"Cobranças por excesso de armazenamento sem notificacao previa de que limite seria atingido",FINANCEIRO,MEDIA
+"Negociacao de contrato com possibilidade de reducao de licencas em periodo de baixa",COMERCIAL,MEDIA
+"Solicitacao de relatorio de conformidade para apresentar em reuniao com regulador",ADMINISTRATIVO,MEDIA
+"Pergunta sobre politica de privacidade e como os dados dos usuarios sao utilizados",OUTROS,BAIXA
+"Servico de envio de emails transacionais com taxa de entrega extremamente baixa",TECNICO,MEDIA
+"Nota fiscal de adiantamento recebida mas servico ainda nao foi concluido totalmente",FINANCEIRO,MEDIA
+"Proposta de contrato de prestacao de servicos com escopo muito bem definido",COMERCIAL,MEDIA
+"Inclusao de procedimento de gestao de crises no plano de continuidade de negocios",ADMINISTRATIVO,MEDIA
+"Feedback sobre curso de capacitacao que foi muito util para equipe de suporte",OUTROS,BAIXA
+"Cluster de cache com todos os nos indisponiveis causando falha total no sistema",TECNICO,ALTA
+"Reembolso de tarifa de manutencao cobrada para sistema que estava fora do ar",FINANCEIRO,ALTA
+"Interesse em contrato de desenvolvimento sob demanda para customizacoes necessarias",COMERCIAL,MEDIA
+"Documentacao de procedimentos de controle de mudancas para aprovacao pela diretoria",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre mecanismo de protecao contra ataques de forca bruta no sistema",OUTROS,BAIXA
+"Inconsistencia entre ambiente de staging e producao causando bugs dificeis de replicar",TECNICO,MEDIA
+"Fatura com services fee nao previstos no contrato original sendo cobrados",FINANCEIRO,MEDIA
+"Solicitacao de proposta para programa de adocao e gestao de mudancas organizacional",COMERCIAL,MEDIA
+"Revisao de descricao de cargos e funcoes para atualizacao na plataforma de RH",ADMINISTRATIVO,BAIXA
+"Duvida sobre processo para solicitar aumento de limite de armazenamento do plano",OUTROS,BAIXA
+"Sistema de deteccao de intrusao gerando muitos alertas falsos sobrecarregando equipe",TECNICO,MEDIA
+"Solicitacao de desconto por indicacao de tres novos clientes para a empresa parceira",FINANCEIRO,BAIXA
+"Proposta de contrato de suporte diferenciado para empresas de infraestrutura critica",COMERCIAL,MEDIA
+"Atualizacao de dados do contador responsavel pela escrituracao da empresa no sistema",ADMINISTRATIVO,BAIXA
+"Como posso configurar permissoes diferenciadas para diferentes grupos de usuarios",OUTROS,BAIXA
+"Erro 404 em rota critica da API causando falha em integracao com parceiro principal",TECNICO,ALTA
+"Cobranças por suporte fora do horario comercial sem que tenha sido solicitado servico",FINANCEIRO,MEDIA
+"Negociacao de novos termos contratuais apos mudanca significativa no escopo do projeto",COMERCIAL,MEDIA
+"Solicitacao de declaracao de que empresa esta em dia com todas as obrigacoes legais",ADMINISTRATIVO,MEDIA
+"Pergunta sobre quais recursos de acessibilidade estao disponiveis no sistema atual",OUTROS,BAIXA
+"Pool de conexoes do banco de dados esgotado causando falha em novas transacoes",TECNICO,ALTA
+"Fatura com juros de mora calculados incorretamente sobre valor principal da divida",FINANCEIRO,MEDIA
+"Proposta de projeto de integracao com marketplace para ampliar canal de vendas",COMERCIAL,MEDIA
+"Revisao de politica de gestao de fornecedores para incluir criterios ESG sustentaveis",ADMINISTRATIVO,MEDIA
+"Sugestao para sistema enviar confirmacao automatica quando chamado for concluido",OUTROS,BAIXA
+"Falha no modulo de sincronizacao em tempo real causando dados desatualizados",TECNICO,MEDIA
+"Estorno de taxa de cancelamento aplicada quando cancelamento foi por culpa da empresa",FINANCEIRO,MEDIA
+"Avaliacao de proposta de fusao de contratos de subsidiarias em contrato unificado",COMERCIAL,MEDIA
+"Inclusao de politica ambiental e sustentabilidade no relatorio anual da empresa",ADMINISTRATIVO,BAIXA
+"Duvida sobre como funciona a gestao de versoes e rollback em caso de problemas",OUTROS,BAIXA
+"Servidor de aplicacao com leak de conexoes de banco esgotando o pool disponivel",TECNICO,ALTA
+"Reducao proporcional do valor faturado durante periodo de indisponibilidade do servico",FINANCEIRO,MEDIA
+"Interesse em contrato especifico para empresas em processo de recuperacao judicial",COMERCIAL,MEDIA
+"Documentacao para due diligence em processo de fusao e aquisicao da empresa",ADMINISTRATIVO,ALTA
+"Curiosidade sobre como funciona o sistema de tickets e priorizacao de chamados",OUTROS,BAIXA
+"Problema de race condition causando inconsistencia de dados em operacoes concorrentes",TECNICO,ALTA
+"Solicitacao de auditoria financeira dos servicos contratados nos ultimos 24 meses",FINANCEIRO,MEDIA
+"Proposta de contrato de servicos de consultoria para implementacao de melhores praticas",COMERCIAL,MEDIA
+"Revisao de matriz de responsabilidades RACI para novo projeto iniciando na empresa",ADMINISTRATIVO,MEDIA
+"Feedback positivo sobre performance melhorada do sistema nas ultimas semanas",OUTROS,BAIXA
+"Falha catastrofica no datacenter principal ativando procedimento de disaster recovery",TECNICO,ALTA
+"Cobranças de licencas para ambiente de desenvolvimento que deveria ser gratuito",FINANCEIRO,MEDIA
+"Negociacao de contrato com clausula de indexacao por indice setorial especifico",COMERCIAL,MEDIA
+"Atualizacao de informacoes sobre estrutura acionaria da empresa no sistema corporativo",ADMINISTRATIVO,MEDIA
+"Pergunta sobre processo de certificacao e conformidade com normas internacionais",OUTROS,BAIXA
+"Erro de validacao de schema causando rejeicao de registros validos no sistema",TECNICO,MEDIA
+"Nota fiscal emitida com data incorreta prejudicando o processo de conciliacao fiscal",FINANCEIRO,MEDIA
+"Proposta de contrato de terceirizacao do helpdesk interno para empresa especializada",COMERCIAL,MEDIA
+"Solicitacao de aprovacao de investimento em nova ferramenta para equipe de TI",ADMINISTRATIVO,MEDIA
+"Duvida sobre as opcoes de customizacao de layout e branding disponiveis no plano",OUTROS,BAIXA
+"Sistema de mensageria com mensagens sendo perdidas em cenario de alta concorrencia",TECNICO,ALTA
+"Reembolso de valores pagos em dobro devido a bug no sistema de pagamento online",FINANCEIRO,ALTA
+"Solicitacao de contrato de suporte estendido para sistema legado que precisa migrar",COMERCIAL,MEDIA
+"Documentacao de arquitetura de sistema para transferencia de conhecimento interna",ADMINISTRATIVO,MEDIA
+"Como posso obter um periodo de avaliacao gratuito para testar funcionalidades",OUTROS,BAIXA
+"Falha no processo de limpeza automatica de dados causando crescimento descontrolado",TECNICO,MEDIA
+"Contestacao de clausula de reajuste contratual que nao estava clara no texto original",FINANCEIRO,MEDIA
+"Proposta de projeto de implantacao com metodologia agil e entregas incrementais",COMERCIAL,MEDIA
+"Inclusao de protocolo de atendimento a clientes especiais no manual de qualidade",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre limite de usuarios simultaneos suportados pelo sistema atualmente",OUTROS,BAIXA
+"Problema critico de seguranca com dados de clientes expostos em endpoint publico",TECNICO,ALTA
+"Fatura com valores em moeda estrangeira sem conversao para moeda nacional correta",FINANCEIRO,MEDIA
+"Interesse em contrato de licenciamento por CPU ao inves de modelo por usuario",COMERCIAL,MEDIA
+"Revisao de politica de relacionamento com fornecedores e prestadores de servicos",ADMINISTRATIVO,BAIXA
+"Sugestao de implementar assistente virtual para ajudar usuarios nas tarefas do dia",OUTROS,BAIXA
+"Erro de timeout no processo de autenticacao causando bloqueio de usuarios legitimos",TECNICO,MEDIA
+"Solicitacao de carta de quitacao de debito apos pagamento total da divida pendente",FINANCEIRO,BAIXA
+"Proposta de contrato de servicos gerenciados com SLA de disponibilidade garantido",COMERCIAL,MEDIA
+"Atualizacao de matriz de aprovacoes financeiras conforme nova politica corporativa",ADMINISTRATIVO,MEDIA
+"Pergunta sobre como o sistema garante a disponibilidade dos dados em caso de falhas",OUTROS,BAIXA
+"Falha no sistema de backup incremental causando backups completos desnecessarios",TECNICO,MEDIA
+"Cobranças por chamados de suporte que estao dentro da cobertura do contrato vigente",FINANCEIRO,MEDIA
+"Negociacao de renovacao com adicao de clausula de escalonamento de suporte dedicado",COMERCIAL,MEDIA
+"Documentacao de baseline de configuracao dos sistemas para gestao de mudancas",ADMINISTRATIVO,MEDIA
+"Feedback sobre processo de renovacao que foi muito simples e rapido de concluir",OUTROS,BAIXA
+"Erro de processamento de pagamentos em lote causando rejeicao de todas as transacoes",TECNICO,ALTA
+"Fatura enviada para endereco de email incorreto causando atraso no pagamento",FINANCEIRO,BAIXA
+"Proposta de contrato para desenvolvimento de plataforma customizada do zero",COMERCIAL,ALTA
+"Revisao de politica de protecao de dados para adequar a legislacao internacional",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre suporte a autenticacao via certificado digital no sistema atual",OUTROS,BAIXA
+"Servicos dependentes apresentando falha em cascata apos indisponibilidade de API",TECNICO,ALTA
+"Reembolso de mensalidade cobrada apos data de cancelamento solicitado pelo cliente",FINANCEIRO,ALTA
+"Interesse em licenca especial para uso em ambiente de educacao e pesquisa academica",COMERCIAL,BAIXA
+"Atualizacao de politica de gestao de continuidade do negocio para nova regulamentacao",ADMINISTRATIVO,MEDIA
+"Duvida sobre como funciona o processo de migracao para novo plano contratado",OUTROS,BAIXA
+"Problema de memoria insuficiente em servidor causando OOM killer terminando processos",TECNICO,ALTA
+"Contestacao de multa contratual por inadimplencia causada por erro no sistema",FINANCEIRO,MEDIA
+"Proposta de acordo de servicos master MSA para toda a familia de produtos",COMERCIAL,MEDIA
+"Solicitacao de relatorio de conformidade regulatoria para submissao a agencia",ADMINISTRATIVO,MEDIA
+"Como funciona o processo de certificacao de usuarios e emissao de diplomas digitais",OUTROS,BAIXA
+"Servidor com certificado TLS expirado causando falha nas conexoes criptografadas",TECNICO,ALTA
+"Nota fiscal com inscricao estadual incorreta causando problema no SPED fiscal",FINANCEIRO,MEDIA
+"Solicitacao de orcamento detalhado para implantacao em empresa de grande porte",COMERCIAL,MEDIA
+"Documentacao para processo de certificacao de qualidade de produto e servico",ADMINISTRATIVO,MEDIA
+"Pergunta sobre quais integracoes nativas estao disponiveis no plano contratado",OUTROS,BAIXA
+"Thread pool da aplicacao esgotado causando rejeicao de novas requisicoes",TECNICO,ALTA
+"Solicitacao de parcelamento de divida em aberto com corretos juros contratuais",FINANCEIRO,MEDIA
+"Proposta de contrato de outsourcing de processos de negocio BPO especializados",COMERCIAL,MEDIA
+"Revisao e atualizacao do mapa de riscos operacionais para proxima reuniao do comite",ADMINISTRATIVO,MEDIA
+"Sugestao para criar modo offline no aplicativo para uso sem conexao com internet",OUTROS,BAIXA
+"Falha no processo de autorizacao de comandos privilegiados no sistema operacional",TECNICO,ALTA
+"Cobranças retroativas de seis meses sendo enviadas de uma so vez surpreendendo",FINANCEIRO,ALTA
+"Negociacao de contrato de servicos com possibilidade de suspensao temporaria",COMERCIAL,MEDIA
+"Solicitacao de carta de dispensa de licitacao para contratacao direta de servico",ADMINISTRATIVO,MEDIA
+"Duvida sobre como funciona o controle de versoes de documentos no sistema",OUTROS,BAIXA
+"Servico de geocodificacao retornando coordenadas incorretas para enderecos brasileiros",TECNICO,MEDIA
+"Fatura com calculo incorreto de desconto aplicado sobre valor total do servico",FINANCEIRO,MEDIA
+"Proposta de contrato para licenciamento de tecnologia proprietaria para uso interno",COMERCIAL,MEDIA
+"Inclusao de modulo de avaliacao de desempenho no sistema de gestao de pessoas",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre disponibilidade de funcionalidade de assinatura eletronica no plano",OUTROS,BAIXA
+"Erro de autorizacao OAuth 2.0 impedindo aplicativo de terceiro de se integrar",TECNICO,MEDIA
+"Reembolso de taxa cobrada por processamento de pagamento que nao foi concluido",FINANCEIRO,MEDIA
+"Solicitacao de contrato de servicos de suporte tecnico nivel 2 e nivel 3 dedicado",COMERCIAL,MEDIA
+"Documentacao necessaria para habilitacao como fornecedor preferencial do governo",ADMINISTRATIVO,MEDIA
+"Como posso solicitar uma reuniao de revisao trimestral com o gerente de conta",OUTROS,BAIXA
+"Falha no processo de reindexacao causando buscas retornando resultados incorretos",TECNICO,MEDIA
+"Pagamento via TED nao identificado pelo sistema permanecendo como pendente ha dias",FINANCEIRO,MEDIA
+"Proposta de plano customizado com funcionalidades escolhidas a la carte pelo cliente",COMERCIAL,MEDIA
+"Revisao de politica de gestao de ativos para incluir ativos digitais e virtuais",ADMINISTRATIVO,BAIXA
+"Feedback sobre documentacao de API muito bem estruturada e facil de implementar",OUTROS,BAIXA
+"Processo de autenticacao falhando para usuarios com caracteres especiais na senha",TECNICO,MEDIA
+"Nota fiscal com data de emissao anterior a data de prestacao do servico contratado",FINANCEIRO,BAIXA
+"Negociacao de reducao do periodo de fidelidade contratual por necessidade urgente",COMERCIAL,MEDIA
+"Solicitacao de avaliacao de competencia para promocao de colaborador interno",ADMINISTRATIVO,MEDIA
+"Duvida sobre processo para aumentar o numero de usuarios no plano atual contratado",OUTROS,BAIXA
+"Sistema de alertas de monitoramento nao notificando equipe sobre falhas detectadas",TECNICO,ALTA
+"Cobranças por servicos adicionais que foram cancelados ha mais de tres meses",FINANCEIRO,MEDIA
+"Proposta de contrato com modelo de receita compartilhada baseado em resultados",COMERCIAL,MEDIA
+"Atualizacao de responsaveis por area no organograma refletindo nova estrutura",ADMINISTRATIVO,BAIXA
+"Curiosidade sobre como funciona o processo de homologacao de novos clientes",OUTROS,BAIXA
+"Erro de deadlock no banco de dados causando travamento periodico das operacoes",TECNICO,ALTA
+"Solicitacao de carta de conformidade fiscal para operacao em outro estado brasileiro",FINANCEIRO,MEDIA
+"Interesse em programa de certificacao tecnica para parceiros integradores do sistema",COMERCIAL,MEDIA
+"Documentacao de politica de privacidade para uso de sistemas de vigilancia corporativa",ADMINISTRATIVO,MEDIA
+"Pergunta sobre como e realizado o controle de qualidade nas atualizacoes do sistema",OUTROS,BAIXA
+"Falha de integridade referencial no banco causando registros orfaos acumulando",TECNICO,MEDIA
+"Fatura com descricao generica sem detalhamento dos servicos efetivamente prestados",FINANCEIRO,BAIXA
+"Proposta de contrato de co-investimento em desenvolvimento de novas funcionalidades",COMERCIAL,MEDIA
+"Revisao de politica de despesas de viagem e representacao para adequacao fiscal",ADMINISTRATIVO,MEDIA
+"Sugestao para criar galeria de templates prontos para acelerar trabalho dos usuarios",OUTROS,BAIXA
+"Servidor de cache com configuracao incorreta causando miss rate de quase 100%",TECNICO,MEDIA
+"Reembolso de cobranças indevidas identificadas em auditoria financeira recente",FINANCEIRO,MEDIA
+"Solicitacao de proposta para projeto de digitalizacao de processos manuais internos",COMERCIAL,MEDIA
+"Inclusao de procedimentos de compliance financeiro no manual de normas internas",ADMINISTRATIVO,MEDIA
+"Como faco para acessar o historico completo de todas as interacoes com suporte",OUTROS,BAIXA
+"Problemas de intermitencia na conexao com o sistema causando perdas de dados",TECNICO,MEDIA
+"Cobranças em duplicidade identificadas na ultima fatura do mes de fevereiro",FINANCEIRO,ALTA
+"Proposta comercial para integracao de sistema com plataforma de ecommerce popular",COMERCIAL,MEDIA
+"Revisao de procedimentos de controle de documentos para certificacao de qualidade",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de aplicativo desktop alem da versao web atual",OUTROS,BAIXA
+"Falha de autenticacao apos expiracao de sessao nao redirecionando corretamente",TECNICO,MEDIA
+"Nota de credito solicitada apos cancelamento parcial de servicos contratados",FINANCEIRO,MEDIA
+"Negociacao de contrato com garantia de suporte local em cidades especificas",COMERCIAL,MEDIA
+"Solicitacao de aprovacao de politica de uso de dispositivos moveis no trabalho",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre disponibilidade de relatorios pre-configurados para area financeira",OUTROS,BAIXA
+"Erro de permissao ao tentar gerar relatorio financeiro no modulo de BI avancado",TECNICO,MEDIA
+"Fatura gerada antes do encerramento do periodo de competencia com valores estimados",FINANCEIRO,MEDIA
+"Proposta de contrato de transicao e migracao para nova versao da plataforma",COMERCIAL,MEDIA
+"Documentacao para certificacao de fornecedor em programa de qualificacao empresarial",ADMINISTRATIVO,MEDIA
+"Feedback sobre processo de implantacao que foi muito bem conduzido pela equipe",OUTROS,BAIXA
+"Sistema de autorizacao baseado em roles RBAC mal configurado permitindo acesso indevido",TECNICO,ALTA
+"Pagamento de boleto recusado pelo banco sem motivo aparente necessitando esclarecimento",FINANCEIRO,MEDIA
+"Solicitacao de proposta para modulo de gestao de cadeia de suprimentos SCM",COMERCIAL,MEDIA
+"Revisao de politica de seguranca fisica para areas com equipamentos de TI criticos",ADMINISTRATIVO,MEDIA
+"Sugestao para o sistema ter opcao de personalizar quais metricas aparecem no dashboard",OUTROS,BAIXA
+"Job de processamento noturno excedendo janela de manutencao impactando o dia seguinte",TECNICO,MEDIA
+"Solicitacao de cancelamento de cobranca automatica ativada sem autorizacao formal",FINANCEIRO,ALTA
+"Proposta de contrato enterprise com recursos avancados de seguranca e compliance",COMERCIAL,MEDIA
+"Atualizacao de plano de evacuacao e procedimentos de emergencia na empresa",ADMINISTRATIVO,MEDIA
+"Duvida sobre disponibilidade de suporte tecnico em horario comercial brasileiro",OUTROS,BAIXA
+"Falha critica no servico de autenticacao deixando todos os usuarios bloqueados",TECNICO,ALTA
+"Cobranças de taxa adicional nao prevista em contrato para determinada funcionalidade",FINANCEIRO,MEDIA
+"Negociacao de desconto para contratacao de servicos complementares ao principal",COMERCIAL,MEDIA
+"Documentacao de processos para adequacao ao Decreto de Dados Pessoais regulatorio",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre como funciona o sistema de pontuacao e gamificacao disponivel",OUTROS,BAIXA
+"Servicos de microservicos com latencia crescente indicando possivel memory leak",TECNICO,ALTA
+"Fatura com numero de referencia incorreto dificultando conciliacao nos sistemas",FINANCEIRO,BAIXA
+"Solicitacao de proposta para implementacao de solucao de gestao de documentos",COMERCIAL,MEDIA
+"Revisao de politica de acesso a informacoes confidenciais e dados de clientes",ADMINISTRATIVO,MEDIA
+"Pergunta sobre recursos de colaboracao e trabalho em equipe disponiveis na plataforma",OUTROS,BAIXA
+"Problema de seguranca com logs de acesso nao sendo gerados para auditoria",TECNICO,ALTA
+"Reembolso de taxa de suporte cobrada por problema causado por bug do proprio sistema",FINANCEIRO,MEDIA
+"Proposta de contrato de licenciamento saas com ajuste por numero de acessos mensais",COMERCIAL,MEDIA
+"Solicitacao de aprovacao para contratacao de servico de consultoria especializada",ADMINISTRATIVO,MEDIA
+"Duvida sobre processo de solicitacao de personalizacoes e customizacoes do sistema",OUTROS,BAIXA
+"Sistema de notificacoes push nao funcionando para usuarios em dispositivos Android",TECNICO,MEDIA
+"Nota fiscal de produto em vez de servico emitida causando problema na escrituracao",FINANCEIRO,MEDIA
+"Proposta de contrato baseado em performance com bonus por metas atingidas juntos",COMERCIAL,MEDIA
+"Documentacao de baseline de seguranca para atender requisitos de auditoria interna",ADMINISTRATIVO,MEDIA
+"Como funciona o processo de abertura de chamado urgente fora do horario normal",OUTROS,BAIXA
+"Banco de dados principal com alto consumo de IO causando gargalo de performance",TECNICO,ALTA
+"Cobranças antecipadas de periodo futuro sem autorizacao nem aviso previo formal",FINANCEIRO,ALTA
+"Negociacao de contrato especial para empresa que esta em processo de crescimento",COMERCIAL,MEDIA
+"Revisao de politica de contratacao e desligamento de colaboradores na empresa",ADMINISTRATIVO,MEDIA
+"Sugestao para criar chat de suporte integrado dentro do proprio sistema da plataforma",OUTROS,BAIXA
+"Erro de overflow de dados em campo numerico causando truncamento de valores",TECNICO,MEDIA
+"Solicitacao de compensacao financeira por tempo de inatividade nao coberto pelo SLA",FINANCEIRO,MEDIA
+"Interesse em contrato de manutencao evolutiva para adicionar novas funcionalidades",COMERCIAL,MEDIA
+"Documentacao de gestao do conhecimento para preservar experiencias da equipe",ADMINISTRATIVO,BAIXA
+"Pergunta sobre processo de desenvolvimento e frequencia de lancamento de atualizacoes",OUTROS,BAIXA
+"Servidor proxy com configuracao de cache incorreta servindo conteudo desatualizado",TECNICO,MEDIA
+"Fatura com competencia incorreta causando problemas na apuracao de impostos",FINANCEIRO,MEDIA
+"Proposta de contrato de trabalho em conjunto para ganhar licitacao governamental",COMERCIAL,MEDIA
+"Revisao de politica de uso de recursos computacionais para otimizacao de custos",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre como e feita a gestao de capacidade dos servidores da plataforma",OUTROS,BAIXA
+"Falha no servico de discovery causando microservicos nao conseguindo se localizar",TECNICO,ALTA
+"Reembolso de pagamento realizado para conta incorreta por erro no sistema bancario",FINANCEIRO,ALTA
+"Solicitacao de orcamento para projeto de cloud migration com suporte especializado",COMERCIAL,MEDIA
+"Documentacao de procedimentos de contingencia para continuidade das operacoes",ADMINISTRATIVO,MEDIA
+"Duvida sobre disponibilidade de recursos de inteligencia artificial na plataforma",OUTROS,BAIXA
+"Processo de geracao de chaves criptograficas falhou deixando dados sem protecao",TECNICO,ALTA
+"Cobranças por modulo enterprise quando foi contratado apenas o plano basico inicial",FINANCEIRO,ALTA
+"Proposta de contrato de suporte tecnico com tecnico exclusivo alocado na empresa",COMERCIAL,MEDIA
+"Revisao de estrutura de cargos e salarios para adequacao a mercado e retencao",ADMINISTRATIVO,MEDIA
+"Feedback sobre webinar de treinamento que foi muito informativo e bem apresentado",OUTROS,BAIXA
+"Sistema de processamento de pagamentos rejeitando cartoes validos por regra incorreta",TECNICO,ALTA
+"Nota fiscal de adiantamento a cancelar pois servico nao sera mais prestado",FINANCEIRO,MEDIA
+"Proposta de solucao customizada para atender necessidades especificas do segmento",COMERCIAL,MEDIA
+"Inclusao de procedimento de gestao de incidentes no plano de resposta a crises",ADMINISTRATIVO,MEDIA
+"Como posso acompanhar o status de atualizacoes e manutencoes programadas do sistema",OUTROS,BAIXA
+"Erro critico na camada de apresentacao causando falha ao renderizar paginas",TECNICO,ALTA
+"Fatura com valores em campos errados confundindo o processo de conciliacao contabil",FINANCEIRO,MEDIA
+"Negociacao de contrato de longo prazo com previsao de expansao gradual do escopo",COMERCIAL,MEDIA
+"Atualizacao de politica de protecao de propriedade intelectual e segredos comerciais",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de historico de auditoria de todas acoes no sistema",OUTROS,BAIXA
+"Thread deadlock identificado causando travamento intermitente da aplicacao principal",TECNICO,ALTA
+"Solicitacao de carta de intencoes para inicio de negociacao formal de contrato",FINANCEIRO,BAIXA
+"Proposta de contrato de servicos de transformacao digital para toda a empresa",COMERCIAL,ALTA
+"Documentacao necessaria para participar de programa de compliance de cliente grande",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre qual stack tecnologico e utilizado no desenvolvimento do sistema",OUTROS,BAIXA
+"Falha na propagacao de configuracoes entre nos do cluster causando comportamento diferente",TECNICO,ALTA
+"Cobranças de juros sobre fatura paga no prazo por erro no registro do pagamento",FINANCEIRO,MEDIA
+"Solicitacao de proposta para implantacao de sistema de gestao integrado ERP completo",COMERCIAL,MEDIA
+"Revisao de manual de boas praticas para usuarios do sistema conforme versao atual",ADMINISTRATIVO,BAIXA
+"Sugestao para criar modulo de gestao de projetos integrado ao sistema principal",OUTROS,BAIXA
+"Endpoint da API de producao retornando dados do ambiente de homologacao incorretamente",TECNICO,ALTA
+"Reembolso de taxa de adesao cobrada quando promocao dizia que seria gratuita",FINANCEIRO,MEDIA
+"Interesse em programa de parceiros integradores com certificacao e suporte tecnico",COMERCIAL,MEDIA
+"Documentacao de indicadores chave de desempenho KPI para avaliacao de fornecedores",ADMINISTRATIVO,MEDIA
+"Duvida sobre processo para solicitar acesso a dados especificos para auditoria",OUTROS,BAIXA
+"Servico de sincronizacao de arquivos com falha causando versoes conflitantes",TECNICO,MEDIA
+"Contestacao de taxa de inadimplencia cobrada sobre periodo que nao estava em atraso",FINANCEIRO,MEDIA
+"Proposta de contrato de gestao de infraestrutura como servico IaaS especializado",COMERCIAL,MEDIA
+"Revisao de politica de gestao de conflito de interesses para area comercial",ADMINISTRATIVO,MEDIA
+"Feedback sobre nova interface que ficou muito mais intuitiva e agradavel de usar",OUTROS,BAIXA
+"Sistema de autorizacao com latencia alta causando timeout nas requisicoes dos usuarios",TECNICO,ALTA
+"Fatura com codigo de barras com digito verificador incorreto impedindo pagamento",FINANCEIRO,MEDIA
+"Proposta de licenciamento em nuvem com modelo pay as you go para flexibilidade",COMERCIAL,MEDIA
+"Solicitacao de treinamento especifico para modulo de relatorios avancados do sistema",ADMINISTRATIVO,MEDIA
+"Como posso verificar se existe uma versao mais recente do sistema disponivel",OUTROS,BAIXA
+"Falha no processo de importacao de dados via API causando registros incompletos",TECNICO,MEDIA
+"Cobranças por chamados que foram abertos e resolvidos dentro do prazo do contrato",FINANCEIRO,BAIXA
+"Negociacao de condicoes especiais para nova unidade de negocio sendo criada",COMERCIAL,MEDIA
+"Documentacao de procedimentos de controle interno para gestao de riscos financeiros",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de suporte em lingua portuguesa de Portugal tambem",OUTROS,BAIXA
+"Problema de performance na busca full-text causando timeouts para queries complexas",TECNICO,MEDIA
+"Nota fiscal de cancelamento ainda nao foi emitida apos solicitacao feita ha semanas",FINANCEIRO,MEDIA
+"Proposta de contrato de desenvolvimento de modulo de machine learning especializado",COMERCIAL,MEDIA
+"Revisao de procedimentos de resposta a emergencias e incidentes de seguranca",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre como o sistema trata dados em repouso e em transito na nuvem",OUTROS,BAIXA
+"Falha na autenticacao biometrica do sistema de ponto causando registros incorretos",TECNICO,MEDIA
+"Solicitacao de carta de credito para inicio de relacionamento comercial com empresa",FINANCEIRO,BAIXA
+"Interesse em contrato de servicos com modelo de precificacao baseado em consumo",COMERCIAL,MEDIA
+"Documentacao para participacao em programa de fornecedores de empresa multinacional",ADMINISTRATIVO,MEDIA
+"Duvida sobre disponibilidade de funcionalidade de aprovacao digital de documentos",OUTROS,BAIXA
+"Servico de email marketing nao entregando mensagens para destinatarios validos",TECNICO,MEDIA
+"Fatura com base de calculo incorreta para retencao de ISS sobre servico prestado",FINANCEIRO,MEDIA
+"Proposta de parceria estrategica para atender segmento de mercado ainda nao explorado",COMERCIAL,MEDIA
+"Inclusao de procedimentos de gestao de vulnerabilidades no plano de seguranca",ADMINISTRATIVO,MEDIA
+"Sugestao para criar modulo de feedback interno para equipes avaliarem processos",OUTROS,BAIXA
+"Sistema de armazenamento distribuido com inconsistencia causando leituras erradas",TECNICO,ALTA
+"Reembolso de valores cobrados por servico em downgrade que ja havia sido concluido",FINANCEIRO,MEDIA
+"Solicitacao de proposta para servico de outsourcing de suporte tecnico nivel 1",COMERCIAL,MEDIA
+"Revisao de politica de gestao de talentos e plano de carreira na organizacao",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de recursos de automacao de fluxos de trabalho",OUTROS,BAIXA
+"Erro de segmentacao de memoria causando crash abrupto da aplicacao em producao",TECNICO,ALTA
+"Cobranças por excesso de requisicoes API quando limite nao estava claro no contrato",FINANCEIRO,MEDIA
+"Proposta de contrato de servicos de seguranca da informacao como servico MSS",COMERCIAL,MEDIA
+"Atualizacao de politica de uso de inteligencia artificial nos processos da empresa",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre como o sistema garante a integridade dos dados ao longo do tempo",OUTROS,BAIXA
+"Falha no gateway de pagamento causando transacoes pendentes por mais de 24 horas",TECNICO,ALTA
+"Fatura sem discriminacao dos itens cobrados dificultando aprovacao financeira interna",FINANCEIRO,MEDIA
+"Negociacao de contrato de parceria para desenvolvimento de canal de distribuicao",COMERCIAL,MEDIA
+"Documentacao de procedimentos de auditoria interna para sistema de gestao integrado",ADMINISTRATIVO,MEDIA
+"Duvida sobre disponibilidade de ferramenta de analise de dados integrada ao sistema",OUTROS,BAIXA
+"Servico de notificacoes em lote com alta taxa de falha nos ultimos tres dias",TECNICO,MEDIA
+"Solicitacao de credito por servico premium que ficou indisponivel por periodo extenso",FINANCEIRO,MEDIA
+"Proposta de contrato de consultoria para otimizacao de processos usando o sistema",COMERCIAL,MEDIA
+"Revisao de politica de gestao de reclamacoes e feedback de clientes internos",ADMINISTRATIVO,BAIXA
+"Sugestao para criar modulo de gestao de reunioes e atas integrado a plataforma",OUTROS,BAIXA
+"Problemas de integridade de dados apos migracao de versao antiga para versao atual",TECNICO,ALTA
+"Cobranças de renovacao automatica sem envio de aviso previo conforme clausula",FINANCEIRO,MEDIA
+"Avaliacao de contrato de servicos de impressao gerenciada para toda a empresa",COMERCIAL,BAIXA
+"Solicitacao de treinamento de reciclagem para equipe que usa o sistema ha anos",ADMINISTRATIVO,MEDIA
+"Como posso exportar todos os meus dados antes de realizar a migracao para outro",OUTROS,BAIXA
+"Erro de race condition na atualizacao de saldo causando inconsistencias financeiras",TECNICO,ALTA
+"Nota fiscal com aliquota de PIS e COFINS calculadas incorretamente no documento",FINANCEIRO,MEDIA
+"Solicitacao de orcamento para projeto de implantacao urgente com prazo reduzido",COMERCIAL,MEDIA
+"Documentacao de processo de onboarding para novos fornecedores aprovados na empresa",ADMINISTRATIVO,MEDIA
+"Pergunta sobre processo e criterios utilizados para definir prioridade dos chamados",OUTROS,BAIXA
+"Falha total na autenticacao de usuarios por problema em servico de diretorio",TECNICO,ALTA
+"Cobranças em moeda estrangeira sem taxa de conversao aplicada conforme contrato",FINANCEIRO,MEDIA
+"Proposta de contrato de servicos de campo para suporte tecnico presencial",COMERCIAL,MEDIA
+"Revisao de politica de gestao de acessos privilegiados para usuarios administradores",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre quantas integracoes diferentes estao disponiveis no marketplace",OUTROS,BAIXA
+"Servico de monitoramento de logs sem espaco para armazenar novos eventos gerados",TECNICO,ALTA
+"Reembolso de taxa de transacao cobrada mesmo com pagamento sendo processado",FINANCEIRO,MEDIA
+"Interesse em contrato de servicos com modelo SaaS mais suporte tecnico dedicado",COMERCIAL,MEDIA
+"Atualizacao de politica de trabalho remoto com novas diretrizes de seguranca digital",ADMINISTRATIVO,MEDIA
+"Duvida sobre processo para reportar falhas de seguranca de forma responsavel",OUTROS,BAIXA
+"Problema de seguranca com senhas de usuarios sendo armazenadas em texto simples",TECNICO,ALTA
+"Fatura com incompatibilidade entre valores do pedido de compra e nota emitida",FINANCEIRO,MEDIA
+"Proposta de contrato para servicos de gestao de identidades e acessos IAM",COMERCIAL,MEDIA
+"Inclusao de modulo de gestao de competencias no sistema de recursos humanos",ADMINISTRATIVO,MEDIA
+"Sugestao para criar funcao de chat entre usuarios dentro do proprio sistema",OUTROS,BAIXA
+"Aplicacao falhando ao processar arquivos acima de determinado tamanho estabelecido",TECNICO,MEDIA
+"Solicitacao de auditoria de cobranças para identificar possiveis cobrancas indevidas",FINANCEIRO,MEDIA
+"Negociacao de contrato de servicos com modelo de precificacao por resultado obtido",COMERCIAL,MEDIA
+"Documentacao de procedimentos de resposta a violacoes de dados pessoais LGPD",ADMINISTRATIVO,ALTA
+"Pergunta sobre disponibilidade de funcionalidade de videoconferencia na plataforma",OUTROS,BAIXA
+"Falha no processo de renovacao automatica de certificados causando expiracoes",TECNICO,ALTA
+"Cobranças de upgrade automatico sem solicitar aprovacao previa conforme definido",FINANCEIRO,ALTA
+"Proposta de programa de capacitacao certificada para parceiros e revendas autorizadas",COMERCIAL,MEDIA
+"Revisao de manual de procedimentos de seguranca para colaboradores remotos",ADMINISTRATIVO,MEDIA
+"Feedback sobre melhoria significativa no tempo de carregamento das paginas sistema",OUTROS,BAIXA
+"Erro de validacao impedindo salvamento de formulario com dados completamente validos",TECNICO,MEDIA
+"Nota fiscal cancelada indevidamente quando deveria apenas ter sido corrigida",FINANCEIRO,MEDIA
+"Solicitacao de proposta para servicos de cloud security posture management CSPM",COMERCIAL,MEDIA
+"Atualizacao de fluxo de aprovacao de compras apos mudanca na politica corporativa",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre disponibilidade de modulo de gestao de contratos no sistema",OUTROS,BAIXA
+"Sistema de filas com mensagens presas causando atraso no processamento de pedidos",TECNICO,ALTA
+"Reembolso de taxa de configuracao inicial cobrada quando servico nao chegou a operar",FINANCEIRO,MEDIA
+"Proposta de contrato de implantacao com suporte pos-producao incluido por 90 dias",COMERCIAL,MEDIA
+"Documentacao de procedimentos de auditoria de acessos para fins de compliance",ADMINISTRATIVO,MEDIA
+"Duvida sobre disponibilidade de funcionalidade de relatorios personalizados no plano",OUTROS,BAIXA
+"Problema de sincronizacao entre banco de dados primario e replica causando divergencia",TECNICO,ALTA
+"Cobranças de taxas de manutencao que nao estavam previstas no contrato original",FINANCEIRO,MEDIA
+"Negociacao de extensao de contrato por prazo adicional com condicoes comerciais atuais",COMERCIAL,MEDIA
+"Solicitacao de material de comunicacao interna sobre nova politica de uso do sistema",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de modulo de integracao com redes sociais corporativas",OUTROS,BAIXA
+"Falha de hardware em storage causando dados de producao ficarem inacessiveis",TECNICO,ALTA
+"Fatura com retencao de imposto indevida para servicos prestados no exterior",FINANCEIRO,MEDIA
+"Proposta de contrato de gestao de projetos usando metodologia agil scrum",COMERCIAL,MEDIA
+"Revisao de politica de uso de ferramentas digitais aprovadas pela empresa",ADMINISTRATIVO,BAIXA
+"Sugestao para criar galeria de casos de uso e exemplos de boas praticas na plataforma",OUTROS,BAIXA
+"Erro de timeout na comunicacao entre servicos causando falhas esporadicas",TECNICO,MEDIA
+"Solicitacao de nota de debito para registrar credito de servico nao entregue",FINANCEIRO,MEDIA
+"Proposta de contrato de servicos de desenvolvimento agil com sprints mensais",COMERCIAL,MEDIA
+"Documentacao de processos de gestao de qualidade para certificacao ISO 27001",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre disponibilidade de suporte tecnico via chat em tempo real",OUTROS,BAIXA
+"Servico de autenticacao biometrica apresentando alta taxa de falsos negativos",TECNICO,MEDIA
+"Cobranças de licencas acima do numero contratado sem autorizacao e sem aviso",FINANCEIRO,ALTA
+"Proposta de contrato de consultoria para implementacao de metodologia DevSecOps",COMERCIAL,MEDIA
+"Revisao de manual de procedimentos para abertura e fechamento de exercicio fiscal",ADMINISTRATIVO,MEDIA
+"Sugestao para adicionar funcionalidade de pesquisa global em todo o conteudo do sistema",OUTROS,BAIXA
+"Aplicacao com falha de seguranca permitindo SQL injection em formularios de busca",TECNICO,ALTA
+"Reembolso de saldo de creditos nao utilizados apos cancelamento do contrato vigente",FINANCEIRO,MEDIA
+"Interesse em contrato de servicos de seguranca ofensiva teste de penetracao",COMERCIAL,MEDIA
+"Atualizacao de politica de gestao de privacidade conforme nova resolucao da ANPD",ADMINISTRATIVO,ALTA
+"Duvida sobre processo de solicitacao de dados pessoais armazenados para exercer direitos",OUTROS,BAIXA
+"Falha critica de seguranca com possivel exposicao de dados de clientes urgente",TECNICO,ALTA
+"Cobranças indevidas de periodo pos cancelamento gerando divida inexistente",FINANCEIRO,ALTA
+"Proposta de contrato de desenvolvimento de plataforma de marketplace B2B",COMERCIAL,ALTA
+"Documentacao para adequacao ao Marco Civil da Internet e legislacao digital",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de certificacao de conformidade com normas setoriais",OUTROS,BAIXA
+"Erro de criptografia causando dados sendo gravados em texto puro no banco",TECNICO,ALTA
+"Fatura com desconto incorreto aplicado gerando divergencia com orcamento aprovado",FINANCEIRO,MEDIA
+"Solicitacao de proposta para programa de adocao e treinamento em larga escala",COMERCIAL,MEDIA
+"Revisao de politica de retencao e descarte seguro de documentos fisicos e digitais",ADMINISTRATIVO,MEDIA
+"Curiosidade sobre processo de gestao de mudancas e como as versoes sao testadas",OUTROS,BAIXA
+"Sistema de gestao de identidades com falha causando usuarios impossibilitados de entrar",TECNICO,ALTA
+"Solicitacao de relatorio detalhado de consumo para justificar renovacao orcamentaria",FINANCEIRO,MEDIA
+"Proposta de contrato de outsourcing de desenvolvimento de software customizado",COMERCIAL,MEDIA
+"Inclusao de politica de uso responsavel de inteligencia artificial na empresa",ADMINISTRATIVO,MEDIA
+"Sugestao para melhorar o processo de cadastro de novos usuarios na plataforma",OUTROS,BAIXA
+"Erro no sistema de notificacoes causando alertas duplicados para mesmos usuarios",TECNICO,MEDIA
+"Nota fiscal emitida com regime tributario incorreto causando recolhimento errado",FINANCEIRO,MEDIA
+"Negociacao de contrato com opcao de pause temporaria durante periodo especifico",COMERCIAL,MEDIA
+"Documentacao de processo de gestao de fornecedores criticos e avaliacoes periodicas",ADMINISTRATIVO,MEDIA
+"Duvida sobre compatibilidade do sistema com proxima versao do sistema operacional",OUTROS,BAIXA
+"Falha no servico de cache distribuido causando sobrecarga no banco de dados principal",TECNICO,ALTA
+"Cobranças de taxa de implementacao quando implementacao foi realizada internamente",FINANCEIRO,MEDIA
+"Proposta de contrato de servicos gerenciados de rede e infraestrutura de TI",COMERCIAL,MEDIA
+"Revisao de politica de gestao de desempenho e avaliacao de colaboradores na empresa",ADMINISTRATIVO,MEDIA
+"Pergunta sobre disponibilidade de modulo de gestao de indicadores e OKRs",OUTROS,BAIXA
+"Servidor principal fora do ar desde as 2h da manha impactando todas as operacoes",TECNICO,ALTA
+"Sistema de pagamentos parou de funcionar impedindo vendas em todo o dia de hoje",TECNICO,ALTA
+"Falha critica na autenticacao deixou todos os usuarios sem acesso por horas",TECNICO,ALTA
+"Banco de dados principal nao responde e toda a producao esta parada urgente",TECNICO,ALTA
+"Virus detectado na rede corporativa se espalhando para multiplas maquinas urgente",TECNICO,ALTA
+"Intruso identificado acessando dados confidenciais de clientes no sistema producao",TECNICO,ALTA
+"Servidor de producao com pane total apos lightning strike no datacenter regional",TECNICO,ALTA
+"Ataque DDoS em andamento derrubando todos os servicos externos da empresa",TECNICO,ALTA
+"Ransomware criptografou todos os arquivos do servidor de producao urgente",TECNICO,ALTA
+"Servico critico de autenticacao SSO caiu afetando todos os departamentos agora",TECNICO,ALTA
+"Cobranca indevida de R 50 mil realizada na conta sem autorizacao urgente",FINANCEIRO,ALTA
+"Fraude detectada em transacao financeira de grande valor precisa ser revertida",FINANCEIRO,ALTA
+"Debito automatico nao autorizado de alto valor foi realizado precisa ser estornado",FINANCEIRO,ALTA
+"Fatura de R 30 mil cobrada com valores completamente incorretos precisa cancelar",FINANCEIRO,ALTA
+"Pagamento de fornecedor critico nao foi processado e contrato pode ser cancelado",FINANCEIRO,ALTA
+"Conta bloqueada por suspeita de fraude impedindo operacoes financeiras urgentes",FINANCEIRO,ALTA
+"Cobranca duplicada de valor muito alto na fatura mensal precisa estorno imediato",FINANCEIRO,ALTA
+"Transferencia bancaria de valor errado enviada para conta incorreta urgente",FINANCEIRO,ALTA
+"Nota fiscal emitida com valor milionario incorreto podendo gerar problemas fiscais",FINANCEIRO,ALTA
+"Imposto declarado incorretamente com valor muito acima causando risco tributario",FINANCEIRO,ALTA
+"Contrato rescindido unilateralmente pelo fornecedor sem justificativa precisa acao",COMERCIAL,ALTA
+"Proposta de aquisiçao da empresa que necessita avaliacao urgente antes da reuniao",COMERCIAL,ALTA
+"Cliente estrategico ameacando cancelar contrato de R 2 milhoes precisa atencao",COMERCIAL,ALTA
+"Concorrente oferecendo proposta muito agressiva para nosso maior cliente urgente",COMERCIAL,ALTA
+"Contrato principal vence em 24 horas e ainda nao foi renovado precisa acao agora",COMERCIAL,ALTA
+"Parceiro estrategico sinalizou saida do acordo que representa 40% da receita",COMERCIAL,ALTA
+"Licitacao critica fecha amanha e precisamos submeter proposta urgente hoje",COMERCIAL,ALTA
+"Negociacao de fusao empresarial em fase critica requer aprovacao executiva imediata",COMERCIAL,ALTA
+"Maior contrato da empresa com prazo vencendo esta semana precisa renovacao urgente",COMERCIAL,ALTA
+"Acordo de distribuicao exclusiva sendo contestado pelo parceiro com prazo urgente",COMERCIAL,ALTA
+"Brecha de seguranca identificada com dados pessoais de funcionarios expostos",ADMINISTRATIVO,ALTA
+"Funcionario demitido ainda tem acesso aos sistemas criticos precisa revogar urgente",ADMINISTRATIVO,ALTA
+"Incidente grave de seguranca fisica com acesso nao autorizado ao datacenter",ADMINISTRATIVO,ALTA
+"Auditoria surpresa do governo marcada para amanha precisamos preparar documentacao",ADMINISTRATIVO,ALTA
+"Processo trabalhista com prazo de resposta para amanha precisa documentacao urgente",ADMINISTRATIVO,ALTA
+"Vistoria de orgao regulador em andamento e falta documentacao critica obrigatoria",ADMINISTRATIVO,ALTA
+"Decisao judicial com prazo improrrogavel exige acao administrativa imediata hoje",ADMINISTRATIVO,ALTA
+"Certificacao obrigatoria vence em 48 horas e empresa ficara irregular sem renovacao",ADMINISTRATIVO,ALTA
+"Incidente de seguranca grave com suspeita de espionagem corporativa detectado",ADMINISTRATIVO,ALTA
+"Prazo de entrega de relatorio regulatorio vence hoje podendo gerar multas pesadas",ADMINISTRATIVO,ALTA
+"Reclamacao urgente sobre servico interrompido que esta causando prejuizos serios",OUTROS,ALTA
+"Situacao de emergencia em cliente que depende do sistema para operacoes criticas",OUTROS,ALTA
+"Problema gravissimo reportado por cliente VIP que ameaca cancelar contrato hoje",OUTROS,ALTA
+"Incidente critico nao categorizado afetando multiplos departamentos da empresa",OUTROS,ALTA
+"Falha em processo regulatorio critico que pode gerar embargo das operacoes",OUTROS,ALTA
+"Emergencia operacional em cliente hospitalar que depende do sistema para pacientes",OUTROS,ALTA
+"Situacao critica reportada por cliente em reuniao com board da empresa hoje",OUTROS,ALTA
+"Falha em sistema que suporta operacoes de vida e morte requer resolucao imediata",OUTROS,ALTA
+"Incidente com potencial de dano reputacional grave precisa acao de comunicacao",OUTROS,ALTA
+"Crise em cliente que esta gerando noticias negativas na midia sobre o sistema",OUTROS,ALTA
+"Aplicativo de gestao travando em todos os dispositivos da equipe de campo urgente",TECNICO,ALTA
+"Todos os relatorios financeiros pararam de funcionar durante fechamento do mes",TECNICO,ALTA
+"Integracao com sistema do banco central parou causando bloqueio das transacoes",TECNICO,ALTA
+"Sistema de backup nao funciona ha uma semana e ha risco iminente de perda de dados",TECNICO,ALTA
+"Atualizacao forcada corrompeu a base de dados de producao precisa restauracao",TECNICO,ALTA
+"Servico de autenticacao em nuvem indisponivel bloqueando acesso de 5000 usuarios",TECNICO,ALTA
+"Falha no sistema de monitoramento fez com que incidente nao fosse detectado a tempo",TECNICO,ALTA
+"Migracao de dados falhou deixando sistema hibrido com inconsistencias criticas",TECNICO,ALTA
+"CPU dos servidores em 100% ha 6 horas sem conseguir identificar causa raiz",TECNICO,ALTA
+"Violacao de seguranca com dados de cartao de credito de clientes potencialmente expostos",TECNICO,ALTA
+"Pagamento de salarios esta bloqueado por problema no sistema de folha urgente",FINANCEIRO,ALTA
+"Debito de valor enorme realizado sem autorizacao precisa investigacao e estorno",FINANCEIRO,ALTA
+"Auditoria fiscal identificou irregularidade que pode gerar multa de alto valor",FINANCEIRO,ALTA
+"Fornecedor cortou credito por fatura nao paga que estava pendente no sistema",FINANCEIRO,ALTA
+"Contrato de financiamento em risco por inadimplencia gerada por erro do sistema",FINANCEIRO,ALTA
+"Fatura de imposto com valor erradissimo pode comprometer situacao fiscal da empresa",FINANCEIRO,ALTA
+"Cobranca abusiva identificada que gerou reclamacao no Procon contra a empresa",FINANCEIRO,ALTA
+"Sequestro de dados financeiros por ransomware requer decisao urgente de pagamento",FINANCEIRO,ALTA
+"Erro de sistema gerou estornos em massa incorretos causando crise no fluxo de caixa",FINANCEIRO,ALTA
+"Transferencia para conta errada de valor alto precisa cancelamento bancario urgente",FINANCEIRO,ALTA
+"Sistema de emissao de NF-e completamente fora do ar impedindo faturamento urgente",TECNICO,ALTA

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TriageAI - Sistema Inteligente de Priorizacao de Chamados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; color: #1e293b; line-height: 1.6; }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 30%, #4f46e5 60%, #6366f1 100%);
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; color: white; padding: 40px 20px;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(99,102,241,0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(6,182,212,0.2) 0%, transparent 40%);
+            animation: float 20s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-20px, -20px); } }
+        .hero-content { position: relative; z-index: 1; max-width: 900px; }
+        .hero-badge {
+            display: inline-block; background: rgba(255,255,255,0.15); padding: 8px 20px;
+            border-radius: 30px; font-size: 14px; font-weight: 500; margin-bottom: 24px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);
+        }
+        .hero h1 { font-size: 56px; font-weight: 800; margin-bottom: 20px; line-height: 1.1; }
+        .hero h1 span { background: linear-gradient(90deg, #06b6d4, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 20px; opacity: 0.85; max-width: 700px; margin: 0 auto 40px; }
+        .hero-stats { display: flex; gap: 40px; justify-content: center; margin-top: 40px; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 36px; font-weight: 800; }
+        .stat-label { font-size: 13px; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Sections */
+        section { padding: 100px 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .section-title { text-align: center; margin-bottom: 60px; }
+        .section-title h2 { font-size: 36px; font-weight: 700; margin-bottom: 12px; }
+        .section-title p { font-size: 18px; color: #64748b; max-width: 600px; margin: 0 auto; }
+        .section-label {
+            display: inline-block; background: #eff6ff; color: #4f46e5; padding: 4px 14px;
+            border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 12px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        /* Problem */
+        .problem { background: #f8fafc; }
+        .problem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .problem-card {
+            background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px;
+            text-align: center; transition: all 0.3s;
+        }
+        .problem-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
+        .problem-icon { font-size: 40px; margin-bottom: 16px; }
+        .problem-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .problem-card p { font-size: 14px; color: #64748b; }
+
+        /* Solution */
+        .solution-flow { display: flex; align-items: center; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 60px; }
+        .flow-step {
+            background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px 24px;
+            text-align: center; min-width: 160px; transition: all 0.3s;
+        }
+        .flow-step:hover { border-color: #6366f1; }
+        .flow-step .material-icons { color: #6366f1; font-size: 28px; display: block; margin-bottom: 8px; }
+        .flow-step h4 { font-size: 14px; font-weight: 600; }
+        .flow-arrow { color: #6366f1; font-size: 24px; font-weight: bold; }
+
+        /* Tech Stack */
+        .tech { background: #1e1b4b; color: white; }
+        .tech .section-label { background: rgba(99,102,241,0.3); color: #a5b4fc; }
+        .tech .section-title p { color: rgba(255,255,255,0.6); }
+        .tech-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .tech-card {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 28px; transition: all 0.3s;
+        }
+        .tech-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .tech-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #a5b4fc; }
+        .tech-card p { font-size: 14px; color: rgba(255,255,255,0.6); }
+        .tech-card .tech-list { list-style: none; margin-top: 12px; }
+        .tech-card .tech-list li { padding: 4px 0; font-size: 14px; color: rgba(255,255,255,0.8); }
+        .tech-card .tech-list li::before { content: ''; display: inline-block; width: 6px; height: 6px; background: #06b6d4; border-radius: 50%; margin-right: 10px; }
+
+        /* Screenshots */
+        .screenshots { background: #f8fafc; }
+        .screenshot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+        .screenshot-item {
+            background: white; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;
+            transition: all 0.3s;
+        }
+        .screenshot-item:hover { box-shadow: 0 12px 24px rgba(0,0,0,0.1); transform: translateY(-4px); }
+        .screenshot-item img { width: 100%; display: block; }
+        .screenshot-mockup {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0); padding: 40px; text-align: center;
+            min-height: 250px; display: flex; align-items: center; justify-content: center;
+        }
+        .screenshot-mockup .mock-content {
+            background: white; border-radius: 12px; padding: 24px; width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: left;
+        }
+        .screenshot-info { padding: 20px; }
+        .screenshot-info h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .screenshot-info p { font-size: 13px; color: #64748b; }
+
+        /* Features */
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .feature-card {
+            background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px;
+            transition: all 0.3s;
+        }
+        .feature-card:hover { border-color: #6366f1; box-shadow: 0 8px 16px rgba(99,102,241,0.1); }
+        .feature-icon {
+            width: 48px; height: 48px; background: #eff6ff; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+        }
+        .feature-icon .material-icons { color: #4f46e5; font-size: 24px; }
+        .feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .feature-card p { font-size: 14px; color: #64748b; }
+
+        /* Architecture */
+        .arch-diagram {
+            background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 40px;
+            text-align: center; font-family: 'Courier New', monospace; font-size: 14px;
+            line-height: 1.8; white-space: pre; overflow-x: auto; color: #334155;
+        }
+
+        /* Git Integration */
+        .git-flow {
+            background: white; border: 2px solid #e2e8f0; border-radius: 16px; padding: 40px;
+            max-width: 800px; margin: 0 auto;
+        }
+        .git-step { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
+        .git-step:last-child { border-bottom: none; }
+        .git-step-num {
+            width: 36px; height: 36px; background: linear-gradient(135deg, #6366f1, #06b6d4);
+            border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px; flex-shrink: 0;
+        }
+        .git-step h4 { font-size: 15px; font-weight: 600; }
+        .git-step p { font-size: 13px; color: #64748b; }
+
+        /* Metrics */
+        .metrics { background: linear-gradient(135deg, #4f46e5, #06b6d4); color: white; }
+        .metrics .section-label { background: rgba(255,255,255,0.2); color: white; }
+        .metrics .section-title p { color: rgba(255,255,255,0.7); }
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .metric-card {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px; padding: 28px; text-align: center; backdrop-filter: blur(10px);
+        }
+        .metric-value { font-size: 42px; font-weight: 800; }
+        .metric-label { font-size: 14px; opacity: 0.8; margin-top: 4px; }
+
+        /* Footer */
+        footer {
+            background: #0f172a; color: rgba(255,255,255,0.6); padding: 40px 20px; text-align: center;
+        }
+        footer p { font-size: 14px; }
+        footer a { color: #6366f1; text-decoration: none; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .hero p { font-size: 16px; }
+            .hero-stats { flex-direction: column; gap: 20px; }
+            .problem-grid, .tech-grid, .features-grid, .metrics-grid { grid-template-columns: 1fr; }
+            .screenshot-grid { grid-template-columns: 1fr; }
+            .solution-flow { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+            section { padding: 60px 20px; }
+            .section-title h2 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">Trabalho de Conclusao de Curso</div>
+        <h1>Priorizacao Inteligente de Chamados com <span>Inteligencia Artificial</span></h1>
+        <p>Sistema completo que utiliza NLP para classificar, priorizar e resolver chamados automaticamente, incluindo integracao com repositorios Git para auto-fix de bugs.</p>
+        <div class="hero-stats">
+            <div class="stat"><div class="stat-value">1000+</div><div class="stat-label">Tickets no Dataset</div></div>
+            <div class="stat"><div class="stat-value">5</div><div class="stat-label">Categorias</div></div>
+            <div class="stat"><div class="stat-value">3</div><div class="stat-label">Provedores Git</div></div>
+            <div class="stat"><div class="stat-value">~85%</div><div class="stat-label">Acuracia do Modelo</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- Problema -->
+<section class="problem">
+    <div class="container">
+        <div class="section-title">
+            <span class="section-label">O Problema</span>
+            <h2>Empresas sofrem com triagem manual de chamados</h2>
+            <p>O processo manual gera ineficiencia, atrasos e insatisfacao dos clientes</p>
+        </div>
+        <div class="problem-grid">
+            <div class="problem-card">
+                <div class="problem-icon">&#128200;</div>
+                <h3>Alto Volume</h3>
+                <p>Centenas de tickets por dia sem priorizacao adequada</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">&#9203;</div>
+                <h3>Triagem Lenta</h3>
+                <p>Tempo excessivo para classificar e direcionar chamados</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">&#10060;</div>
+                <h3>Erros de Classificacao</h3>
+                <p>Categorizacao incorreta gera retrabalho e atrasos</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">&#128176;</div>
+                <h3>Custo Alto</h3>
+                <p>Equipe dedicada a triagem manual com baixa eficiencia</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Solucao -->
+<section>
+    <div class="container">
+        <div class="section-title">
+            <span class="section-label">A Solucao</span>
+            <h2>TriageAI - Classificacao e Priorizacao Automatica</h2>
+            <p>Inteligencia Artificial que aprende e melhora continuamente</p>
+        </div>
+        <div class="solution-flow">
+            <div class="flow-step">
+                <span class="material-icons">edit_note</span>
+                <h4>Chamado Criado</h4>
+            </div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-step">
+                <span class="material-icons">psychology</span>
+                <h4>IA Classifica</h4>
+            </div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-step">
+                <span class="material-icons">low_priority</span>
+                <h4>Prioridade Definida</h4>
+            </div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-step">
+                <span class="material-icons">code</span>
+                <h4>Auto-Fix (Git)</h4>
+            </div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-step">
+                <span class="material-icons">check_circle</span>
+                <h4>PR Criado</h4>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="screenshots">
+    <div class="container">
+        <div class="section-title">
+            <span class="section-label">Funcionalidades</span>
+            <h2>Tudo que o sistema oferece</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><span class="material-icons">smart_toy</span></div>
+                <h3>Classificacao por IA</h3>
+                <p>NLP com TF-IDF e Logistic Regression classifica categoria e prioridade automaticamente</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><span class="material-icons">feedback</span></div>
+                <h3>Feedback Loop</h3>
+                <p>Usuarios corrigem a IA. Apos 10 feedbacks, o modelo re-treina automaticamente</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><span class="material-icons">build</span></div>
+                <h3>Auto-Fix Git</h3>
+                <p>Cria branch, analisa codigo, commita fix e abre PR automaticamente</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><span class="material-icons">security</span></div>
+                <h3>Autenticacao JWT</h3>
+                <p>Login seguro com tokens JWT, controle por perfil (Admin, Agente, Cliente)</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><span class="material-icons">dashboard</span></div>
+                <h3>Dashboard</h3>
+                <p>Metricas em tempo real: tickets por categoria, prioridade e status</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><span class="material-icons">sync</span></div>
+                <h3>Sync de PR Status</h3>
+                <p>Monitora PRs a cada 60s: merge fecha ticket, close reabre</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Telas do Sistema -->
+<section>
+    <div class="container">
+        <div class="section-title">
+            <span class="section-label">Telas</span>
+            <h2>Interface moderna e responsiva</h2>
+        </div>
+        <div class="screenshot-grid">
+            <div class="screenshot-item">
+                <div class="screenshot-mockup">
+                    <div class="mock-content">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                            <div style="font-weight:700;font-size:18px">TriageAI - Login</div>
+                        </div>
+                        <div style="background:#f1f5f9;border-radius:8px;padding:10px;margin-bottom:8px;font-size:13px;color:#94a3b8">Email</div>
+                        <div style="background:#f1f5f9;border-radius:8px;padding:10px;margin-bottom:16px;font-size:13px;color:#94a3b8">Senha</div>
+                        <div style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;text-align:center;padding:10px;border-radius:8px;font-weight:600;font-size:14px">Entrar</div>
+                    </div>
+                </div>
+                <div class="screenshot-info">
+                    <h3>Tela de Login</h3>
+                    <p>Layout split-screen com gradiente e features do produto</p>
+                </div>
+            </div>
+            <div class="screenshot-item">
+                <div class="screenshot-mockup">
+                    <div class="mock-content">
+                        <div style="font-weight:700;margin-bottom:12px">Dashboard</div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+                            <div style="background:#eff6ff;padding:8px;border-radius:6px;text-align:center"><div style="font-weight:700;font-size:18px;color:#2563eb">42</div><div style="font-size:10px;color:#64748b">Total</div></div>
+                            <div style="background:#fef2f2;padding:8px;border-radius:6px;text-align:center"><div style="font-weight:700;font-size:18px;color:#dc2626">12</div><div style="font-size:10px;color:#64748b">Alta</div></div>
+                            <div style="background:#f0fdf4;padding:8px;border-radius:6px;text-align:center"><div style="font-weight:700;font-size:18px;color:#16a34a">8</div><div style="font-size:10px;color:#64748b">Baixa</div></div>
+                        </div>
+                        <div style="font-size:12px;color:#64748b;margin-bottom:6px">Por Categoria</div>
+                        <div style="background:#e2e8f0;border-radius:4px;height:8px;margin-bottom:4px"><div style="background:#3b82f6;height:100%;width:60%;border-radius:4px"></div></div>
+                        <div style="background:#e2e8f0;border-radius:4px;height:8px;margin-bottom:4px"><div style="background:#ec4899;height:100%;width:40%;border-radius:4px"></div></div>
+                        <div style="background:#e2e8f0;border-radius:4px;height:8px"><div style="background:#8b5cf6;height:100%;width:25%;border-radius:4px"></div></div>
+                    </div>
+                </div>
+                <div class="screenshot-info">
+                    <h3>Dashboard</h3>
+                    <p>Cards de metricas, graficos por categoria e status em tempo real</p>
+                </div>
+            </div>
+            <div class="screenshot-item">
+                <div class="screenshot-mockup">
+                    <div class="mock-content">
+                        <div style="font-weight:700;margin-bottom:12px">Chamados</div>
+                        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                                <span style="font-size:12px;color:#64748b">#1</span>
+                                <span style="background:#fef2f2;color:#dc2626;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600">ALTA</span>
+                            </div>
+                            <div style="font-weight:600;font-size:13px">Sistema fora do ar</div>
+                            <div style="display:flex;gap:6px;margin-top:6px">
+                                <span style="background:#eff6ff;color:#2563eb;padding:2px 6px;border-radius:4px;font-size:10px">TECNICO</span>
+                                <span style="background:#dbeafe;color:#1d4ed8;padding:2px 6px;border-radius:4px;font-size:10px">ABERTO</span>
+                            </div>
+                        </div>
+                        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                                <span style="font-size:12px;color:#64748b">#2</span>
+                                <span style="background:#fffbeb;color:#d97706;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600">MEDIA</span>
+                            </div>
+                            <div style="font-weight:600;font-size:13px">Erro ao gerar boleto</div>
+                            <div style="display:flex;gap:6px;margin-top:6px">
+                                <span style="background:#fdf2f8;color:#db2777;padding:2px 6px;border-radius:4px;font-size:10px">FINANCEIRO</span>
+                                <span style="background:#fef3c7;color:#b45309;padding:2px 6px;border-radius:4px;font-size:10px">EM ANDAMENTO</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="screenshot-info">
+                    <h3>Lista de Chamados</h3>
+                    <p>Cards com badges coloridos por prioridade, categoria e status</p>
+                </div>
+            </div>
+            <div class="screenshot-item">
+                <div class="screenshot-mockup">
+                    <div class="mock-content">
+                        <div style="font-weight:700;margin-bottom:8px">Auto-Fix</div>
+                        <div style="font-size:12px;color:#64748b;margin-bottom:12px">Ticket #15 - Bug no cadastro</div>
+                        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:8px">
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                                <span style="color:#16a34a;font-size:16px">&#10003;</span>
+                                <span style="font-weight:600;font-size:13px">Pull Request Criado</span>
+                            </div>
+                            <div style="font-size:11px;color:#64748b">github.com/.../pull/1</div>
+                            <div style="display:flex;gap:6px;margin-top:6px">
+                                <span style="background:#dbeafe;color:#1d4ed8;padding:2px 6px;border-radius:4px;font-size:10px">OPEN</span>
+                                <span style="font-size:10px;color:#64748b">Branch: fix/ticket-15</span>
+                            </div>
+                        </div>
+                        <div style="background:linear-gradient(135deg,#6366f1,#06b6d4);color:white;text-align:center;padding:8px;border-radius:8px;font-weight:600;font-size:12px">Executar Auto-Fix</div>
+                    </div>
+                </div>
+                <div class="screenshot-info">
+                    <h3>Integracao Git - Auto-Fix</h3>
+                    <p>Cria branch, analisa codigo, commita fix e abre PR automaticamente</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tech Stack -->
+<section class="tech">
+    <div class="container">
+        <div class="section-title">
+            <span class="section-label">Tecnologias</span>
+            <h2>Stack moderno e escalavel</h2>
+            <p>Arquitetura de microservicos pronta para producao</p>
+        </div>
+        <div class="tech-grid">
+            <div class="tech-card">
+                <h3>Backend</h3>
+                <p>API REST robusta com seguranca JWT</p>
+                <ul class="tech-list">
+                    <li>Java 17 + Spring Boot 3.2</li>
+                    <li>Spring Security (JWT)</li>
+                    <li>Spring Data JPA</li>
+                    <li>H2 Database (MVP)</li>
+                </ul>
+            </div>
+            <div class="tech-card">
+                <h3>Inteligencia Artificial</h3>
+                <p>NLP para classificacao de texto</p>
+                <ul class="tech-list">
+                    <li>Python + FastAPI</li>
+                    <li>scikit-learn (TF-IDF)</li>
+                    <li>Logistic Regression</li>
+                    <li>Auto-retrain com feedback</li>
+                </ul>
+            </div>
+            <div class="tech-card">
+                <h3>Frontend</h3>
+                <p>Interface moderna e responsiva</p>
+                <ul class="tech-list">
+                    <li>Angular 17 (Standalone)</li>
+                    <li>Angular Material</li>
+                    <li>Design System customizado</li>
+                    <li>Lazy loading de rotas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Git Integration -->
+<section>
+    <div class="container">
+        <div class="section-title">
+            <span class="section-label">Diferencial</span>
+            <h2>Integracao Git - Auto-Fix de Bugs</h2>
+            <p>Da abertura do ticket ao Pull Request, tudo automatico</p>
+        </div>
+        <div class="git-flow">
+            <div class="git-step">
+                <div class="git-step-num">1</div>
+                <div><h4>Ticket TECNICO criado</h4><p>Usuario reporta um bug no sistema</p></div>
+            </div>
+            <div class="git-step">
+                <div class="git-step-num">2</div>
+                <div><h4>IA analisa o repositorio</h4><p>Busca arquivos relevantes via API do GitHub/GitLab/Bitbucket</p></div>
+            </div>
+            <div class="git-step">
+                <div class="git-step-num">3</div>
+                <div><h4>Branch criada: fix/ticket-N</h4><p>Branch automatica a partir da main/master</p></div>
+            </div>
+            <div class="git-step">
+                <div class="git-step-num">4</div>
+                <div><h4>Fix gerado e commitado</h4><p>IA gera correcao baseada em patterns de erro</p></div>
+            </div>
+            <div class="git-step">
+                <div class="git-step-num">5</div>
+                <div><h4>Pull Request aberto</h4><p>PR com descricao do ticket e reviewer atribuido</p></div>
+            </div>
+            <div class="git-step">
+                <div class="git-step-num">6</div>
+                <div><h4>Status sincronizado</h4><p>Merge fecha ticket, close reabre - sync a cada 60s</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Metricas -->
+<section class="metrics">
+    <div class="container">
+        <div class="section-title">
+            <span class="section-label">Resultados</span>
+            <h2>Metricas do Sistema</h2>
+            <p>Impacto mensuravel na operacao de suporte</p>
+        </div>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">~85%</div>
+                <div class="metric-label">Acuracia da IA</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">70%</div>
+                <div class="metric-label">Reducao no Tempo de Triagem</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">&lt;2s</div>
+                <div class="metric-label">Tempo de Classificacao</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">3</div>
+                <div class="metric-label">Provedores Git Suportados</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <p style="font-size:20px;font-weight:700;color:white;margin-bottom:8px">TriageAI</p>
+        <p>Sistema Inteligente de Classificacao e Priorizacao Automatica de Chamados</p>
+        <p style="margin-top:8px">utilizando Tecnicas de Processamento de Linguagem Natural</p>
+        <p style="margin-top:20px;font-size:13px">
+            <a href="https://github.com/CleytonPrudencio/TriageAI">GitHub</a> &middot;
+            Projeto Academico - TCC 2026
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>
