@@ -58,24 +58,42 @@ public class GitIntegrationService {
                         "IA nao encontrou correcoes para aplicar", 0);
             }
 
-            // 4. Apply fixes: commit each file
+            // 4. Apply fixes: commit each file (supports creating new files)
             int filesChanged = 0;
             for (CodeAnalysisResponse.FileFix fix : analysis.getFixes()) {
                 try {
-                    // Get existing file SHA (needed for GitHub)
-                    Map<String, Object> existingFile = gitProvider.getFileContent(
-                            config, fix.getFilePath(), config.getDefaultBranch());
-                    String existingSha = existingFile.get("sha").toString();
+                    String existingSha = null;
+                    boolean isNewFile = (fix.getOriginalCode() == null || fix.getOriginalCode().isBlank());
 
-                    // Update file on the fix branch
-                    String commitMsg = String.format("[TriageAI #%d] Fix: %s\n\n%s",
-                            ticket.getId(), ticket.getTitulo(), fix.getExplanation());
+                    if (!isNewFile) {
+                        // Get existing file SHA (needed for GitHub updates)
+                        try {
+                            Map<String, Object> existingFile = gitProvider.getFileContent(
+                                    config, fix.getFilePath(), branchName);
+                            existingSha = existingFile.get("sha").toString();
+                        } catch (Exception e) {
+                            // File might not exist on fix branch yet, try default branch
+                            try {
+                                Map<String, Object> existingFile = gitProvider.getFileContent(
+                                        config, fix.getFilePath(), config.getDefaultBranch());
+                                existingSha = existingFile.get("sha").toString();
+                            } catch (Exception e2) {
+                                // File doesn't exist anywhere - treat as new file
+                                isNewFile = true;
+                            }
+                        }
+                    }
+
+                    String action = isNewFile ? "Create" : "Fix";
+                    String commitMsg = String.format("[TriageAI #%d] %s: %s\n\n%s",
+                            ticket.getId(), action, fix.getFilePath(), fix.getExplanation());
 
                     gitProvider.updateFile(config, fix.getFilePath(), fix.getFixedCode(),
                             commitMsg, branchName, existingSha);
                     filesChanged++;
+                    log.info("{} file '{}' on branch '{}'", action, fix.getFilePath(), branchName);
                 } catch (Exception e) {
-                    log.warn("Failed to update file '{}': {}", fix.getFilePath(), e.getMessage());
+                    log.warn("Failed to process file '{}': {}", fix.getFilePath(), e.getMessage());
                 }
             }
 

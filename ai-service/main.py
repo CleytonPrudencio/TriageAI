@@ -9,7 +9,9 @@ import base64
 from contextlib import asynccontextmanager
 from typing import Optional
 
+import json
 import requests
+import anthropic
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
@@ -228,361 +230,93 @@ def fetch_file_content(owner: str, repo: str, path: str, token: str, provider: s
     return None
 
 
-def find_relevant_files(files: list[str], title: str, description: str) -> list[str]:
-    """Find files most likely related to the ticket."""
-    text = (title + " " + description).lower()
+def analyze_with_claude(ticket_title: str, ticket_description: str, categoria: str,
+                        file_tree: list[str], file_contents: dict[str, str]) -> list[FileFix]:
+    """Usa Claude API para analisar codigo e gerar correcoes inteligentes."""
 
-    # Extract keywords
-    keywords = set()
-    for word in re.findall(r'[a-zA-Z]+', text):
-        if len(word) > 2:
-            keywords.add(word.lower())
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        print("ANTHROPIC_API_KEY not set, skipping Claude analysis")
+        return []
 
-    # Map common Portuguese terms to file patterns
-    term_to_files = {
-        'tela': ['.html', '.jsx', '.tsx', '.vue', '.css', 'component'],
-        'inicial': ['index', 'home', 'main', 'landing', 'app'],
-        'pagina': ['.html', 'page', 'index', 'component'],
-        'site': ['.html', '.css', '.js', 'index'],
-        'estilo': ['.css', '.scss', 'style', 'theme'],
-        'layout': ['.html', '.css', 'layout', 'header', 'footer', 'template'],
-        'botao': ['.html', '.css', '.js', 'button', 'component'],
-        'formulario': ['.html', 'form', 'contact', 'component'],
-        'menu': ['.html', '.css', 'nav', 'header', 'menu', 'sidebar'],
-        'imagem': ['.html', '.css', 'img', 'image', 'asset'],
-        'login': ['login', 'auth', 'signin', 'security'],
-        'cadastro': ['register', 'signup', 'cadastro', 'controller', 'service', 'form'],
-        'erro': ['error', 'handler', 'exception', 'controller', 'service', '.java', '.py', '.js'],
-        'erros': ['error', 'handler', 'exception', 'controller', 'service', '.java', '.py', '.js'],
-        'api': ['api', 'service', 'controller', 'endpoint', 'route'],
-        'banco': ['.sql', 'database', 'migration', 'model', 'repository', 'schema'],
-        'config': ['.json', '.yaml', '.yml', '.env', 'config', 'properties'],
-        # Domain terms PT -> EN file patterns
-        'produto': ['produto', 'product', 'item', 'controller', 'service', 'model'],
-        'produtos': ['produto', 'product', 'item', 'controller', 'service', 'model'],
-        'estoque': ['estoque', 'stock', 'inventory', 'movimento', 'controller', 'service'],
-        'categoria': ['categori', 'category', 'tipo', 'type', 'enum'],
-        'categorias': ['categori', 'category', 'tipo', 'type', 'enum'],
-        'valor': ['preco', 'price', 'valor', 'produto', 'product', 'model', 'service'],
-        'usuario': ['user', 'usuario', 'auth', 'security', 'controller'],
-        'venda': ['venda', 'sale', 'order', 'pedido', 'service', 'controller'],
-        'pagamento': ['pagamento', 'payment', 'billing', 'financ'],
-        'relatorio': ['relatorio', 'report', 'dashboard', 'stats'],
-        'notificacao': ['notifica', 'notification', 'email', 'alert'],
-        'permissao': ['permission', 'role', 'security', 'auth', 'access'],
-        'movimentacao': ['movimento', 'movimenta', 'transaction', 'service', 'controller'],
-        'adicionar': ['controller', 'service', 'form', 'create', 'add', 'post'],
-        'remover': ['controller', 'service', 'delete', 'remove'],
-        'atualizar': ['controller', 'service', 'update', 'put', 'edit'],
-    }
+    # Monta contexto com arvore de arquivos e conteudo dos mais relevantes
+    files_context = "## Arvore de arquivos do repositorio:\n"
+    files_context += "\n".join(f"- {f}" for f in file_tree[:100])
 
-    # Score files
-    scored = []
-    for f in files:
-        fname = f.lower()
-        score = 0
+    files_context += "\n\n## Conteudo dos arquivos relevantes:\n"
+    for path, content in file_contents.items():
+        # Limita conteudo para nao estourar contexto
+        truncated = content[:8000] if len(content) > 8000 else content
+        files_context += f"\n### {path}\n```\n{truncated}\n```\n"
 
-        # Direct keyword match in filename
-        fname_parts = fname.replace("/", " ").replace("_", " ").replace("-", " ").replace(".", " ")
-        for kw in keywords:
-            if kw in fname_parts:
-                score += 2
+    prompt = f"""Voce e um engenheiro de software senior. Analise o ticket de suporte e o codigo do repositorio abaixo.
+Sua tarefa e gerar correcoes de codigo para resolver o problema descrito no ticket.
 
-        # Term-based matching
-        for term, patterns in term_to_files.items():
-            if term in text:
-                for pat in patterns:
-                    if pat in fname:
-                        score += 3
+## Ticket
+- Titulo: {ticket_title}
+- Descricao: {ticket_description}
+- Categoria: {categoria}
 
-        # Boost main files
-        if 'index' in fname:
-            score += 2
-        if fname.endswith('.html'):
-            score += 1
+{files_context}
 
-        # Deprioritize tests/docs
-        if 'test' in fname or 'spec' in fname or 'readme' in fname:
-            score -= 3
+## Instrucoes
+1. Analise o problema descrito no ticket
+2. Identifique quais arquivos precisam ser modificados ou criados
+3. Gere as correcoes necessarias
+4. Se precisar CRIAR um arquivo novo que nao existe, use o campo filePath com o caminho desejado e originalCode vazio ""
+5. Cada fix deve conter o codigo COMPLETO do arquivo (nao use "..." ou trechos parciais)
 
-        if score > 0:
-            scored.append((f, score))
+Responda APENAS com um JSON valido no formato:
+{{
+  "fixes": [
+    {{
+      "filePath": "caminho/do/arquivo.ext",
+      "originalCode": "codigo original completo (vazio se arquivo novo)",
+      "fixedCode": "codigo corrigido/novo completo",
+      "explanation": "explicacao breve em portugues do que foi feito"
+    }}
+  ]
+}}
 
-    # If no matches, return main files (index.html, main files, etc.)
-    if not scored:
-        fallback = []
-        for f in files:
-            fl = f.lower()
-            if 'index' in fl or 'main' in fl or 'home' in fl or 'app' in fl:
-                fallback.append(f)
-        return fallback[:5]
+Se nao houver correcoes a fazer, retorne: {{"fixes": []}}
+Responda SOMENTE o JSON, sem markdown, sem explicacao extra."""
 
-    scored.sort(key=lambda x: -x[1])
-    return [f for f, _ in scored[:5]]
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=8000,
+            messages=[{"role": "user", "content": prompt}]
+        )
 
+        response_text = message.content[0].text.strip()
 
-def generate_fix(file_path: str, content: str, title: str, description: str) -> Optional[FileFix]:
-    """Generate a fix based on ticket description and file type."""
-    text = (title + " " + description).lower()
-    ext = file_path.rsplit('.', 1)[-1] if '.' in file_path else ''
+        # Limpa resposta (remove markdown code blocks se houver)
+        if response_text.startswith("```"):
+            response_text = re.sub(r'^```\w*\n?', '', response_text)
+            response_text = re.sub(r'\n?```$', '', response_text)
 
-    # HTML fixes
-    if ext == 'html':
-        return generate_html_fix(file_path, content, text)
+        result = json.loads(response_text)
+        fixes = []
+        for fix_data in result.get("fixes", []):
+            fixes.append(FileFix(
+                filePath=fix_data["filePath"],
+                originalCode=fix_data.get("originalCode", ""),
+                fixedCode=fix_data["fixedCode"],
+                explanation=fix_data["explanation"]
+            ))
 
-    # CSS fixes
-    if ext in ('css', 'scss', 'sass', 'less'):
-        return generate_css_fix(file_path, content, text)
+        print(f"Claude generated {len(fixes)} fixes")
+        return fixes
 
-    # JS/TS fixes
-    if ext in ('js', 'ts', 'jsx', 'tsx'):
-        return generate_js_fix(file_path, content, text)
-
-    # Java fixes
-    if ext == 'java':
-        return generate_java_fix(file_path, content, text)
-
-    # Python fixes
-    if ext == 'py':
-        return generate_python_fix(file_path, content, text)
-
-    return None
-
-
-def generate_html_fix(file_path: str, content: str, text: str) -> Optional[FileFix]:
-    """Fix HTML files based on ticket description."""
-    fixed = content
-    explanations = []
-
-    # Missing page / section
-    if any(kw in text for kw in ['falta', 'faltando', 'criar', 'adicionar', 'nova', 'novo', 'inicial']):
-        if '<body' in fixed:
-            # Add a hero section / initial screen
-            hero_section = """
-    <!-- [TriageAI] Secao inicial adicionada -->
-    <section id="hero" style="padding: 60px 20px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; min-height: 80vh; display: flex; align-items: center; justify-content: center;">
-        <div style="max-width: 800px;">
-            <h1 style="font-size: 3em; margin-bottom: 20px;">Bem-vindo ao nosso site</h1>
-            <p style="font-size: 1.2em; opacity: 0.9; margin-bottom: 30px;">Solucoes inovadoras para o seu negocio</p>
-            <a href="#contato" style="background: white; color: #667eea; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 1.1em;">Saiba Mais</a>
-        </div>
-    </section>"""
-            # Insert after <body> tag
-            body_match = re.search(r'(<body[^>]*>)', fixed)
-            if body_match:
-                insert_pos = body_match.end()
-                fixed = fixed[:insert_pos] + hero_section + fixed[insert_pos:]
-                explanations.append("Adicionada secao hero/inicial com titulo e call-to-action")
-
-    # Missing title/header
-    if any(kw in text for kw in ['titulo', 'header', 'cabecalho']):
-        if '<header' not in fixed and '<body' in fixed:
-            header = """
-    <!-- [TriageAI] Header adicionado -->
-    <header style="background: #333; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;">
-        <h1 style="margin: 0; font-size: 1.5em;">Site</h1>
-        <nav>
-            <a href="#" style="color: white; margin: 0 15px; text-decoration: none;">Home</a>
-            <a href="#" style="color: white; margin: 0 15px; text-decoration: none;">Sobre</a>
-            <a href="#" style="color: white; margin: 0 15px; text-decoration: none;">Contato</a>
-        </nav>
-    </header>"""
-            body_match = re.search(r'(<body[^>]*>)', fixed)
-            if body_match:
-                insert_pos = body_match.end()
-                fixed = fixed[:insert_pos] + header + fixed[insert_pos:]
-                explanations.append("Adicionado header com navegacao")
-
-    # Fix broken links / errors
-    if any(kw in text for kw in ['erro', 'quebrado', 'broken', 'link', 'bug']):
-        # Fix common HTML issues
-        if '<meta charset' not in fixed and '<head' in fixed:
-            fixed = fixed.replace('<head>', '<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">', 1)
-            explanations.append("Adicionadas meta tags charset e viewport")
-
-    # Responsiveness
-    if any(kw in text for kw in ['responsivo', 'mobile', 'celular', 'responsiv']):
-        if 'viewport' not in fixed and '<head' in fixed:
-            fixed = fixed.replace('<head>', '<head>\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">', 1)
-            explanations.append("Adicionada meta viewport para responsividade")
-
-    # Footer
-    if any(kw in text for kw in ['footer', 'rodape', 'rodapé']):
-        if '<footer' not in fixed and '</body' in fixed:
-            footer = """
-    <!-- [TriageAI] Footer adicionado -->
-    <footer style="background: #333; color: white; padding: 30px; text-align: center; margin-top: 40px;">
-        <p>&copy; 2026 - Todos os direitos reservados</p>
-    </footer>"""
-            fixed = fixed.replace('</body>', footer + '\n</body>', 1)
-            explanations.append("Adicionado footer ao site")
-
-    if not explanations:
-        return None
-
-    return FileFix(
-        filePath=file_path,
-        originalCode=content,
-        fixedCode=fixed,
-        explanation="; ".join(explanations)
-    )
-
-
-def generate_css_fix(file_path: str, content: str, text: str) -> Optional[FileFix]:
-    """Fix CSS files."""
-    fixed = content
-    explanations = []
-
-    if any(kw in text for kw in ['responsivo', 'mobile', 'celular']):
-        if '@media' not in fixed:
-            fixed += """
-
-/* [TriageAI] Media queries para responsividade */
-@media (max-width: 768px) {
-    body { padding: 10px; }
-    .container { width: 100%; padding: 0 15px; }
-    img { max-width: 100%; height: auto; }
-    table { display: block; overflow-x: auto; }
-}
-"""
-            explanations.append("Adicionadas media queries para dispositivos moveis")
-
-    if any(kw in text for kw in ['estilo', 'visual', 'design', 'bonito', 'feio']):
-        if 'font-family' not in fixed:
-            fixed = """/* [TriageAI] Reset e estilos base */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; }
-a { color: #667eea; text-decoration: none; }
-a:hover { text-decoration: underline; }
-img { max-width: 100%; }
-
-""" + fixed
-            explanations.append("Adicionado reset CSS e estilos base")
-
-    if not explanations:
-        return None
-
-    return FileFix(filePath=file_path, originalCode=content, fixedCode=fixed, explanation="; ".join(explanations))
-
-
-def generate_js_fix(file_path: str, content: str, text: str) -> Optional[FileFix]:
-    """Fix JavaScript/TypeScript files."""
-    fixed = content
-    explanations = []
-
-    if any(kw in text for kw in ["erro", "error", "bug", "crash", "falha", "undefined"]):
-        # Wrap main code in try-catch if not present
-        if 'try' not in fixed and 'catch' not in fixed and len(fixed) > 50:
-            fixed = f"try {{\n{fixed}\n}} catch (error) {{\n  console.error('[TriageAI] Erro capturado:', error);\n}}"
-            explanations.append("Adicionado try-catch para captura de erros")
-
-    if any(kw in text for kw in ["lento", "performance", "otimizar"]):
-        if 'addEventListener' in fixed and 'DOMContentLoaded' not in fixed:
-            fixed = f"document.addEventListener('DOMContentLoaded', function() {{\n{fixed}\n}});"
-            explanations.append("Envolvido codigo em DOMContentLoaded para melhor performance")
-
-    if not explanations:
-        return None
-
-    return FileFix(filePath=file_path, originalCode=content, fixedCode=fixed, explanation="; ".join(explanations))
-
-
-def generate_java_fix(file_path: str, content: str, text: str) -> Optional[FileFix]:
-    """Fix Java files."""
-    lines = content.split("\n")
-    fixed_lines = list(lines)
-    explanations = []
-
-    # Pattern 1: NullPointerException
-    if any(kw in text for kw in ["null", "nullpointer", "nulo"]):
-        for i, line in enumerate(lines):
-            if re.search(r'\b\w+\.\w+\(', line) and "if " not in line and "//" not in line.strip()[:2]:
-                var_match = re.match(r'(\s*)((\w+)\.\w+\(.*)', line)
-                if var_match:
-                    indent, var_name = var_match.group(1), var_match.group(3)
-                    if var_name not in ('this', 'super', 'System', 'Math', 'String', 'log', 'return'):
-                        fixed_lines[i] = f"{indent}if ({var_name} != null) {{\n{line}\n{indent}}}"
-                        explanations.append(f"Verificacao de null para '{var_name}'")
-                        break
-
-    # Pattern 2: Error/Exception handling
-    if any(kw in text for kw in ["erro", "error", "exception", "crash", "falha", "bug"]):
-        # Add try-catch around methods that don't have it
-        for i, line in enumerate(lines):
-            if 'public ' in line and ('void ' in line or 'Response' in line or 'return' in lines[min(i+3, len(lines)-1)].strip()[:6] if i+3 < len(lines) else False):
-                method_indent = re.match(r'(\s*)', line).group(1)
-                body_indent = method_indent + "    "
-                # Find the opening brace
-                for j in range(i, min(i+3, len(lines))):
-                    if '{' in lines[j]:
-                        fixed_lines[j] = lines[j].replace('{', '{\n' + body_indent + 'try {')
-                        # Find closing brace of method
-                        brace_count = 0
-                        for k in range(j, len(lines)):
-                            brace_count += lines[k].count('{') - lines[k].count('}')
-                            if brace_count == 0:
-                                fixed_lines[k] = body_indent + '} catch (Exception e) {\n' + body_indent + '    // [TriageAI] Tratamento de erro adicionado\n' + body_indent + '    throw new RuntimeException("Erro ao processar: " + e.getMessage(), e);\n' + method_indent + '}'
-                                explanations.append(f"Try-catch adicionado ao metodo para tratamento de erros")
-                                break
-                        break
-                if explanations:
-                    break
-
-    # Pattern 3: Validation - add input validation to controller/service methods
-    if any(kw in text for kw in ["cadastro", "adicionar", "criar", "salvar", "valor", "invalido"]):
-        for i, line in enumerate(lines):
-            if ('save(' in line or 'create(' in line or 'cadastr' in line.lower()) and '//' not in line.strip()[:2]:
-                indent = re.match(r'(\s*)', line).group(1)
-                # Add validation comment before save
-                validation = f"{indent}// [TriageAI] Validacao de dados antes de salvar\n{indent}if (entity == null) throw new IllegalArgumentException(\"Dados invalidos para cadastro\");\n"
-                fixed_lines[i] = validation + line
-                explanations.append("Validacao de dados adicionada antes do cadastro/save")
-                break
-
-    # Pattern 4: Logging - add logging to service methods
-    if any(kw in text for kw in ["erro", "log", "rastrear", "debug"]):
-        added_log = False
-        for i, line in enumerate(lines):
-            if 'public ' in line and 'class ' not in line and not added_log:
-                # Check if method has logging
-                method_body = "\n".join(lines[i:min(i+20, len(lines))])
-                if 'log.' not in method_body and 'logger.' not in method_body:
-                    for j in range(i, min(i+3, len(lines))):
-                        if '{' in lines[j]:
-                            indent = re.match(r'(\s*)', lines[j]).group(1) + "    "
-                            method_name = re.search(r'(\w+)\s*\(', line)
-                            if method_name:
-                                log_line = f'{indent}log.info("[TriageAI] Executando {method_name.group(1)}");\n'
-                                fixed_lines[j] = lines[j] + '\n' + log_line
-                                explanations.append(f"Log adicionado ao metodo {method_name.group(1)}")
-                                added_log = True
-                            break
-
-    if not explanations:
-        return None
-
-    return FileFix(filePath=file_path, originalCode=content, fixedCode="\n".join(fixed_lines), explanation="; ".join(explanations))
-
-
-def generate_python_fix(file_path: str, content: str, text: str) -> Optional[FileFix]:
-    """Fix Python files."""
-    fixed = content
-    explanations = []
-
-    if any(kw in text for kw in ["erro", "error", "bug", "crash"]):
-        if 'try:' not in fixed and 'except' not in fixed and 'def ' in fixed:
-            fixed = fixed + "\n\n# [TriageAI] TODO: Adicionar tratamento de erros nas funcoes acima\n"
-            explanations.append("Sugerido tratamento de erros")
-
-    if not explanations:
-        return None
-
-    return FileFix(filePath=file_path, originalCode=content, fixedCode=fixed, explanation="; ".join(explanations))
+    except Exception as e:
+        print(f"Claude analysis error: {e}")
+        return []
 
 
 @app.post("/analyze-code", response_model=CodeAnalysisResponseModel)
 def analyze_code(request: CodeAnalysisRequest):
-    """Analyze repository code and suggest fixes based on ticket description."""
+    """Analyze repository code using Claude AI to suggest/create fixes."""
     print(f"Analyzing repo {request.repo_owner}/{request.repo_name} for ticket: {request.ticket_title}")
 
     # 1. Fetch file tree from repo
@@ -595,25 +329,49 @@ def analyze_code(request: CodeAnalysisRequest):
     if not files:
         return CodeAnalysisResponseModel(fixes=[])
 
-    # 2. Find files most relevant to the ticket
-    relevant = find_relevant_files(files, request.ticket_title, request.ticket_description)
-    print(f"Relevant files: {relevant}")
+    # 2. Fetch content of the most relevant files (top 10 by size/importance)
+    # Prioritize config files, main files, and source code
+    priority_patterns = ['pom.xml', 'package.json', 'application', 'config',
+                         'index', 'main', 'app', 'service', 'controller', 'model']
 
-    if not relevant:
-        return CodeAnalysisResponseModel(fixes=[])
+    scored_files = []
+    text = (request.ticket_title + " " + request.ticket_description).lower()
+    keywords = set(w for w in re.findall(r'[a-zA-Z]+', text) if len(w) > 2)
 
-    # 3. Fetch content of relevant files and generate fixes
-    fixes = []
-    for file_path in relevant:
+    for f in files:
+        fname = f.lower()
+        score = 0
+        for kw in keywords:
+            if kw in fname.replace("/", " ").replace("_", " ").replace("-", " "):
+                score += 3
+        for pat in priority_patterns:
+            if pat in fname:
+                score += 2
+        if 'test' in fname or 'spec' in fname:
+            score -= 5
+        scored_files.append((f, score))
+
+    scored_files.sort(key=lambda x: -x[1])
+    top_files = [f for f, s in scored_files[:10]]
+    print(f"Top files for analysis: {top_files}")
+
+    # 3. Fetch content of top files
+    file_contents = {}
+    for file_path in top_files:
         content = fetch_file_content(
             request.repo_owner, request.repo_name,
             file_path, request.api_token, request.provider, request.default_branch
         )
         if content:
-            fix = generate_fix(file_path, content, request.ticket_title, request.ticket_description)
-            if fix:
-                fixes.append(fix)
-                print(f"Fix generated for {file_path}: {fix.explanation}")
+            file_contents[file_path] = content
 
-    print(f"Total fixes: {len(fixes)}")
+    print(f"Fetched content of {len(file_contents)} files")
+
+    # 4. Send to Claude for intelligent analysis
+    fixes = analyze_with_claude(
+        request.ticket_title, request.ticket_description,
+        request.categoria, files, file_contents
+    )
+
+    print(f"Total fixes from Claude: {len(fixes)}")
     return CodeAnalysisResponseModel(fixes=fixes)
