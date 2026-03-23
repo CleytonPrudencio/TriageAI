@@ -47,7 +47,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
               <mat-icon *ngIf="!conn.avatarUrl" class="connection-avatar-icon">account_circle</mat-icon>
               <div class="connection-info">
                 <span class="connection-provider">{{ conn.provider }}</span>
-                <span class="connection-username">@{{ conn.username }}</span>
+                <span class="connection-username">{{'@'}}{{ conn.username }}</span>
               </div>
               <button mat-icon-button class="connection-remove" (click)="disconnect(conn)"
                       matTooltip="Desconectar">
@@ -87,7 +87,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
                     class="connect-btn">
               <mat-spinner *ngIf="connecting" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
               <mat-icon *ngIf="!connecting">link</mat-icon>
-              {{ connecting ? 'Conectando...' : 'Conectar' }}
+              <span *ngIf="connecting">Conectando...</span><span *ngIf="!connecting">Conectar</span>
             </button>
           </div>
         </div>
