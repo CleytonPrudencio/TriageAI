@@ -284,17 +284,25 @@ import { RepoConfigService } from '../../services/repo-config.service';
           <div class="sidebar-section" *ngIf="ticket.categoria === 'TECNICO'">
             <h3><mat-icon>build</mat-icon> Auto-Fix</h3>
             <p class="hint">Analisa o repo e cria um PR com a correcao</p>
+
+            <!-- Validacao: nenhum repo configurado -->
+            <div *ngIf="repoConfigs.length === 0" class="validation-alert">
+              <mat-icon>warning</mat-icon>
+              <span>Nenhum repositorio configurado. Va em <strong>Repositorios</strong> para adicionar.</span>
+            </div>
+
+            <!-- Repo select -->
             <mat-form-field appearance="outline" *ngIf="repoConfigs.length > 0">
-              <mat-label>Repositorio</mat-label>
+              <mat-label>Repositorio *</mat-label>
               <mat-select [(ngModel)]="selectedRepoId">
                 <mat-option *ngFor="let rc of repoConfigs" [value]="rc.id">
                   {{ rc.name }} ({{ rc.repoOwner }}/{{ rc.repoName }})
                 </mat-option>
               </mat-select>
+              <mat-hint *ngIf="!selectedRepoId" class="validation-hint">Selecione um repositorio</mat-hint>
             </mat-form-field>
-            <div *ngIf="repoConfigs.length === 0" class="hint">
-              Nenhum repo configurado. Va em Configuracoes > Repositorios.
-            </div>
+
+            <!-- Branch type -->
             <mat-form-field appearance="outline" *ngIf="repoConfigs.length > 0">
               <mat-label>Tipo de branch</mat-label>
               <mat-select [(ngModel)]="branchType">
@@ -308,19 +316,34 @@ import { RepoConfigService } from '../../services/repo-config.service';
                 <mat-option value="docs">docs</mat-option>
               </mat-select>
             </mat-form-field>
+
+            <!-- Branch name -->
             <mat-form-field appearance="outline" *ngIf="repoConfigs.length > 0">
-              <mat-label>Nome da branch</mat-label>
+              <mat-label>Nome da branch *</mat-label>
               <input matInput [(ngModel)]="branchNameInput">
+              <mat-hint *ngIf="!branchNameInput" class="validation-hint">Informe o nome da branch</mat-hint>
             </mat-form-field>
-            <div class="branch-preview" *ngIf="repoConfigs.length > 0">
+
+            <!-- Preview -->
+            <div class="branch-preview" *ngIf="repoConfigs.length > 0 && selectedRepoId && branchNameInput">
               <code>{{ branchType === 'auto' ? '(IA)' : branchType }}/{{ branchNameInput }}</code>
             </div>
+
+            <!-- Botao com validacao -->
             <button mat-raised-button color="accent" (click)="onAutoFix()" class="full-btn autofix-btn"
-                    [disabled]="!selectedRepoId || fixLoading" *ngIf="repoConfigs.length > 0 && !ticket.prUrl">
+                    [disabled]="!selectedRepoId || !branchNameInput || fixLoading"
+                    *ngIf="repoConfigs.length > 0 && !ticket.prUrl">
               <mat-spinner *ngIf="fixLoading" diameter="18"></mat-spinner>
               <mat-icon *ngIf="!fixLoading">rocket_launch</mat-icon>
               {{ fixLoading ? 'Analisando e criando PR...' : 'Executar Auto-Fix' }}
             </button>
+
+            <!-- Mensagem de validacao quando clica sem preencher -->
+            <div *ngIf="repoConfigs.length > 0 && (!selectedRepoId || !branchNameInput) && !ticket.prUrl" class="validation-summary">
+              <mat-icon>info_outline</mat-icon>
+              <span>Preencha repositorio e nome da branch para executar</span>
+            </div>
+
             <div *ngIf="fixResult" class="fix-result" [class.success]="fixResult.status === 'success'" [class.error]="fixResult.status === 'error'">
               <mat-icon>{{ fixResult.status === 'success' ? 'check_circle' : 'error' }}</mat-icon>
               <span>{{ fixResult.message }}</span>
@@ -448,7 +471,14 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .repo-link { color: #6366f1; text-decoration: none; display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; }
     .repo-link:hover { text-decoration: underline; }
     .repo-icon-sm { font-size: 14px; width: 14px; height: 14px; }
-    .branch-code { background: #1e293b; color: #38bdf8; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+    .branch-code { background: #1e293b !important; color: #38bdf8 !important; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; display: inline-block; }
+
+    /* Validacoes Auto-Fix */
+    .validation-alert { display: flex; align-items: center; gap: 8px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-bottom: 12px; color: #92400e; font-size: 13px; }
+    .validation-alert mat-icon { color: #f59e0b; font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; }
+    .validation-hint { color: #ef4444 !important; font-size: 11px; }
+    .validation-summary { display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 12px; margin-top: 8px; }
+    .validation-summary mat-icon { font-size: 16px; width: 16px; height: 16px; }
     .pr-status-sm { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
     .repo-pr-btn { width: 100%; margin-top: 10px; font-size: 12px; }
 
