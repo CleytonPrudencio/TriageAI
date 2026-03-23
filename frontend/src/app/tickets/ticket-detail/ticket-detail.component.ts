@@ -706,15 +706,19 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   scrollToAutoFix(): void {
+    // Se já tem repo e branch preenchidos, executa direto
+    if (this.selectedRepoId && this.branchNameInput) {
+      this.onAutoFix();
+      return;
+    }
+    // Senão, rola até a seção para preencher
     const el = document.getElementById('autofix-section');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.classList.add('highlight-section');
       setTimeout(() => el.classList.remove('highlight-section'), 2000);
     }
-    if (!this.selectedRepoId) {
-      this.snackBar.open('Selecione um repositorio na secao Auto-Fix ao lado', 'OK', { duration: 4000 });
-    }
+    this.snackBar.open('Preencha o repositorio e nome da branch antes de executar', 'OK', { duration: 4000 });
   }
 
   getFixSummaryText(): string {
