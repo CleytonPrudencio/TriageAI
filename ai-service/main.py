@@ -516,68 +516,263 @@ def fetch_file_content(owner: str, repo: str, path: str, token: str, provider: s
     return None
 
 
+def extract_file_paths_from_text(text: str) -> list[str]:
+    """Extract explicit file paths mentioned in ticket text.
+
+    Looks for patterns like:
+    - src/main/java/com/example/Service.java
+    - backend/services/ParcelService.java
+    - components/Header.tsx
+    """
+    # Match file paths with at least one directory separator and a file extension
+    path_pattern = r'(?:[\w.-]+/)+[\w.-]+\.(?:java|py|ts|tsx|js|jsx|go|rs|rb|php|cs|cpp|c|xml|yml|yaml|json|html|css|scss|vue|svelte|sql)'
+    paths = re.findall(path_pattern, text)
+    # Deduplicate while preserving order
+    seen = set()
+    unique = []
+    for p in paths:
+        if p not in seen:
+            seen.add(p)
+            unique.append(p)
+    return unique
+
+
+def extract_class_names_from_text(text: str) -> list[str]:
+    """Extract class/component names mentioned in ticket text.
+
+    Looks for PascalCase names like ParcelService, UserRepository, OrderController.
+    """
+    # Match PascalCase identifiers (at least two capital-starting segments)
+    class_pattern = r'\b([A-Z][a-z]+(?:[A-Z][a-z0-9]*)+)\b'
+    names = re.findall(class_pattern, text)
+    # Deduplicate while preserving order
+    seen = set()
+    unique = []
+    for n in names:
+        if n not in seen:
+            seen.add(n)
+            unique.append(n)
+    return unique
+
+
+def find_files_in_tree(file_tree: list[str], file_paths: list[str], class_names: list[str]) -> list[str]:
+    """Find files in repo tree that match extracted paths or class names.
+
+    Returns list of exact repo paths, prioritizing:
+    1. Exact path matches (ticket mentions full path)
+    2. Filename matches (ticket mentions class name that maps to a file)
+    3. Related files (e.g., if Service is found, also include its Repository/Controller)
+    """
+    matched = []
+    matched_set = set()
+
+    # 1. Exact path matches - check if any extracted path is a suffix of a repo path
+    for extracted_path in file_paths:
+        for repo_path in file_tree:
+            if repo_path.endswith(extracted_path) or repo_path == extracted_path:
+                if repo_path not in matched_set:
+                    matched.append(repo_path)
+                    matched_set.add(repo_path)
+
+    # 2. Class name matches - find files whose name matches a class name
+    for class_name in class_names:
+        for repo_path in file_tree:
+            filename = repo_path.split('/')[-1].split('.')[0]
+            if filename == class_name:
+                if repo_path not in matched_set:
+                    matched.append(repo_path)
+                    matched_set.add(repo_path)
+
+    # 3. Related files - for each matched file, look for related files
+    #    e.g., if ParcelService.java is matched, also look for ParcelRepository, ParcelController, Parcel.java
+    related_suffixes = ['Service', 'Repository', 'Controller', 'Dto', 'DTO', 'Entity', 'Model',
+                        'Config', 'Exception', 'Mapper', 'Helper', 'Util', 'Interface']
+    base_names = set()
+    for path in list(matched):
+        filename = path.split('/')[-1].split('.')[0]
+        for suffix in related_suffixes:
+            if filename.endswith(suffix):
+                base_name = filename[:-len(suffix)]
+                if base_name:
+                    base_names.add(base_name)
+                break
+        else:
+            # File doesn't end with a known suffix, use the full name as base
+            base_names.add(filename)
+
+    for base_name in base_names:
+        for repo_path in file_tree:
+            filename = repo_path.split('/')[-1].split('.')[0]
+            if filename.startswith(base_name) and repo_path not in matched_set:
+                # Skip test files for related matches
+                if 'test' not in repo_path.lower() and 'spec' not in repo_path.lower():
+                    matched.append(repo_path)
+                    matched_set.add(repo_path)
+
+    return matched
+
+
+def score_files_fallback(file_tree: list[str], ticket_text: str) -> list[str]:
+    """Fallback: score files by keyword matching when no explicit files are found.
+
+    Used when the ticket doesn't mention specific file paths or class names.
+    """
+    priority_patterns = ['pom.xml', 'package.json', 'application', 'config',
+                         'index', 'main', 'app', 'service', 'controller', 'model']
+
+    keywords = set(w for w in re.findall(r'[a-zA-Z]+', ticket_text.lower()) if len(w) > 2)
+
+    scored = []
+    for f in file_tree:
+        fname = f.lower()
+        score = 0
+        for kw in keywords:
+            if kw in fname.replace("/", " ").replace("_", " ").replace("-", " "):
+                score += 3
+        for pat in priority_patterns:
+            if pat in fname:
+                score += 2
+        if 'test' in fname or 'spec' in fname:
+            score -= 5
+        scored.append((f, score))
+
+    scored.sort(key=lambda x: -x[1])
+    return [f for f, s in scored[:10]]
+
+
+def use_claude_to_identify_files(ticket_title: str, ticket_description: str,
+                                  categoria: str, file_tree: list[str]) -> list[str]:
+    """Use Claude to determine which files are likely affected based on the ticket and file tree."""
+    api_key = get_anthropic_key()
+    if not api_key:
+        return []
+
+    # Only send a manageable portion of the file tree
+    tree_text = "\n".join(f"- {f}" for f in file_tree[:200])
+
+    prompt = f"""Given this bug report and the repository file tree, identify which files most likely need to be modified to fix the bug.
+
+## Bug Report
+Title: {ticket_title}
+Description: {ticket_description}
+Category: {categoria}
+
+## Repository Files
+{tree_text}
+
+## Instructions
+Return ONLY a JSON array of file paths (max 10) that are most likely to need changes.
+Focus on source code files, not config or test files.
+Example: ["src/main/java/com/example/Service.java", "src/main/java/com/example/Controller.java"]
+
+Return ONLY the JSON array, nothing else."""
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        response_text = message.content[0].text.strip()
+        if response_text.startswith("```"):
+            response_text = re.sub(r'^```\w*\n?', '', response_text)
+            response_text = re.sub(r'\n?```$', '', response_text)
+
+        suggested = json.loads(response_text)
+        # Validate that suggested paths exist in the file tree
+        valid = [f for f in suggested if f in file_tree]
+        print(f"Claude suggested {len(suggested)} files, {len(valid)} exist in repo")
+        return valid
+    except Exception as e:
+        print(f"Claude file identification failed: {e}")
+        return []
+
+
 def analyze_with_claude(ticket_title: str, ticket_description: str, categoria: str,
-                        file_tree: list[str], file_contents: dict[str, str]) -> list[FileFix]:
-    """Usa Claude API para analisar codigo e gerar correcoes inteligentes."""
+                        file_contents: dict[str, str]) -> list[FileFix]:
+    """Use Claude to analyze real file contents and generate fixes that modify existing files."""
 
     api_key = get_anthropic_key()
     if not api_key:
         print("ANTHROPIC_API_KEY not set, skipping Claude analysis")
         return []
 
-    # Monta contexto com arvore de arquivos e conteudo dos mais relevantes
-    files_context = "## Arvore de arquivos do repositorio:\n"
-    files_context += "\n".join(f"- {f}" for f in file_tree[:100])
+    if not file_contents:
+        print("No file contents to analyze")
+        return []
 
-    files_context += "\n\n## Conteudo dos arquivos relevantes:\n"
+    # Detect language from file extensions for syntax highlighting
+    ext_to_lang = {
+        '.java': 'java', '.py': 'python', '.ts': 'typescript', '.tsx': 'tsx',
+        '.js': 'javascript', '.jsx': 'jsx', '.go': 'go', '.rs': 'rust',
+        '.rb': 'ruby', '.php': 'php', '.cs': 'csharp', '.cpp': 'cpp', '.c': 'c',
+        '.xml': 'xml', '.yml': 'yaml', '.yaml': 'yaml', '.json': 'json',
+        '.html': 'html', '.css': 'css', '.scss': 'scss', '.sql': 'sql',
+        '.vue': 'vue', '.svelte': 'svelte',
+    }
+
+    # Build file contents section
+    files_section = ""
     for path, content in file_contents.items():
-        # Limita conteudo para nao estourar contexto
-        truncated = content[:8000] if len(content) > 8000 else content
-        files_context += f"\n### {path}\n```\n{truncated}\n```\n"
+        ext = '.' + path.rsplit('.', 1)[-1] if '.' in path else ''
+        lang = ext_to_lang.get(ext, '')
+        # Truncate very large files to avoid exceeding context
+        truncated = content[:12000] if len(content) > 12000 else content
+        files_section += f"\n### File: {path}\n```{lang}\n{truncated}\n```\n"
 
-    prompt = f"""Voce e um engenheiro de software senior. Analise o ticket de suporte e o codigo do repositorio abaixo.
-Sua tarefa e gerar correcoes de codigo para resolver o problema descrito no ticket.
+    prompt = f"""You are a senior developer fixing a bug in a codebase.
 
-## Ticket
-- Titulo: {ticket_title}
-- Descricao: {ticket_description}
-- Categoria: {categoria}
+## Bug Report
+Title: {ticket_title}
+Description: {ticket_description}
+Category: {categoria}
 
-{files_context}
+## Existing Files (these are the REAL files from the repository - do NOT rename classes or change packages)
+{files_section}
 
-## Instrucoes
-1. Analise o problema descrito no ticket
-2. Identifique quais arquivos precisam ser modificados ou criados
-3. Gere as correcoes necessarias
-4. Se precisar CRIAR um arquivo novo que nao existe, use o campo filePath com o caminho desejado e originalCode vazio ""
-5. Cada fix deve conter o codigo COMPLETO do arquivo (nao use "..." ou trechos parciais)
+## Instructions
+1. Analyze the bug described above
+2. Determine which of the provided files need to be modified to fix the bug
+3. Return ONLY the modified files with the complete updated content
+4. Do NOT create new files unless absolutely necessary (e.g., new interface methods)
+5. Do NOT change class names, package names, or import paths
+6. Do NOT change method signatures unless required for the fix
+7. Keep all existing functionality intact
+8. Add comments explaining what was changed and why
 
-Responda APENAS com um JSON valido no formato:
+## Response Format
+Respond with ONLY a valid JSON object:
 {{
   "fixes": [
     {{
-      "filePath": "caminho/do/arquivo.ext",
-      "originalCode": "codigo original completo (vazio se arquivo novo)",
-      "fixedCode": "codigo corrigido/novo completo",
-      "explanation": "explicacao breve em portugues do que foi feito"
+      "file_path": "exact/path/from/repo/FileName.java",
+      "action": "modify",
+      "content": "complete file content with fixes applied",
+      "explanation": "what was changed and why"
     }}
   ]
 }}
 
-Se nao houver correcoes a fazer, retorne: {{"fixes": []}}
-Responda SOMENTE o JSON, sem markdown, sem explicacao extra."""
+IMPORTANT:
+- The file_path must match EXACTLY the path provided above
+- For "modify" action, include the COMPLETE file content (not just the diff)
+- For "create" action (only if truly needed), use the CORRECT package name matching the project structure
+- NEVER invent class names - use the real ones from the codebase
+- If no fixes are needed, return: {{"fixes": []}}
+- Respond ONLY with JSON, no markdown, no extra explanation."""
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=8000,
+            max_tokens=16000,
             messages=[{"role": "user", "content": prompt}]
         )
 
         response_text = message.content[0].text.strip()
 
-        # Limpa resposta (remove markdown code blocks se houver)
+        # Clean response (remove markdown code blocks if present)
         if response_text.startswith("```"):
             response_text = re.sub(r'^```\w*\n?', '', response_text)
             response_text = re.sub(r'\n?```$', '', response_text)
@@ -585,11 +780,22 @@ Responda SOMENTE o JSON, sem markdown, sem explicacao extra."""
         result = json.loads(response_text)
         fixes = []
         for fix_data in result.get("fixes", []):
+            file_path = fix_data["file_path"]
+            action = fix_data.get("action", "modify")
+            content = fix_data["content"]
+            explanation = fix_data["explanation"]
+
+            # For "modify" action, originalCode is the real file content
+            # For "create" action, originalCode is empty
+            original_code = ""
+            if action == "modify" and file_path in file_contents:
+                original_code = file_contents[file_path]
+
             fixes.append(FileFix(
-                filePath=fix_data["filePath"],
-                originalCode=fix_data.get("originalCode", ""),
-                fixedCode=fix_data["fixedCode"],
-                explanation=fix_data["explanation"]
+                filePath=file_path,
+                originalCode=original_code,
+                fixedCode=content,
+                explanation=explanation,
             ))
 
         print(f"Claude generated {len(fixes)} fixes")
@@ -602,48 +808,58 @@ Responda SOMENTE o JSON, sem markdown, sem explicacao extra."""
 
 @app.post("/analyze-code", response_model=CodeAnalysisResponseModel)
 def analyze_code(request: CodeAnalysisRequest):
-    """Analyze repository code using Claude AI to suggest/create fixes."""
+    """Analyze repository code using Claude AI to suggest/create fixes.
+
+    Strategy:
+    1. Parse ticket text for explicitly mentioned file paths and class names
+    2. Match those against the real repo file tree
+    3. If no explicit matches, use Claude to identify affected files
+    4. Fallback to keyword scoring if all else fails
+    5. Fetch actual file contents and send to Claude for fix generation
+    """
     print(f"Analyzing repo {request.repo_owner}/{request.repo_name} for ticket: {request.ticket_title}")
 
-    # 1. Fetch file tree from repo
-    files = fetch_repo_tree(
+    ticket_text = request.ticket_title + " " + request.ticket_description
+
+    # Step 1: Fetch file tree from repo
+    file_tree = fetch_repo_tree(
         request.repo_owner, request.repo_name,
         request.api_token, request.provider, request.default_branch
     )
-    print(f"Found {len(files)} files in repo")
+    print(f"Found {len(file_tree)} files in repo")
 
-    if not files:
+    if not file_tree:
         return CodeAnalysisResponseModel(fixes=[])
 
-    # 2. Fetch content of the most relevant files (top 10 by size/importance)
-    # Prioritize config files, main files, and source code
-    priority_patterns = ['pom.xml', 'package.json', 'application', 'config',
-                         'index', 'main', 'app', 'service', 'controller', 'model']
+    # Step 2: Extract file paths and class names from ticket text
+    mentioned_paths = extract_file_paths_from_text(ticket_text)
+    mentioned_classes = extract_class_names_from_text(ticket_text)
+    print(f"Extracted from ticket - paths: {mentioned_paths}, classes: {mentioned_classes}")
 
-    scored_files = []
-    text = (request.ticket_title + " " + request.ticket_description).lower()
-    keywords = set(w for w in re.findall(r'[a-zA-Z]+', text) if len(w) > 2)
+    # Step 3: Find matching files in the repo tree
+    target_files = find_files_in_tree(file_tree, mentioned_paths, mentioned_classes)
+    print(f"Matched {len(target_files)} files from ticket references")
 
-    for f in files:
-        fname = f.lower()
-        score = 0
-        for kw in keywords:
-            if kw in fname.replace("/", " ").replace("_", " ").replace("-", " "):
-                score += 3
-        for pat in priority_patterns:
-            if pat in fname:
-                score += 2
-        if 'test' in fname or 'spec' in fname:
-            score -= 5
-        scored_files.append((f, score))
+    # Step 4: If no files matched from text extraction, use Claude to identify files
+    if not target_files:
+        print("No explicit file matches found, asking Claude to identify affected files...")
+        target_files = use_claude_to_identify_files(
+            request.ticket_title, request.ticket_description,
+            request.categoria, file_tree
+        )
 
-    scored_files.sort(key=lambda x: -x[1])
-    top_files = [f for f, s in scored_files[:10]]
-    print(f"Top files for analysis: {top_files}")
+    # Step 5: Fallback to keyword scoring if still no files
+    if not target_files:
+        print("Claude file identification returned no results, falling back to keyword scoring...")
+        target_files = score_files_fallback(file_tree, ticket_text)
 
-    # 3. Fetch content of top files
+    # Limit to 10 files maximum
+    target_files = target_files[:10]
+    print(f"Final target files for analysis: {target_files}")
+
+    # Step 6: Fetch actual content of target files
     file_contents = {}
-    for file_path in top_files:
+    for file_path in target_files:
         content = fetch_file_content(
             request.repo_owner, request.repo_name,
             file_path, request.api_token, request.provider, request.default_branch
@@ -653,10 +869,13 @@ def analyze_code(request: CodeAnalysisRequest):
 
     print(f"Fetched content of {len(file_contents)} files")
 
-    # 4. Send to Claude for intelligent analysis
+    if not file_contents:
+        return CodeAnalysisResponseModel(fixes=[])
+
+    # Step 7: Send real file contents to Claude for fix generation
     fixes = analyze_with_claude(
         request.ticket_title, request.ticket_description,
-        request.categoria, files, file_contents
+        request.categoria, file_contents
     )
 
     print(f"Total fixes from Claude: {len(fixes)}")
