@@ -620,13 +620,53 @@ def find_files_in_tree(file_tree: list[str], file_paths: list[str], class_names:
                     matched.append(repo_path)
                     matched_set.add(repo_path)
 
-    # 4. Also search for files mentioned in ticket by partial name (e.g., "UserController" in text)
-    #    This catches cases where class names use different prefixes (User vs Usuario)
+    # 4. Search by partial name match (e.g., "UserController" in text)
     for cn in class_names:
         cn_lower = cn.lower()
         for repo_path in file_tree:
             filename_lower = repo_path.split('/')[-1].split('.')[0].lower()
             if filename_lower == cn_lower and repo_path not in matched_set:
+                matched.append(repo_path)
+                matched_set.add(repo_path)
+
+    # 5. Synonym matching - User/Usuario, Parcel/Encomenda, etc.
+    #    For each base_name, also search common translations
+    synonyms = {
+        'usuario': ['user', 'usuario'],
+        'user': ['user', 'usuario'],
+        'encomenda': ['parcel', 'encomenda'],
+        'parcel': ['parcel', 'encomenda'],
+        'reclamacao': ['complaint', 'reclamacao'],
+        'complaint': ['complaint', 'reclamacao'],
+        'empresa': ['company', 'empresa', 'condominium', 'condo'],
+        'pagamento': ['payment', 'pagamento'],
+        'payment': ['payment', 'pagamento'],
+    }
+    extra_bases = set()
+    for bn in base_names:
+        bn_lower = bn.lower()
+        if bn_lower in synonyms:
+            for syn in synonyms[bn_lower]:
+                extra_bases.add(syn.capitalize())
+                extra_bases.add(syn)
+
+    for base_name in extra_bases:
+        for repo_path in file_tree:
+            filename = repo_path.split('/')[-1].split('.')[0]
+            if (filename.lower().startswith(base_name.lower()) or base_name.lower() in filename.lower()) \
+                    and repo_path not in matched_set:
+                if 'test' not in repo_path.lower() and 'spec/' not in repo_path.lower():
+                    matched.append(repo_path)
+                    matched_set.add(repo_path)
+
+    # 6. Always include security config if ticket mentions auth/security
+    security_keywords = ['autenticacao', 'autenticação', 'authentication', 'security', 'jwt',
+                         'login', 'autorização', 'autorizacao', 'permission', 'role']
+    ticket_combined = ' '.join(file_paths + class_names).lower()
+    if any(kw in ticket_combined for kw in security_keywords):
+        for repo_path in file_tree:
+            fname = repo_path.split('/')[-1].lower()
+            if ('security' in fname or 'auth' in fname or 'jwt' in fname) and repo_path not in matched_set:
                 matched.append(repo_path)
                 matched_set.add(repo_path)
 
@@ -752,38 +792,39 @@ Category: {categoria}
 ## Existing Files (these are the REAL files from the repository - do NOT rename classes or change packages)
 {files_section}
 
-## Instructions
-1. Analyze ALL provided files carefully - understand the real class names, packages, field names and relationships
-2. Determine which files need to be modified to COMPLETELY fix the bug
-3. Return ALL modified files with COMPLETE updated content
-4. Fix EVERY file that needs changing - DTOs, Controllers, Services, Repositories, Specifications, Entities
-5. Use the EXACT class names, field names and types you see in the provided files
-6. If a DTO is missing a field, ADD IT. If a Controller needs auth, ADD IT
-7. If a JPA entity uses @ManyToOne, use root.get("entity").get("id") NOT root.get("entityId")
-8. Do NOT change class names, package names, or import paths
-9. Keep all existing functionality intact
-10. Add brief comments on changed lines explaining what was fixed
+## Critical Rules (MUST follow)
+1. Read ALL provided files carefully. Understand the REAL field names, types, relationships, and packages.
+2. If an Entity has @ManyToOne Empresa empresa, the JPA path is root.get("empresa").get("id"), NEVER root.get("empresaId")
+3. If a Controller already has an endpoint, MODIFY it - do NOT create a duplicate in a new file. Duplicate routes crash the app.
+4. Look at how authentication works in existing code (findByCpf vs findByUsername). Use the SAME pattern.
+5. MODIFY existing files when possible. Only CREATE new files if the functionality truly doesn't exist yet.
+6. Include ALL necessary changes: DTOs, Controllers, Services, Repositories, Specifications, Entities.
+7. Use the EXACT class names, field names, import paths and types from the provided files.
+8. If a DTO needs a new field, ADD it to the existing DTO file.
+9. If a Controller needs authentication, ADD @PreAuthorize or SecurityContext checks to the EXISTING controller.
+10. Keep all existing functionality intact. Only change what's needed for the fix.
 
 ## Response Format
-Respond with ONLY a valid JSON object:
+Respond with ONLY a valid JSON object (no markdown, no explanation outside JSON):
 {{
   "fixes": [
     {{
       "file_path": "exact/path/from/repo/FileName.java",
       "action": "modify",
       "content": "complete file content with fixes applied",
-      "explanation": "what was changed and why"
+      "explanation": "brief description of what was changed"
     }}
   ]
 }}
 
-IMPORTANT:
-- The file_path must match EXACTLY the path provided above
-- For "modify" action, include the COMPLETE file content (not just the diff)
-- For "create" action (only if truly needed), use the CORRECT package name matching the project structure
-- NEVER invent class names - use the real ones from the codebase
-- If no fixes are needed, return: {{"fixes": []}}
-- Respond ONLY with JSON, no markdown, no extra explanation."""
+Rules for the response:
+- file_path must match EXACTLY a path from the files listed above
+- action "modify" = replace existing file content. Include the COMPLETE file content.
+- action "create" = new file. ONLY if truly needed. Use correct package from existing files.
+- NEVER create a file that duplicates an existing controller/service endpoint
+- NEVER invent class names, method names or field names that don't exist in the codebase
+- NEVER use root.get("fieldId") when the entity has @ManyToOne - use root.get("relation").get("id")
+- Respond ONLY with the JSON object"""
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
