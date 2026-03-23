@@ -49,7 +49,7 @@ import { SistemaService, Sistema } from '../../services/sistema.service';
             <mat-icon class="sistema-chip-icon">dns</mat-icon>
             <span>Repo: {{ selectedSistema.repoFullName || 'N/A' }}</span>
             <span class="chip-sep">|</span>
-            <span>Branch: {{ selectedSistema.targetBranch || 'main' }}</span>
+            <span>Branch: Auto (IA)</span>
             <span class="chip-sep">|</span>
             <span>Auto-fix: {{ selectedSistema.autoFixEnabled ? 'Ativado' : 'Desativado' }}</span>
           </div>
