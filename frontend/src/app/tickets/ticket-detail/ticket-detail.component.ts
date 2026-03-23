@@ -134,19 +134,11 @@ import { RepoConfigService } from '../../services/repo-config.service';
               <div class="pr-summary-box" *ngIf="prSummaryData?.fixes?.length">
                 <h4><mat-icon>summarize</mat-icon> Resumo da Correcao</h4>
                 <p class="pr-summary-text">
-                  A IA analisou o repositorio <strong>{{ prSummaryData?.repo }}</strong>
-                  e gerou <strong>{{ prSummaryData?.filesChanged }} alteracao(es)</strong>
+                  A IA analisou o repositorio <strong>{{ prSummaryData?.repo }}</strong>,
+                  identificou os arquivos afetados e gerou <strong>{{ prSummaryData?.filesChanged }} correcao(oes)</strong>
                   na branch <code class="branch-code-inline">{{ ticket.prBranch }}</code>.
+                  As alteracoes incluem {{ getFixSummaryText() }}.
                 </p>
-                <ul class="pr-summary-list">
-                  <li *ngFor="let fix of prSummaryData.fixes">
-                    <mat-icon class="summary-file-icon">{{ fix.explanation?.toLowerCase().includes('created') || fix.explanation?.toLowerCase().includes('criado') ? 'note_add' : 'edit_note' }}</mat-icon>
-                    <div>
-                      <code class="summary-file-path">{{ fix.file }}</code>
-                      <span class="summary-explanation">{{ fix.explanation }}</span>
-                    </div>
-                  </li>
-                </ul>
               </div>
 
               <!-- Review / Approve (para casos excepcionais) -->
@@ -707,6 +699,13 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
         this.snackBar.open('Erro ao remover PR', 'OK', { duration: 3000 });
       }
     });
+  }
+
+  getFixSummaryText(): string {
+    if (!this.prSummaryData?.fixes?.length) return '';
+    const explanations = this.prSummaryData.fixes.map((f: any) => f.explanation).filter(Boolean);
+    if (explanations.length <= 2) return explanations.join(' e ');
+    return explanations.slice(0, -1).join('; ') + ' e ' + explanations[explanations.length - 1];
   }
 
   approvePr(): void {
