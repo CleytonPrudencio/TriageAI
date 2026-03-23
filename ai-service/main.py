@@ -13,7 +13,7 @@ import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from model.classifier import load_models, predict, train
+from model.classifier import load_models, predict, train, get_metrics, get_version
 from model.preprocessor import preprocess
 
 cat_model = None
@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="TriageAI - AI Service", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="TriageAI - AI Service", version="2.0.0", lifespan=lifespan)
 
 
 class PredictRequest(BaseModel):
@@ -95,12 +95,29 @@ def merge_feedback_and_retrain():
 
 @app.get("/health")
 def health():
+    version = get_version()
     return {
         "status": "ok",
         "models_loaded": cat_model is not None,
+        "model_version": version.get('version', 0),
         "feedback_pending": feedback_count,
         "retrain_threshold": RETRAIN_THRESHOLD,
     }
+
+
+@app.get("/metrics")
+def metrics():
+    """Retorna metricas detalhadas do modelo (accuracy, F1, confusion matrix)."""
+    m = get_metrics()
+    if not m:
+        raise HTTPException(status_code=404, detail="No metrics available. Train the model first.")
+    return m
+
+
+@app.get("/version")
+def version():
+    """Retorna versao e data do ultimo treino."""
+    return get_version()
 
 
 @app.post("/predict", response_model=PredictResponse)
