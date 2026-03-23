@@ -2,22 +2,22 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatInputModule } from '@angular/material/input';
 import { Ticket } from '../../models/ticket.model';
 import { TicketService } from '../../services/ticket.service';
 
 @Component({
   selector: 'app-ticket-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, MatTableModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatSelectModule, MatPaginatorModule, MatCardModule, MatTooltipModule],
+  imports: [CommonModule, FormsModule, RouterLink, MatButtonModule, MatIconModule, MatFormFieldModule, MatSelectModule, MatPaginatorModule, MatTooltipModule, MatInputModule],
   template: `
+    <!-- Header -->
     <div class="page-header">
       <div>
         <h1>Chamados</h1>
@@ -25,7 +25,7 @@ import { TicketService } from '../../services/ticket.service';
       </div>
       <div class="header-actions">
         <button mat-stroked-button class="board-btn" (click)="goToBoard()">
-          <mat-icon>dashboard</mat-icon> Quadro
+          <mat-icon>view_kanban</mat-icon> Quadro
         </button>
         <a mat-raised-button color="primary" routerLink="/tickets/new" class="new-btn">
           <mat-icon>add</mat-icon> Novo Chamado
@@ -33,6 +33,27 @@ import { TicketService } from '../../services/ticket.service';
       </div>
     </div>
 
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-chip">
+        <mat-icon>confirmation_number</mat-icon>
+        <span>{{ totalElements }} tickets</span>
+      </div>
+      <div class="stat-chip alta" *ngIf="countByPriority('ALTA') > 0">
+        <mat-icon>priority_high</mat-icon>
+        <span>{{ countByPriority('ALTA') }} alta</span>
+      </div>
+      <div class="stat-chip media" *ngIf="countByPriority('MEDIA') > 0">
+        <mat-icon>remove</mat-icon>
+        <span>{{ countByPriority('MEDIA') }} media</span>
+      </div>
+      <div class="stat-chip baixa" *ngIf="countByPriority('BAIXA') > 0">
+        <mat-icon>arrow_downward</mat-icon>
+        <span>{{ countByPriority('BAIXA') }} baixa</span>
+      </div>
+    </div>
+
+    <!-- Filters -->
     <div class="filters-bar">
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Status</mat-label>
@@ -40,6 +61,7 @@ import { TicketService } from '../../services/ticket.service';
           <mat-option value="">Todos</mat-option>
           <mat-option value="ABERTO">Aberto</mat-option>
           <mat-option value="EM_ANDAMENTO">Em Andamento</mat-option>
+          <mat-option value="CODE_REVIEW">Code Review</mat-option>
           <mat-option value="RESOLVIDO">Resolvido</mat-option>
           <mat-option value="FECHADO">Fechado</mat-option>
         </mat-select>
@@ -64,24 +86,59 @@ import { TicketService } from '../../services/ticket.service';
           <mat-option value="OUTROS">Outros</mat-option>
         </mat-select>
       </mat-form-field>
+      <button mat-icon-button class="clear-filters" *ngIf="filterStatus || filterPrioridade || filterCategoria"
+              (click)="clearFilters()" matTooltip="Limpar filtros">
+        <mat-icon>filter_alt_off</mat-icon>
+      </button>
     </div>
 
-    <!-- Cards layout for tickets -->
-    <div class="tickets-grid">
-      <a *ngFor="let t of tickets" [routerLink]="['/tickets', t.id]" class="ticket-card">
-        <div class="ticket-card-header">
-          <span class="ticket-id">#{{ t.id }}</span>
-          <span class="badge priority" [class]="'pri-' + t.prioridade?.toLowerCase()">{{ t.prioridade }}</span>
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="tickets.length === 0">
+      <mat-icon>inbox</mat-icon>
+      <h3>Nenhum chamado encontrado</h3>
+      <p>Crie um novo chamado ou ajuste os filtros</p>
+      <a mat-raised-button color="primary" routerLink="/tickets/new">
+        <mat-icon>add</mat-icon> Criar Chamado
+      </a>
+    </div>
+
+    <!-- Ticket table -->
+    <div class="tickets-table" *ngIf="tickets.length > 0">
+      <div class="table-header">
+        <span class="col-id">#</span>
+        <span class="col-title">Titulo</span>
+        <span class="col-cat">Categoria</span>
+        <span class="col-pri">Prioridade</span>
+        <span class="col-status">Status</span>
+        <span class="col-score">IA</span>
+        <span class="col-date">Data</span>
+      </div>
+      <a *ngFor="let t of tickets" [routerLink]="['/tickets', t.id]" class="table-row">
+        <span class="col-id ticket-id">#{{ t.id }}</span>
+        <div class="col-title">
+          <span class="ticket-title">{{ t.titulo }}</span>
+          <span class="ticket-desc">{{ t.descricao | slice:0:80 }}</span>
         </div>
-        <h3 class="ticket-title">{{ t.titulo }}</h3>
-        <p class="ticket-desc">{{ t.descricao | slice:0:100 }}{{ (t.descricao?.length || 0) > 100 ? '...' : '' }}</p>
-        <div class="ticket-card-footer">
-          <span class="badge category" [class]="'cat-' + t.categoria?.toLowerCase()">{{ t.categoria }}</span>
-          <span class="badge status" [class]="'st-' + t.status?.toLowerCase()">{{ t.status?.replace('_', ' ') }}</span>
-          <span class="ai-score" matTooltip="Score da IA">
-            <mat-icon>smart_toy</mat-icon> {{ t.aiScore | number:'1.0-0' }}%
-          </span>
-        </div>
+        <span class="col-cat">
+          <span class="badge" [class]="'cat-' + t.categoria.toLowerCase()">{{ t.categoria }}</span>
+        </span>
+        <span class="col-pri">
+          <span class="pri-indicator" [class]="'pri-dot-' + t.prioridade.toLowerCase()"></span>
+          {{ t.prioridade }}
+        </span>
+        <span class="col-status">
+          <span class="badge" [class]="'st-' + t.status.toLowerCase()">{{ t.status.replace('_', ' ') }}</span>
+        </span>
+        <span class="col-score">
+          <div class="score-bar-container" matTooltip="Confianca da IA">
+            <div class="score-bar" [style.width.%]="(t.aiScore || 0) * 100"
+                 [class.score-high]="(t.aiScore || 0) >= 0.7"
+                 [class.score-mid]="(t.aiScore || 0) >= 0.4 && (t.aiScore || 0) < 0.7"
+                 [class.score-low]="(t.aiScore || 0) < 0.4"></div>
+          </div>
+          <span class="score-text">{{ (t.aiScore || 0) * 100 | number:'1.0-0' }}%</span>
+        </span>
+        <span class="col-date">{{ t.createdAt | date:'dd/MM' }}</span>
       </a>
     </div>
 
@@ -90,85 +147,135 @@ import { TicketService } from '../../services/ticket.service';
   `,
   styles: [`
     .page-header {
-      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;
+      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;
     }
     .page-header h1 { font-size: 28px; font-weight: 700; margin: 0; color: var(--text); }
     .page-subtitle { color: var(--text-secondary); margin: 4px 0 0; font-size: 14px; }
-    .header-actions { display: flex; gap: 8px; align-items: center; }
-    .board-btn { height: 44px; border-radius: 10px !important; font-weight: 500; }
-    .board-btn mat-icon { margin-right: 4px; }
-    .new-btn { height: 44px; border-radius: 10px !important; font-weight: 600; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .board-btn {
+      height: 42px; border-radius: 10px !important; font-weight: 500;
+      border-color: var(--border) !important;
+    }
+    .board-btn mat-icon { margin-right: 4px; font-size: 18px; }
+    .new-btn {
+      height: 42px; border-radius: 10px !important; font-weight: 600;
+      background: var(--primary) !important;
+    }
 
+    /* Stats bar */
+    .stats-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat-chip {
+      display: flex; align-items: center; gap: 6px; padding: 6px 14px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 20px; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+    }
+    .stat-chip mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .stat-chip.alta { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+    .stat-chip.alta mat-icon { color: #dc2626; }
+    .stat-chip.media { background: #fffbeb; color: #d97706; border-color: #fde68a; }
+    .stat-chip.media mat-icon { color: #d97706; }
+    .stat-chip.baixa { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+    .stat-chip.baixa mat-icon { color: #16a34a; }
+
+    /* Filters */
     .filters-bar {
-      display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+      display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px 16px;
     }
-    .filter-field { width: 180px; }
+    .filter-field { width: 170px; }
     .filter-field .mat-mdc-form-field-subscript-wrapper { display: none; }
+    .clear-filters { color: var(--text-secondary); }
 
-    .tickets-grid {
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      background: var(--bg-card); border: 2px dashed var(--border);
+      border-radius: 16px;
+    }
+    .empty-state mat-icon { font-size: 48px; width: 48px; height: 48px; color: var(--text-secondary); opacity: 0.5; }
+    .empty-state h3 { margin: 16px 0 8px; color: var(--text); font-size: 18px; }
+    .empty-state p { color: var(--text-secondary); margin-bottom: 20px; }
+
+    /* Table */
+    .tickets-table {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .table-header {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 16px;
-      margin-bottom: 16px;
+      grid-template-columns: 50px 1fr 120px 100px 130px 90px 60px;
+      padding: 12px 20px; background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-secondary);
     }
-
-    .ticket-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      text-decoration: none;
-      color: var(--text);
-      transition: all 0.2s;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
+    .table-row {
+      display: grid;
+      grid-template-columns: 50px 1fr 120px 100px 130px 90px 60px;
+      padding: 14px 20px; border-bottom: 1px solid #f1f5f9;
+      text-decoration: none; color: var(--text);
+      transition: background 0.15s; cursor: pointer;
+      align-items: center;
     }
+    .table-row:last-child { border-bottom: none; }
+    .table-row:hover { background: #f8fafc; }
 
-    .ticket-card:hover {
-      box-shadow: var(--shadow-md);
-      border-color: var(--primary-light);
-      transform: translateY(-2px);
+    .ticket-id { font-weight: 600; color: var(--text-secondary); font-size: 13px; }
+    .col-title { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding-right: 16px; }
+    .ticket-title { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ticket-desc { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .col-pri { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+    .pri-indicator { width: 8px; height: 8px; border-radius: 50%; }
+    .pri-dot-alta { background: #dc2626; }
+    .pri-dot-media { background: #d97706; }
+    .pri-dot-baixa { background: #16a34a; }
+
+    .col-score { display: flex; align-items: center; gap: 6px; }
+    .score-bar-container {
+      width: 40px; height: 6px; background: #e2e8f0;
+      border-radius: 3px; overflow: hidden;
     }
+    .score-bar { height: 100%; border-radius: 3px; transition: width 0.3s; }
+    .score-high { background: #16a34a; }
+    .score-mid { background: #d97706; }
+    .score-low { background: #dc2626; }
+    .score-text { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
 
-    .ticket-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .ticket-id { color: var(--text-secondary); font-size: 13px; font-weight: 600; }
-    .ticket-title { font-size: 16px; font-weight: 600; margin: 0 0 8px; line-height: 1.4; }
-    .ticket-desc { font-size: 13px; color: var(--text-secondary); margin: 0 0 16px; line-height: 1.5; flex: 1; }
-
-    .ticket-card-footer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .col-date { font-size: 12px; color: var(--text-secondary); }
 
     .badge {
-      padding: 4px 10px; border-radius: 6px; font-size: 11px;
+      padding: 3px 8px; border-radius: 6px; font-size: 10px;
       font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+      white-space: nowrap;
     }
-
     .pri-alta { background: #fef2f2; color: #dc2626; }
     .pri-media { background: #fffbeb; color: #d97706; }
     .pri-baixa { background: #f0fdf4; color: #16a34a; }
-
     .cat-tecnico { background: #eff6ff; color: #2563eb; }
     .cat-financeiro { background: #fdf2f8; color: #db2777; }
     .cat-comercial { background: #f5f3ff; color: #7c3aed; }
     .cat-administrativo { background: #f0fdfa; color: #0d9488; }
     .cat-outros { background: #f8fafc; color: #64748b; }
-
     .st-aberto { background: #dbeafe; color: #1d4ed8; }
     .st-em_andamento { background: #fef3c7; color: #b45309; }
+    .st-code_review { background: #ede9fe; color: #7c3aed; }
     .st-resolvido { background: #d1fae5; color: #059669; }
     .st-fechado { background: #f1f5f9; color: #475569; }
 
-    .ai-score {
-      margin-left: auto; display: flex; align-items: center; gap: 4px;
-      color: var(--text-secondary); font-size: 12px; font-weight: 500;
-    }
-    .ai-score mat-icon { font-size: 14px; width: 14px; height: 14px; color: var(--primary); }
-
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       .page-header { flex-direction: column; gap: 16px; }
       .filters-bar { flex-direction: column; }
       .filter-field { width: 100%; }
-      .tickets-grid { grid-template-columns: 1fr; }
+      .table-header { display: none; }
+      .table-row {
+        grid-template-columns: 1fr;
+        gap: 8px; padding: 16px;
+        border: 1px solid var(--border); border-radius: 12px;
+        margin-bottom: 8px;
+      }
+      .tickets-table { background: none; border: none; }
     }
   `]
 })
@@ -196,6 +303,17 @@ export class TicketListComponent implements OnInit {
       this.tickets = res.content;
       this.totalElements = res.totalElements;
     });
+  }
+
+  countByPriority(pri: string): number {
+    return this.tickets.filter(t => t.prioridade === pri).length;
+  }
+
+  clearFilters(): void {
+    this.filterStatus = '';
+    this.filterPrioridade = '';
+    this.filterCategoria = '';
+    this.loadTickets();
   }
 
   onPage(event: PageEvent): void {
