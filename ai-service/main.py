@@ -487,9 +487,11 @@ def fetch_repo_tree(owner: str, repo: str, token: str, provider: str, branch: st
             '.html', '.css', '.js', '.ts', '.jsx', '.tsx', '.json',
             '.java', '.py', '.php', '.rb', '.go', '.cs', '.cpp', '.c', '.rs',
             '.vue', '.svelte', '.scss', '.sass', '.less', '.xml', '.yaml', '.yml',
-            '.md', '.txt', '.cfg', '.ini', '.env', '.sql',
+            '.md', '.txt', '.cfg', '.ini', '.env', '.sql', '.kt', '.swift',
+            '.properties', '.gradle', '.toml', '.sh', '.bat', '.dockerfile',
         }
-        skip = {'node_modules/', '.git/', 'vendor/', 'dist/', 'build/', '.min.', 'package-lock'}
+        skip = {'node_modules/', '.git/', 'vendor/', 'dist/', 'build/', '.min.', 'package-lock',
+                '.class', '.jar', '.war', 'target/', '__pycache__/', '.pyc'}
         result = []
         for item in tree:
             if item["type"] != "blob":
@@ -874,8 +876,8 @@ def analyze_code(request: CodeAnalysisRequest):
         print("Claude file identification returned no results, falling back to keyword scoring...")
         target_files = score_files_fallback(file_tree, ticket_text)
 
-    # Limit to 15 files maximum to ensure complete analysis
-    target_files = target_files[:15]
+    # Fetch content of up to 30 most relevant files for thorough analysis
+    target_files = target_files[:30]
     print(f"Final target files for analysis: {target_files}")
 
     # Step 6: Fetch actual content of target files
