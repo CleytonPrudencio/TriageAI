@@ -67,6 +67,35 @@ public class GitController {
         return ResponseEntity.ok(Map.of("message", "PR fechado, branch deletada e ticket resetado"));
     }
 
+    @PostMapping("/review/{ticketId}")
+    public ResponseEntity<?> reviewPr(@PathVariable Long ticketId, @RequestBody Map<String, String> body) {
+        log.info("PR review for ticket #{}: {}", ticketId, body.get("action"));
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket nao encontrado"));
+
+        if (ticket.getPrUrl() == null || ticket.getRepoConfig() == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Ticket nao tem PR"));
+        }
+
+        String action = body.getOrDefault("action", "APPROVE");
+        String comment = body.getOrDefault("comment", "");
+
+        try {
+            gitProviderService.submitPrReview(ticket.getRepoConfig(), ticket.getPrUrl(), action, comment);
+
+            if ("APPROVE".equals(action)) {
+                ticket.setPrStatus("APPROVED");
+                ticket.setStatus(Status.CODE_REVIEW);
+                ticketRepository.save(ticket);
+            }
+
+            return ResponseEntity.ok(Map.of("message", "Review enviado com sucesso"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/repos")
     public ResponseEntity<List<GitRepoResponse>> listUserRepos(
             @RequestParam String provider,

@@ -509,6 +509,28 @@ public class GitProviderService {
         }
     }
 
+    public void submitPrReview(RepoConfig config, String prUrl, String action, String comment) {
+        RestClient client = buildClient(config);
+
+        switch (config.getProvider()) {
+            case GITHUB -> {
+                String prNumber = prUrl.replaceAll(".*/pull/(\\d+).*", "$1");
+                // GitHub review event: APPROVE, REQUEST_CHANGES, COMMENT
+                String event = "APPROVE".equals(action) ? "APPROVE" : "REQUEST_CHANGES";
+                client.post()
+                        .uri("/repos/{owner}/{repo}/pulls/{number}/reviews",
+                                config.getRepoOwner(), config.getRepoName(), prNumber)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Map.of("event", event, "body", comment != null ? comment : ""))
+                        .retrieve().toBodilessEntity();
+                log.info("Submitted {} review for PR #{} on {}/{}", event, prNumber,
+                        config.getRepoOwner(), config.getRepoName());
+            }
+            case GITLAB -> { /* TODO */ }
+            case BITBUCKET -> { /* TODO */ }
+        }
+    }
+
     public List<String> listFiles(RepoConfig config, String branch, String path) {
         RestClient client = buildClient(config);
 

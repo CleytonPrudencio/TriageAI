@@ -129,6 +129,48 @@ import { RepoConfigService } from '../../services/repo-config.service';
                 </div>
               </div>
 
+              <!-- Resumo geral do PR -->
+              <div class="pr-summary-box" *ngIf="prSummaryData?.fixes?.length">
+                <h4><mat-icon>summarize</mat-icon> Resumo da Correcao</h4>
+                <p class="pr-summary-text">
+                  A IA analisou o repositorio <strong>{{ prSummaryData?.repo }}</strong>
+                  e gerou <strong>{{ prSummaryData?.filesChanged }} alteracao(es)</strong>
+                  na branch <code class="branch-code-inline">{{ ticket.prBranch }}</code>.
+                </p>
+                <ul class="pr-summary-list">
+                  <li *ngFor="let fix of prSummaryData.fixes">
+                    <mat-icon class="summary-file-icon">{{ fix.explanation?.toLowerCase().includes('created') || fix.explanation?.toLowerCase().includes('criado') ? 'note_add' : 'edit_note' }}</mat-icon>
+                    <div>
+                      <code class="summary-file-path">{{ fix.file }}</code>
+                      <span class="summary-explanation">{{ fix.explanation }}</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Review / Approve (para casos excepcionais) -->
+              <div class="pr-review-section" *ngIf="ticket.prStatus === 'OPEN'">
+                <h4><mat-icon>rate_review</mat-icon> Review</h4>
+                <div class="review-actions">
+                  <button mat-raised-button class="approve-btn" (click)="approvePr()" [disabled]="reviewLoading">
+                    <mat-icon>check_circle</mat-icon>
+                    {{ reviewLoading ? 'Enviando...' : 'Aprovar PR' }}
+                  </button>
+                  <button mat-stroked-button color="warn" class="request-changes-btn" (click)="requestChangesPr()" [disabled]="reviewLoading">
+                    <mat-icon>feedback</mat-icon>
+                    Solicitar Alteracoes
+                  </button>
+                </div>
+                <mat-form-field appearance="outline" class="review-comment-field" *ngIf="showReviewComment">
+                  <mat-label>Comentario (opcional)</mat-label>
+                  <textarea matInput [(ngModel)]="reviewComment" rows="3"></textarea>
+                </mat-form-field>
+                <button mat-flat-button color="warn" class="send-review-btn" *ngIf="showReviewComment"
+                        (click)="submitRequestChanges()" [disabled]="reviewLoading">
+                  <mat-icon>send</mat-icon> Enviar Review
+                </button>
+              </div>
+
               <div class="pr-fixes" *ngIf="prSummaryData?.fixes?.length">
                 <h4><mat-icon>build_circle</mat-icon> Correcoes aplicadas</h4>
                 <div class="pr-fix-item" *ngFor="let fix of prSummaryData.fixes">
@@ -538,6 +580,27 @@ import { RepoConfigService } from '../../services/repo-config.service';
 
     .pr-header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .pr-action-btn { font-size: 12px; }
+
+    /* PR Summary */
+    .pr-summary-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-top: 16px; }
+    .pr-summary-box h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 10px; font-size: 15px; color: #334155; }
+    .pr-summary-text { color: #64748b; font-size: 14px; line-height: 1.6; margin: 0 0 12px; }
+    .branch-code-inline { background: #eff6ff; color: #1d4ed8; padding: 1px 6px; border-radius: 4px; font-size: 12px; border: 1px solid #bfdbfe; }
+    .pr-summary-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+    .pr-summary-list li { display: flex; gap: 10px; align-items: flex-start; background: white; padding: 10px 12px; border-radius: 8px; border: 1px solid #f1f5f9; }
+    .summary-file-icon { color: #6366f1; font-size: 18px; width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; }
+    .summary-file-path { display: block; font-size: 12px; color: #1e293b; font-weight: 600; margin-bottom: 2px; }
+    .summary-explanation { display: block; font-size: 12px; color: #64748b; line-height: 1.4; }
+
+    /* Review Section */
+    .pr-review-section { background: #fefce8; border: 1px solid #fde68a; border-radius: 10px; padding: 16px; margin-top: 16px; }
+    .pr-review-section h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; font-size: 15px; color: #854d0e; }
+    .review-actions { display: flex; gap: 10px; }
+    .approve-btn { background: #16a34a !important; color: white !important; }
+    .request-changes-btn { font-size: 13px; }
+    .review-comment-field { width: 100%; margin-top: 12px; }
+    .send-review-btn { width: 100%; margin-top: 4px; }
+
     .rerun-section { margin: 16px 0; text-align: center; }
     .rerun-btn {
       background: linear-gradient(135deg, #f59e0b, #d97706) !important;
@@ -567,6 +630,9 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   branchType: string = 'auto';
   branchNameInput: string = '';
   deletingFix = false;
+  reviewLoading = false;
+  showReviewComment = false;
+  reviewComment = '';
   private pollingInterval: any;
 
   constructor(
@@ -637,6 +703,47 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       error: () => {
         this.deletingFix = false;
         this.snackBar.open('Erro ao remover PR', 'OK', { duration: 3000 });
+      }
+    });
+  }
+
+  approvePr(): void {
+    if (!confirm('Aprovar este PR no GitHub?')) return;
+    this.reviewLoading = true;
+    const prNumber = this.ticket.prUrl?.replace(/.*\/pull\/(\d+).*/, '$1');
+    this.http.post<any>(`http://localhost:8080/api/git/review/${this.ticket.id}`, {
+      action: 'APPROVE', comment: 'Approved via TriageAI'
+    }).subscribe({
+      next: () => {
+        this.reviewLoading = false;
+        this.ticket.prStatus = 'APPROVED';
+        this.snackBar.open('PR aprovado com sucesso!', 'OK', { duration: 3000 });
+      },
+      error: () => {
+        this.reviewLoading = false;
+        this.snackBar.open('Erro ao aprovar PR', 'OK', { duration: 3000 });
+      }
+    });
+  }
+
+  requestChangesPr(): void {
+    this.showReviewComment = true;
+  }
+
+  submitRequestChanges(): void {
+    this.reviewLoading = true;
+    this.http.post<any>(`http://localhost:8080/api/git/review/${this.ticket.id}`, {
+      action: 'REQUEST_CHANGES', comment: this.reviewComment || 'Changes requested via TriageAI'
+    }).subscribe({
+      next: () => {
+        this.reviewLoading = false;
+        this.showReviewComment = false;
+        this.reviewComment = '';
+        this.snackBar.open('Review enviado!', 'OK', { duration: 3000 });
+      },
+      error: () => {
+        this.reviewLoading = false;
+        this.snackBar.open('Erro ao enviar review', 'OK', { duration: 3000 });
       }
     });
   }
