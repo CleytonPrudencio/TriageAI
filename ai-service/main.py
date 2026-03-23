@@ -25,7 +25,30 @@ RETRAIN_THRESHOLD = 10
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), 'data', 'tickets_dataset.csv')
 FEEDBACK_PATH = os.path.join(os.path.dirname(__file__), 'data', 'feedback.csv')
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), 'data', 'config.json')
 retrain_lock = threading.Lock()
+
+
+def load_config():
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, "r") as f:
+            return json.load(f)
+    return {}
+
+
+def save_config_file(config):
+    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
+    with open(CONFIG_PATH, "w") as f:
+        json.dump(config, f, indent=2)
+
+
+def get_anthropic_key():
+    # First check config file, then env var
+    config = load_config()
+    key = config.get("anthropic_api_key", "")
+    if not key:
+        key = os.environ.get("ANTHROPIC_API_KEY", "")
+    return key
 
 
 @asynccontextmanager
@@ -105,6 +128,26 @@ def health():
         "feedback_pending": feedback_count,
         "retrain_threshold": RETRAIN_THRESHOLD,
     }
+
+
+@app.get("/config")
+def get_config():
+    """Get current configuration (without sensitive values)"""
+    config = load_config()
+    return {
+        "anthropic_key_set": bool(config.get("anthropic_api_key", "")),
+        "anthropic_key_preview": config.get("anthropic_api_key", "")[:12] + "..." if config.get("anthropic_api_key", "") else "",
+    }
+
+
+@app.post("/config")
+def save_config(body: dict):
+    """Save configuration"""
+    config = load_config()
+    if "anthropic_api_key" in body and body["anthropic_api_key"]:
+        config["anthropic_api_key"] = body["anthropic_api_key"]
+    save_config_file(config)
+    return {"message": "Configuration saved", "anthropic_key_set": bool(config.get("anthropic_api_key", ""))}
 
 
 @app.get("/metrics")
@@ -224,7 +267,7 @@ def get_dataset_stats():
 @app.post("/training/generate")
 def generate_training_data(request: TrainingGenerateRequest):
     """Usa Claude para gerar dados de treino sinteticos."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    api_key = get_anthropic_key()
     if not api_key:
         raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
 
@@ -382,7 +425,7 @@ def analyze_with_claude(ticket_title: str, ticket_description: str, categoria: s
                         file_tree: list[str], file_contents: dict[str, str]) -> list[FileFix]:
     """Usa Claude API para analisar codigo e gerar correcoes inteligentes."""
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    api_key = get_anthropic_key()
     if not api_key:
         print("ANTHROPIC_API_KEY not set, skipping Claude analysis")
         return []

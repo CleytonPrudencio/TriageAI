@@ -51,6 +51,10 @@ import { AuthService } from '../services/auth.service';
             <mat-icon>model_training</mat-icon>
             <span *ngIf="!sidebarCollapsed">Treino IA</span>
           </a>
+          <a routerLink="/config" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Configuracoes' : ''" matTooltipPosition="right">
+            <mat-icon>tune</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Configuracoes</span>
+          </a>
         </nav>
 
         <div class="sidebar-footer">
