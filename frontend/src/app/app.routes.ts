@@ -12,6 +12,7 @@ export const routes: Routes = [
       { path: 'dashboard', loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'tickets', loadComponent: () => import('./tickets/ticket-list/ticket-list.component').then(m => m.TicketListComponent) },
       { path: 'tickets/new', loadComponent: () => import('./tickets/ticket-form/ticket-form.component').then(m => m.TicketFormComponent) },
+      { path: 'tickets/board', loadComponent: () => import('./tickets/ticket-board/ticket-board.component').then(m => m.TicketBoardComponent) },
       { path: 'tickets/:id', loadComponent: () => import('./tickets/ticket-detail/ticket-detail.component').then(m => m.TicketDetailComponent) },
       { path: 'settings/repos', loadComponent: () => import('./settings/repo-config/repo-config.component').then(m => m.RepoConfigComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

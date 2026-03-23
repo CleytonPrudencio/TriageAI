@@ -25,10 +25,10 @@ export class RepoConfigService {
     return this.http.delete<void>(`${this.API}/repo-configs/${id}`);
   }
 
-  autoFix(ticketId: number, repoConfigId: number): Observable<AutoFixResponse> {
-    return this.http.post<AutoFixResponse>(
-      `${this.API}/git/auto-fix/${ticketId}?repoConfigId=${repoConfigId}`, {}
-    );
+  autoFix(ticketId: number, repoConfigId: number, branchType: string = 'fix', branchName?: string): Observable<AutoFixResponse> {
+    let url = `${this.API}/git/auto-fix/${ticketId}?repoConfigId=${repoConfigId}&branchType=${branchType}`;
+    if (branchName) url += `&branchName=${encodeURIComponent(branchName)}`;
+    return this.http.post<AutoFixResponse>(url, {});
   }
 
   listRepos(provider: string, token: string): Observable<GitRepo[]> {

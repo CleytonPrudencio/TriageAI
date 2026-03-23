@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,9 +23,14 @@ import { TicketService } from '../../services/ticket.service';
         <h1>Chamados</h1>
         <p class="page-subtitle">Gerencie e acompanhe todos os chamados</p>
       </div>
-      <a mat-raised-button color="primary" routerLink="/tickets/new" class="new-btn">
-        <mat-icon>add</mat-icon> Novo Chamado
-      </a>
+      <div class="header-actions">
+        <button mat-stroked-button class="board-btn" (click)="goToBoard()">
+          <mat-icon>dashboard</mat-icon> Quadro
+        </button>
+        <a mat-raised-button color="primary" routerLink="/tickets/new" class="new-btn">
+          <mat-icon>add</mat-icon> Novo Chamado
+        </a>
+      </div>
     </div>
 
     <div class="filters-bar">
@@ -89,6 +94,9 @@ import { TicketService } from '../../services/ticket.service';
     }
     .page-header h1 { font-size: 28px; font-weight: 700; margin: 0; color: var(--text); }
     .page-subtitle { color: var(--text-secondary); margin: 4px 0 0; font-size: 14px; }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .board-btn { height: 44px; border-radius: 10px !important; font-weight: 500; }
+    .board-btn mat-icon { margin-right: 4px; }
     .new-btn { height: 44px; border-radius: 10px !important; font-weight: 600; }
 
     .filters-bar {
@@ -172,7 +180,7 @@ export class TicketListComponent implements OnInit {
   filterPrioridade = '';
   filterCategoria = '';
 
-  constructor(private ticketService: TicketService) {}
+  constructor(private ticketService: TicketService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadTickets();
@@ -193,5 +201,9 @@ export class TicketListComponent implements OnInit {
   onPage(event: PageEvent): void {
     this.page = event.pageIndex;
     this.loadTickets();
+  }
+
+  goToBoard(): void {
+    this.router.navigate(['/tickets/board']);
   }
 }

@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatInputModule } from '@angular/material/input';
 import { Ticket } from '../../models/ticket.model';
 import { RepoConfig } from '../../models/repo-config.model';
 import { TicketService } from '../../services/ticket.service';
@@ -18,7 +19,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
 @Component({
   selector: 'app-ticket-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatButtonModule, MatIconModule, MatSelectModule, MatFormFieldModule, MatSnackBarModule, MatDividerModule, MatProgressSpinnerModule],
+  imports: [CommonModule, FormsModule, MatCardModule, MatButtonModule, MatIconModule, MatSelectModule, MatFormFieldModule, MatSnackBarModule, MatDividerModule, MatProgressSpinnerModule, MatInputModule],
   template: `
     <div *ngIf="ticket">
       <div class="page-header">
@@ -143,6 +144,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
               <mat-select [(ngModel)]="newStatus" (selectionChange)="onStatusChange()">
                 <mat-option value="ABERTO">Aberto</mat-option>
                 <mat-option value="EM_ANDAMENTO">Em Andamento</mat-option>
+                <mat-option value="CODE_REVIEW">Code Review</mat-option>
                 <mat-option value="RESOLVIDO">Resolvido</mat-option>
                 <mat-option value="FECHADO">Fechado</mat-option>
               </mat-select>
@@ -206,6 +208,25 @@ import { RepoConfigService } from '../../services/repo-config.service';
             </mat-form-field>
             <div *ngIf="repoConfigs.length === 0" class="hint">
               Nenhum repo configurado. Va em Configuracoes > Repositorios.
+            </div>
+            <mat-form-field appearance="outline" *ngIf="repoConfigs.length > 0">
+              <mat-label>Tipo de branch</mat-label>
+              <mat-select [(ngModel)]="branchType">
+                <mat-option value="fix">fix</mat-option>
+                <mat-option value="feat">feat</mat-option>
+                <mat-option value="hotfix">hotfix</mat-option>
+                <mat-option value="bugfix">bugfix</mat-option>
+                <mat-option value="chore">chore</mat-option>
+                <mat-option value="refactor">refactor</mat-option>
+                <mat-option value="docs">docs</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" *ngIf="repoConfigs.length > 0">
+              <mat-label>Nome da branch</mat-label>
+              <input matInput [(ngModel)]="branchNameInput">
+            </mat-form-field>
+            <div class="branch-preview" *ngIf="repoConfigs.length > 0">
+              <code>{{ branchType }}/{{ branchNameInput }}</code>
             </div>
             <button mat-raised-button color="accent" (click)="onAutoFix()" class="full-btn autofix-btn"
                     [disabled]="!selectedRepoId || fixLoading" *ngIf="repoConfigs.length > 0 && !ticket.prUrl">
@@ -285,6 +306,15 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .st-em_andamento { background: #fef3c7; color: #b45309; }
     .st-resolvido { background: #d1fae5; color: #059669; }
     .st-fechado { background: #f1f5f9; color: #475569; }
+    .st-code_review { background: #ede9fe; color: #7c3aed; }
+
+    .branch-preview {
+      margin: -8px 0 12px; padding: 6px 10px; background: #f1f5f9;
+      border-radius: 6px; font-size: 13px;
+    }
+    .branch-preview code {
+      font-family: 'Fira Code', 'Consolas', monospace; color: #334155;
+    }
 
     .delete-btn { width: 100%; margin-top: 8px; }
 
@@ -365,6 +395,8 @@ export class TicketDetailComponent implements OnInit {
   fixResult: any = null;
   prSummaryData: any = null;
   reclassifyLoading = false;
+  branchType: string = 'fix';
+  branchNameInput: string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -381,6 +413,7 @@ export class TicketDetailComponent implements OnInit {
       this.newStatus = ticket.status;
       this.feedbackCategoria = ticket.categoria;
       this.feedbackPrioridade = ticket.prioridade;
+      this.branchNameInput = 'ticket-' + ticket.id;
       this.parsePrSummary();
     });
     this.repoConfigService.findAll().subscribe(configs => this.repoConfigs = configs);
@@ -390,7 +423,7 @@ export class TicketDetailComponent implements OnInit {
     if (!this.ticket || !this.selectedRepoId) return;
     this.fixLoading = true;
     this.fixResult = null;
-    this.repoConfigService.autoFix(this.ticket.id, this.selectedRepoId).subscribe({
+    this.repoConfigService.autoFix(this.ticket.id, this.selectedRepoId, this.branchType, this.branchNameInput).subscribe({
       next: (result) => {
         this.fixResult = result;
         this.fixLoading = false;

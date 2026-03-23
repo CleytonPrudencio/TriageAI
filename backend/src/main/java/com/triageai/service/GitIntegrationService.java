@@ -30,13 +30,21 @@ public class GitIntegrationService {
     private String aiServiceUrl;
 
     public AutoFixResponse processAutoFix(Long ticketId, Long repoConfigId) {
+        return processAutoFix(ticketId, repoConfigId, "fix", null);
+    }
+
+    public AutoFixResponse processAutoFix(Long ticketId, Long repoConfigId, String branchType, String branchNameCustom) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket nao encontrado"));
 
         RepoConfig config = repoConfigRepository.findById(repoConfigId)
                 .orElseThrow(() -> new RuntimeException("Configuracao de repositorio nao encontrada"));
 
-        String branchName = "fix/ticket-" + ticket.getId();
+        // Build branch name: type/name
+        String namePart = (branchNameCustom != null && !branchNameCustom.isBlank())
+                ? branchNameCustom.replaceAll("[^a-zA-Z0-9_-]", "-")
+                : "ticket-" + ticket.getId();
+        String branchName = branchType + "/" + namePart;
 
         try {
             // 1. Get base branch SHA
@@ -120,7 +128,7 @@ public class GitIntegrationService {
             ticket.setPrUrl(prUrl);
             ticket.setPrStatus("OPEN");
             ticket.setPrSummary(prSummary);
-            ticket.setStatus(com.triageai.model.enums.Status.EM_ANDAMENTO);
+            ticket.setStatus(com.triageai.model.enums.Status.CODE_REVIEW);
             ticket.setRepoConfig(config);
             ticketRepository.save(ticket);
 

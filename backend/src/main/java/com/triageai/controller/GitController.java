@@ -31,8 +31,10 @@ public class GitController {
     @PostMapping("/auto-fix/{ticketId}")
     public ResponseEntity<AutoFixResponse> autoFix(
             @PathVariable Long ticketId,
-            @RequestParam Long repoConfigId) {
-        AutoFixResponse result = gitIntegrationService.processAutoFix(ticketId, repoConfigId);
+            @RequestParam Long repoConfigId,
+            @RequestParam(defaultValue = "fix") String branchType,
+            @RequestParam(required = false) String branchName) {
+        AutoFixResponse result = gitIntegrationService.processAutoFix(ticketId, repoConfigId, branchType, branchName);
         return ResponseEntity.ok(result);
     }
 
