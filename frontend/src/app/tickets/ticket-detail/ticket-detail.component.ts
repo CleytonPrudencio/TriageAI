@@ -136,6 +136,43 @@ import { RepoConfigService } from '../../services/repo-config.service';
             </div>
           </div>
 
+          <!-- Repo Info -->
+          <div class="sidebar-section repo-info-section" *ngIf="prSummaryData?.repo || ticket.prUrl">
+            <mat-divider></mat-divider>
+            <h3><mat-icon class="section-title-icon">source</mat-icon> Repositorio</h3>
+            <div class="repo-info-card">
+              <div class="info-row" *ngIf="prSummaryData?.repo">
+                <span class="info-label">Repo</span>
+                <a [href]="'https://github.com/' + prSummaryData.repo" target="_blank" class="repo-link">
+                  <mat-icon class="repo-icon-sm">open_in_new</mat-icon>
+                  {{ prSummaryData.repo }}
+                </a>
+              </div>
+              <div class="info-row" *ngIf="ticket.prBranch">
+                <span class="info-label">Branch</span>
+                <code class="branch-code">{{ ticket.prBranch }}</code>
+              </div>
+              <div class="info-row" *ngIf="ticket.prStatus">
+                <span class="info-label">PR Status</span>
+                <span class="badge pr-status-sm"
+                      [class.pr-open]="ticket.prStatus === 'OPEN'"
+                      [class.pr-merged]="ticket.prStatus === 'MERGED'"
+                      [class.pr-approved]="ticket.prStatus === 'APPROVED'"
+                      [class.pr-closed]="ticket.prStatus === 'CLOSED'">
+                  {{ ticket.prStatus }}
+                </span>
+              </div>
+              <div class="info-row" *ngIf="prSummaryData?.filesChanged">
+                <span class="info-label">Arquivos</span>
+                <span>{{ prSummaryData.filesChanged }} alterado(s)</span>
+              </div>
+              <a *ngIf="ticket.prUrl" [href]="ticket.prUrl" target="_blank"
+                 mat-stroked-button class="repo-pr-btn">
+                <mat-icon>open_in_new</mat-icon> Ver PR no GitHub
+              </a>
+            </div>
+          </div>
+
           <mat-divider></mat-divider>
 
           <div class="sidebar-section">
@@ -346,9 +383,21 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .pr-status-badge { margin-left: 8px; font-size: 10px; padding: 2px 8px; border-radius: 4px; }
     .pr-open { background: #dbeafe; color: #1d4ed8; }
     .pr-merged { background: #ede9fe; color: #7c3aed; }
+    .pr-approved { background: #ecfdf5; color: #059669; }
     .pr-closed { background: #fef2f2; color: #dc2626; }
     .pr-link-btn { font-size: 12px; }
     .pr-link-btn mat-icon { font-size: 14px; width: 14px; height: 14px; margin-right: 4px; }
+
+    /* Repo Info Sidebar */
+    .repo-info-section h3 { display: flex; align-items: center; gap: 6px; }
+    .section-title-icon { font-size: 20px; width: 20px; height: 20px; color: #6366f1; }
+    .repo-info-card { background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0; }
+    .repo-link { color: #6366f1; text-decoration: none; display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; }
+    .repo-link:hover { text-decoration: underline; }
+    .repo-icon-sm { font-size: 14px; width: 14px; height: 14px; }
+    .branch-code { background: #1e293b; color: #38bdf8; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+    .pr-status-sm { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+    .repo-pr-btn { width: 100%; margin-top: 10px; font-size: 12px; }
 
     .pr-details {
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
