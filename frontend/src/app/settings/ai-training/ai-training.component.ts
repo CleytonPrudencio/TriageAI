@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -816,7 +817,8 @@ export class AiTrainingComponent implements OnInit {
 
   constructor(
     private trainingService: AiTrainingService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -884,8 +886,29 @@ export class AiTrainingComponent implements OnInit {
   loadDatasetStats(): void {
     this.trainingService.getDatasetStats().subscribe({
       next: (res) => {
-        this.datasetStats = res;
-        if (res.modelInfo) this.modelInfo = res.modelInfo;
+        // Map Python field names to frontend expectations
+        this.datasetStats = {
+          total: res.total,
+          porCategoria: res.byCategoria || res.porCategoria || {},
+          porPrioridade: res.byPrioridade || res.porPrioridade || {},
+          recentSamples: res.recentSamples || [],
+        };
+      },
+      error: () => {}
+    });
+
+    // Load model info from dashboard stats (which fetches from AI /metrics)
+    this.http.get<any>('http://localhost:8080/api/dashboard/stats').subscribe({
+      next: (stats) => {
+        if (stats.iaModelVersion) {
+          this.modelInfo = {
+            version: stats.iaModelVersion,
+            accuracy: stats.iaAccuracy,
+            f1: stats.iaF1Score,
+            datasetSize: stats.iaDatasetSize,
+            lastTrained: stats.iaTrainedAt,
+          };
+        }
       },
       error: () => {}
     });
@@ -977,7 +1000,17 @@ export class AiTrainingComponent implements OnInit {
       next: (res) => {
         this.training = false;
         this.trainingResult = res;
-        if (res.modelInfo) this.modelInfo = res.modelInfo;
+        // Extract metrics from retrain response
+        if (res.metrics) {
+          const m = res.metrics;
+          this.modelInfo = {
+            version: (this.modelInfo?.version || 0) + 1,
+            accuracy: m.categoria?.accuracy || 0,
+            f1: m.categoria?.f1_weighted || 0,
+            datasetSize: m.dataset_size || 0,
+            lastTrained: m.trained_at || new Date().toISOString(),
+          };
+        }
         this.showMessage('Modelo re-treinado com sucesso!');
         this.loadDatasetStats();
       },
