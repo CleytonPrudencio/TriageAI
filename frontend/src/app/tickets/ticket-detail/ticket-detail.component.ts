@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -640,7 +641,8 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private ticketService: TicketService,
     private repoConfigService: RepoConfigService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -708,15 +710,14 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   approvePr(): void {
-    if (!confirm('Aprovar este PR no GitHub?')) return;
+    if (!this.ticket || !confirm('Aprovar este PR no GitHub?')) return;
     this.reviewLoading = true;
-    const prNumber = this.ticket.prUrl?.replace(/.*\/pull\/(\d+).*/, '$1');
-    this.http.post<any>(`http://localhost:8080/api/git/review/${this.ticket.id}`, {
+    this.http.post<any>(`http://localhost:8080/api/git/review/${this.ticket!.id}`, {
       action: 'APPROVE', comment: 'Approved via TriageAI'
     }).subscribe({
       next: () => {
         this.reviewLoading = false;
-        this.ticket.prStatus = 'APPROVED';
+        this.ticket!.prStatus = 'APPROVED';
         this.snackBar.open('PR aprovado com sucesso!', 'OK', { duration: 3000 });
       },
       error: () => {
@@ -731,8 +732,9 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   submitRequestChanges(): void {
+    if (!this.ticket) return;
     this.reviewLoading = true;
-    this.http.post<any>(`http://localhost:8080/api/git/review/${this.ticket.id}`, {
+    this.http.post<any>(`http://localhost:8080/api/git/review/${this.ticket!.id}`, {
       action: 'REQUEST_CHANGES', comment: this.reviewComment || 'Changes requested via TriageAI'
     }).subscribe({
       next: () => {
