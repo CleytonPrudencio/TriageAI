@@ -39,6 +39,10 @@ export class TicketService {
     return this.http.put<Ticket>(`${this.API}/${id}/feedback`, data);
   }
 
+  reclassify(id: number): Observable<Ticket> {
+    return this.http.put<Ticket>(`${this.API}/${id}/reclassify`, {});
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API}/${id}`);
   }

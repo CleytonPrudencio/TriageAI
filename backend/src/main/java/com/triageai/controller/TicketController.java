@@ -76,6 +76,11 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.feedback(id, request));
     }
 
+    @PutMapping("/{id}/reclassify")
+    public ResponseEntity<TicketResponse> reclassify(@PathVariable Long id) {
+        return ResponseEntity.ok(ticketService.reclassify(id));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         ticketService.delete(id);

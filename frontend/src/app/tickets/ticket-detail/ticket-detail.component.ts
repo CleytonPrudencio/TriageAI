@@ -152,6 +152,18 @@ import { RepoConfigService } from '../../services/repo-config.service';
           <mat-divider></mat-divider>
 
           <div class="sidebar-section">
+            <h3><mat-icon>refresh</mat-icon> Reclassificar</h3>
+            <p class="hint">Pede para a IA reavaliar este chamado com o modelo atual</p>
+            <button mat-raised-button class="full-btn reclassify-btn" (click)="onReclassify()" [disabled]="reclassifyLoading">
+              <mat-spinner *ngIf="reclassifyLoading" diameter="18"></mat-spinner>
+              <mat-icon *ngIf="!reclassifyLoading">psychology</mat-icon>
+              {{ reclassifyLoading ? 'Reclassificando...' : 'Reclassificar com IA' }}
+            </button>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="sidebar-section">
             <h3><mat-icon>feedback</mat-icon> Corrigir IA</h3>
             <p class="hint">Corrija a classificacao para melhorar o modelo</p>
             <mat-form-field appearance="outline">
@@ -276,6 +288,8 @@ import { RepoConfigService } from '../../services/repo-config.service';
 
     .delete-btn { width: 100%; margin-top: 8px; }
 
+    .reclassify-btn { background: linear-gradient(135deg, #f59e0b, #ef4444) !important; color: white !important; }
+    .reclassify-btn mat-spinner { margin-right: 4px; }
     .autofix-btn { background: linear-gradient(135deg, #6366f1, #06b6d4) !important; color: white !important; }
     .autofix-btn mat-spinner { margin-right: 4px; }
 
@@ -350,6 +364,7 @@ export class TicketDetailComponent implements OnInit {
   fixLoading = false;
   fixResult: any = null;
   prSummaryData: any = null;
+  reclassifyLoading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -437,6 +452,31 @@ export class TicketDetailComponent implements OnInit {
         this.router.navigate(['/tickets']);
       });
     }
+  }
+
+  onReclassify(): void {
+    if (!this.ticket) return;
+    this.reclassifyLoading = true;
+    this.ticketService.reclassify(this.ticket.id).subscribe({
+      next: (t) => {
+        const oldCat = this.ticket!.categoria;
+        const oldPri = this.ticket!.prioridade;
+        const oldScore = this.ticket!.aiScore;
+        this.ticket = t;
+        this.feedbackCategoria = t.categoria;
+        this.feedbackPrioridade = t.prioridade;
+        this.newStatus = t.status;
+        this.reclassifyLoading = false;
+        this.snackBar.open(
+          `Reclassificado! ${oldCat} → ${t.categoria} | ${oldPri} → ${t.prioridade} | Score: ${(t.aiScore * 100).toFixed(0)}%`,
+          'OK', { duration: 5000 }
+        );
+      },
+      error: () => {
+        this.reclassifyLoading = false;
+        this.snackBar.open('Erro ao reclassificar. Verifique se a IA esta rodando.', 'OK', { duration: 4000 });
+      }
+    });
   }
 
   parsePrSummary(): void {

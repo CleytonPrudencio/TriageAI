@@ -97,6 +97,20 @@ public class TicketService {
         return TicketResponse.from(saved);
     }
 
+    public TicketResponse reclassify(Long id) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket nao encontrado"));
+
+        String fullText = ticket.getTitulo() + " " + ticket.getDescricao();
+        AiPredictionResponse prediction = aiService.predict(fullText);
+
+        ticket.setCategoria(Category.valueOf(prediction.getCategoria()));
+        ticket.setPrioridade(Priority.valueOf(prediction.getPrioridade()));
+        ticket.setAiScore(prediction.getScore());
+
+        return TicketResponse.from(ticketRepository.save(ticket));
+    }
+
     public void delete(Long id) {
         ticketRepository.deleteById(id);
     }

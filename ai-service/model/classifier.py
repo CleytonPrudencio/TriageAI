@@ -30,7 +30,6 @@ def build_pipeline():
         class_weight='balanced',
         random_state=42,
         solver='lbfgs',
-        multi_class='multinomial',
     )
 
     svm = CalibratedClassifierCV(
