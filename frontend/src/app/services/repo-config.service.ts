@@ -31,6 +31,10 @@ export class RepoConfigService {
     return this.http.post<AutoFixResponse>(url, {});
   }
 
+  deleteAutoFix(ticketId: number): Observable<any> {
+    return this.http.delete<any>(`${this.API}/git/auto-fix/${ticketId}`);
+  }
+
   listRepos(provider: string, token: string): Observable<GitRepo[]> {
     return this.http.get<GitRepo[]>(
       `${this.API}/git/repos?provider=${provider}&token=${encodeURIComponent(token)}`

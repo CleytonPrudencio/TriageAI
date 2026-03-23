@@ -27,6 +27,15 @@ import { SistemaService, Sistema } from '../../services/sistema.service';
 
     <div class="form-layout">
       <div class="form-card">
+        <!-- Loading overlay -->
+        <div class="loading-overlay" *ngIf="loading">
+          <div class="loading-content">
+            <mat-spinner diameter="48"></mat-spinner>
+            <h3>Classificando com IA...</h3>
+            <p>Analisando o chamado e atribuindo categoria e prioridade</p>
+          </div>
+        </div>
+
         <form (ngSubmit)="onSubmit()">
           <mat-form-field appearance="outline">
             <mat-label>Sistema (opcional)</mat-label>
@@ -67,43 +76,30 @@ import { SistemaService, Sistema } from '../../services/sistema.service';
           </div>
         </form>
       </div>
-
-      <div class="result-card" *ngIf="result">
-        <div class="result-header">
-          <mat-icon>check_circle</mat-icon>
-          <h3>Classificacao da IA</h3>
-        </div>
-        <div class="result-items">
-          <div class="result-item">
-            <span class="result-label">Categoria</span>
-            <span class="badge" [class]="'cat-' + result.categoria?.toLowerCase()">{{ result.categoria }}</span>
-          </div>
-          <div class="result-item">
-            <span class="result-label">Prioridade</span>
-            <span class="badge" [class]="'pri-' + result.prioridade?.toLowerCase()">{{ result.prioridade }}</span>
-          </div>
-          <div class="result-item">
-            <span class="result-label">Confianca</span>
-            <div class="score-bar">
-              <div class="score-fill" [style.width.%]="(result.aiScore || 0) * 100"></div>
-            </div>
-            <span class="score-text">{{ (result.aiScore || 0) * 100 | number:'1.0-0' }}%</span>
-          </div>
-        </div>
-        <p class="result-hint">Voce pode corrigir a classificacao na pagina de detalhes do chamado.</p>
-      </div>
     </div>
   `,
   styles: [`
     .page-header h1 { font-size: 28px; font-weight: 700; margin: 0; }
     .page-subtitle { color: var(--text-secondary); margin: 4px 0 0; font-size: 14px; }
 
-    .form-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+    .form-layout { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 24px; max-width: 720px; }
 
     .form-card {
       background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 32px;
+      border-radius: var(--radius); padding: 32px; position: relative;
+      overflow: hidden;
     }
+
+    .loading-overlay {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.92); z-index: 10;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--radius);
+    }
+    .loading-content { text-align: center; }
+    .loading-content mat-spinner { margin: 0 auto 16px; }
+    .loading-content h3 { margin: 0 0 8px; font-size: 18px; font-weight: 600; color: #1e40af; }
+    .loading-content p { margin: 0; font-size: 14px; color: #64748b; }
 
     mat-form-field { width: 100%; margin-bottom: 8px; }
 
@@ -111,36 +107,6 @@ import { SistemaService, Sistema } from '../../services/sistema.service';
     .submit-btn { height: 44px; border-radius: 10px !important; font-weight: 600; display: flex; align-items: center; gap: 8px; }
     .submit-btn mat-spinner { margin-right: 4px; }
 
-    .result-card {
-      background: var(--bg-card); border: 2px solid #10b981;
-      border-radius: var(--radius); padding: 32px; height: fit-content;
-    }
-
-    .result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
-    .result-header mat-icon { color: #10b981; font-size: 28px; width: 28px; height: 28px; }
-    .result-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
-
-    .result-items { display: flex; flex-direction: column; gap: 20px; }
-    .result-item { display: flex; align-items: center; gap: 12px; }
-    .result-label { font-size: 13px; color: var(--text-secondary); width: 80px; font-weight: 500; }
-
-    .badge {
-      padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase;
-    }
-    .pri-alta { background: #fef2f2; color: #dc2626; }
-    .pri-media { background: #fffbeb; color: #d97706; }
-    .pri-baixa { background: #f0fdf4; color: #16a34a; }
-    .cat-tecnico { background: #eff6ff; color: #2563eb; }
-    .cat-financeiro { background: #fdf2f8; color: #db2777; }
-    .cat-comercial { background: #f5f3ff; color: #7c3aed; }
-    .cat-administrativo { background: #f0fdfa; color: #0d9488; }
-    .cat-outros { background: #f8fafc; color: #64748b; }
-
-    .score-bar { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
-    .score-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #06b6d4); border-radius: 4px; transition: width 0.5s; }
-    .score-text { font-size: 14px; font-weight: 600; color: var(--primary); min-width: 40px; text-align: right; }
-
-    .result-hint { margin: 20px 0 0; font-size: 12px; color: var(--text-secondary); }
 
     .sistema-chip {
       display: flex; align-items: center; gap: 8px;
@@ -151,16 +117,12 @@ import { SistemaService, Sistema } from '../../services/sistema.service';
     .sistema-chip-icon { font-size: 16px; width: 16px; height: 16px; color: #3b82f6; }
     .chip-sep { color: #93c5fd; }
 
-    @media (max-width: 768px) {
-      .form-layout { grid-template-columns: 1fr; }
-    }
   `]
 })
 export class TicketFormComponent {
   titulo = '';
   descricao = '';
   loading = false;
-  result: any = null;
   sistemas: Sistema[] = [];
   selectedSistemaId: number | null = null;
   selectedSistema: Sistema | null = null;
@@ -186,10 +148,8 @@ export class TicketFormComponent {
     }
     this.ticketService.create(data).subscribe({
       next: (ticket) => {
-        this.result = ticket;
-        this.loading = false;
         this.snackBar.open('Chamado criado com sucesso!', 'OK', { duration: 3000 });
-        setTimeout(() => this.router.navigate(['/tickets', ticket.id]), 2500);
+        this.router.navigate(['/tickets', ticket.id]);
       },
       error: () => {
         this.snackBar.open('Erro ao criar chamado', 'OK', { duration: 3000 });

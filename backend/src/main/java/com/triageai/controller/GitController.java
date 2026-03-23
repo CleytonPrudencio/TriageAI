@@ -5,13 +5,17 @@ import com.triageai.dto.GitConnectionRequest;
 import com.triageai.dto.GitConnectionResponse;
 import com.triageai.dto.GitRepoResponse;
 import com.triageai.model.GitConnection;
+import com.triageai.model.Ticket;
 import com.triageai.model.User;
 import com.triageai.model.enums.GitProvider;
+import com.triageai.model.enums.Status;
 import com.triageai.repository.GitConnectionRepository;
+import com.triageai.repository.TicketRepository;
 import com.triageai.service.GitIntegrationService;
 import com.triageai.service.GitProviderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/git")
 @RequiredArgsConstructor
@@ -27,6 +32,7 @@ public class GitController {
     private final GitIntegrationService gitIntegrationService;
     private final GitProviderService gitProviderService;
     private final GitConnectionRepository gitConnectionRepository;
+    private final TicketRepository ticketRepository;
 
     @PostMapping("/auto-fix/{ticketId}")
     public ResponseEntity<AutoFixResponse> autoFix(
@@ -36,6 +42,29 @@ public class GitController {
             @RequestParam(required = false) String branchName) {
         AutoFixResponse result = gitIntegrationService.processAutoFix(ticketId, repoConfigId, branchType, branchName);
         return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/auto-fix/{ticketId}")
+    public ResponseEntity<?> deleteAutoFix(@PathVariable Long ticketId) {
+        log.info("Deleting auto-fix for ticket #{}", ticketId);
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket nao encontrado"));
+
+        if (ticket.getRepoConfig() != null && (ticket.getPrUrl() != null || ticket.getPrBranch() != null)) {
+            gitProviderService.closePrAndDeleteBranch(
+                    ticket.getRepoConfig(), ticket.getPrUrl(), ticket.getPrBranch());
+        }
+
+        // Clear PR data from ticket
+        ticket.setPrUrl(null);
+        ticket.setPrBranch(null);
+        ticket.setPrStatus(null);
+        ticket.setPrSummary(null);
+        ticket.setStatus(Status.ABERTO);
+        ticketRepository.save(ticket);
+
+        return ResponseEntity.ok(Map.of("message", "PR fechado, branch deletada e ticket resetado"));
     }
 
     @GetMapping("/repos")

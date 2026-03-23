@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -60,6 +60,22 @@ import { RepoConfigService } from '../../services/repo-config.service';
             <p>{{ ticket.descricao }}</p>
           </div>
 
+          <!-- Auto-Fix Processing Banner -->
+          <div class="processing-banner" *ngIf="ticket.status === 'EM_ANDAMENTO' && !ticket.prUrl">
+            <div class="processing-content">
+              <div class="processing-spinner"></div>
+              <div class="processing-text">
+                <h4>IA Processando Auto-Fix</h4>
+                <p>A IA esta analisando o repositorio e gerando a correcao automaticamente. Isso pode levar alguns minutos.</p>
+                <div class="processing-steps">
+                  <span class="step active"><mat-icon>check_circle</mat-icon> Ticket classificado</span>
+                  <span class="step active"><mat-icon>sync</mat-icon> Analisando codigo...</span>
+                  <span class="step"><mat-icon>schedule</mat-icon> Criando branch e PR</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- PR Info Expandido -->
           <div class="pr-info" *ngIf="ticket.prUrl">
             <mat-divider></mat-divider>
@@ -77,9 +93,17 @@ import { RepoConfigService } from '../../services/repo-config.service';
                     </span>
                   </div>
                 </div>
-                <a [href]="ticket.prUrl" target="_blank" mat-stroked-button class="pr-link-btn">
-                  <mat-icon>open_in_new</mat-icon> Ver no GitHub
-                </a>
+                <div class="pr-header-actions">
+                  <a [href]="ticket.prUrl" target="_blank" mat-stroked-button class="pr-link-btn">
+                    <mat-icon>open_in_new</mat-icon> Ver no GitHub
+                  </a>
+                  <button mat-stroked-button color="warn" class="pr-action-btn"
+                          (click)="deleteAutoFix()" [disabled]="deletingFix"
+                          *ngIf="ticket.prStatus === 'OPEN' || ticket.prStatus === 'FAILED' || ticket.prStatus === 'ANALYSIS_FAILED'">
+                    <mat-icon>{{ deletingFix ? 'hourglass_empty' : 'delete_sweep' }}</mat-icon>
+                    {{ deletingFix ? 'Removendo...' : 'Apagar PR e Branch' }}
+                  </button>
+                </div>
               </div>
 
               <div class="pr-details">
@@ -116,6 +140,14 @@ import { RepoConfigService } from '../../services/repo-config.service';
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Re-run Auto-Fix (shown when no PR exists or after deletion) -->
+          <div class="rerun-section" *ngIf="!ticket.prUrl && ticket.categoria === 'TECNICO' && repoConfigs.length > 0">
+            <button mat-raised-button class="rerun-btn" (click)="onAutoFix()" [disabled]="fixLoading">
+              <mat-icon>{{ fixLoading ? 'hourglass_empty' : 'build' }}</mat-icon>
+              {{ fixLoading ? 'Executando Auto-Fix...' : 'Executar Auto-Fix Novamente' }}
+            </button>
           </div>
         </div>
 
@@ -448,12 +480,49 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .pr-fix-file code { font-size: 13px; font-weight: 600; color: #1e293b; }
     .pr-fix-explanation { font-size: 12px; color: #64748b; margin: 6px 0 0 22px; }
 
+    .processing-banner {
+      background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+      border: 1px solid #93c5fd;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+      animation: pulse-border 2s infinite;
+    }
+    @keyframes pulse-border {
+      0%, 100% { border-color: #93c5fd; }
+      50% { border-color: #3b82f6; }
+    }
+    .processing-content { display: flex; gap: 20px; align-items: flex-start; }
+    .processing-spinner {
+      width: 40px; height: 40px; border: 3px solid #e2e8f0;
+      border-top-color: #3b82f6; border-radius: 50%;
+      animation: spin 1s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .processing-text h4 { margin: 0 0 8px; color: #1e40af; font-size: 16px; }
+    .processing-text p { margin: 0 0 12px; color: #64748b; font-size: 14px; }
+    .processing-steps { display: flex; flex-direction: column; gap: 6px; }
+    .processing-steps .step { display: flex; align-items: center; gap: 6px; color: #94a3b8; font-size: 13px; }
+    .processing-steps .step.active { color: #3b82f6; }
+    .processing-steps .step mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+    .pr-header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .pr-action-btn { font-size: 12px; }
+    .rerun-section { margin: 16px 0; text-align: center; }
+    .rerun-btn {
+      background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+      color: white !important;
+      padding: 10px 24px;
+      border-radius: 8px !important;
+      font-weight: 600;
+    }
+
     @media (max-width: 768px) {
       .detail-layout { grid-template-columns: 1fr; }
     }
   `]
 })
-export class TicketDetailComponent implements OnInit {
+export class TicketDetailComponent implements OnInit, OnDestroy {
   ticket: Ticket | null = null;
   newStatus = '';
   feedbackCategoria = '';
@@ -467,6 +536,8 @@ export class TicketDetailComponent implements OnInit {
   reclassifyLoading = false;
   branchType: string = 'auto';
   branchNameInput: string = '';
+  deletingFix = false;
+  private pollingInterval: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -485,6 +556,9 @@ export class TicketDetailComponent implements OnInit {
       this.feedbackPrioridade = ticket.prioridade;
       this.branchNameInput = 'ticket-' + ticket.id;
       this.parsePrSummary();
+      if (ticket.status === 'EM_ANDAMENTO' && !ticket.prUrl) {
+        this.startPolling();
+      }
     });
     this.repoConfigService.findAll().subscribe(configs => this.repoConfigs = configs);
   }
@@ -509,6 +583,30 @@ export class TicketDetailComponent implements OnInit {
       error: (err) => {
         this.fixResult = { status: 'error', message: 'Erro ao executar auto-fix' };
         this.fixLoading = false;
+      }
+    });
+  }
+
+  deleteAutoFix(): void {
+    if (!this.ticket) return;
+    if (!confirm('Tem certeza? Isso vai fechar o PR e deletar a branch no GitHub.')) return;
+
+    this.deletingFix = true;
+    this.repoConfigService.deleteAutoFix(this.ticket.id).subscribe({
+      next: () => {
+        this.deletingFix = false;
+        this.ticket!.prUrl = null as any;
+        this.ticket!.prBranch = null as any;
+        this.ticket!.prStatus = null as any;
+        this.ticket!.prSummary = null as any;
+        this.ticket!.status = 'ABERTO';
+        this.prSummaryData = null;
+        this.fixResult = null;
+        this.snackBar.open('PR fechado e branch deletada!', 'OK', { duration: 3000 });
+      },
+      error: () => {
+        this.deletingFix = false;
+        this.snackBar.open('Erro ao remover PR', 'OK', { duration: 3000 });
       }
     });
   }
@@ -590,6 +688,31 @@ export class TicketDetailComponent implements OnInit {
         this.prSummaryData = null;
       }
     }
+  }
+
+  startPolling(): void {
+    this.pollingInterval = setInterval(() => {
+      this.ticketService.findById(this.ticket!.id).subscribe(t => {
+        this.ticket = t;
+        if (t.prUrl || t.status !== 'EM_ANDAMENTO') {
+          this.stopPolling();
+          if (t.prSummary) {
+            try { this.prSummaryData = JSON.parse(t.prSummary); } catch (e) {}
+          }
+        }
+      });
+    }, 5000);
+  }
+
+  stopPolling(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
   }
 
   goBack(): void {

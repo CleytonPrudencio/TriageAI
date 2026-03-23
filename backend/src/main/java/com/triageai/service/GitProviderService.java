@@ -470,6 +470,45 @@ public class GitProviderService {
         return repos;
     }
 
+    public void closePrAndDeleteBranch(RepoConfig config, String prUrl, String branchName) {
+        RestClient client = buildClient(config);
+
+        switch (config.getProvider()) {
+            case GITHUB -> {
+                // 1. Close the PR
+                if (prUrl != null) {
+                    String prNumber = prUrl.replaceAll(".*/pull/(\\d+).*", "$1");
+                    try {
+                        client.patch()
+                            .uri("/repos/{owner}/{repo}/pulls/{number}",
+                                    config.getRepoOwner(), config.getRepoName(), prNumber)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(Map.of("state", "closed"))
+                            .retrieve().toBodilessEntity();
+                        log.info("Closed PR #{} on {}/{}", prNumber, config.getRepoOwner(), config.getRepoName());
+                    } catch (Exception e) {
+                        log.warn("Failed to close PR: {}", e.getMessage());
+                    }
+                }
+
+                // 2. Delete the branch
+                if (branchName != null) {
+                    try {
+                        client.delete()
+                            .uri("/repos/{owner}/{repo}/git/refs/heads/{branch}",
+                                    config.getRepoOwner(), config.getRepoName(), branchName)
+                            .retrieve().toBodilessEntity();
+                        log.info("Deleted branch '{}' on {}/{}", branchName, config.getRepoOwner(), config.getRepoName());
+                    } catch (Exception e) {
+                        log.warn("Failed to delete branch: {}", e.getMessage());
+                    }
+                }
+            }
+            case GITLAB -> { /* TODO */ }
+            case BITBUCKET -> { /* TODO */ }
+        }
+    }
+
     public List<String> listFiles(RepoConfig config, String branch, String path) {
         RestClient client = buildClient(config);
 
