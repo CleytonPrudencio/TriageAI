@@ -471,7 +471,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .repo-link { color: #6366f1; text-decoration: none; display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; }
     .repo-link:hover { text-decoration: underline; }
     .repo-icon-sm { font-size: 14px; width: 14px; height: 14px; }
-    .branch-code { background: #1e293b !important; color: #38bdf8 !important; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; display: inline-block; }
+    .branch-code { background: #eff6ff !important; color: #1d4ed8 !important; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; border: 1px solid #bfdbfe; }
 
     /* Validacoes Auto-Fix */
     .validation-alert { display: flex; align-items: center; gap: 8px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-bottom: 12px; color: #92400e; font-size: 13px; }
