@@ -11,8 +11,16 @@ export interface Sistema {
   repoOwner: string;
   repoFullName: string;
   provider: string;
-  targetBranch: string;
   autoFixEnabled: boolean;
+  branchMapping: {
+    hotfix: string;
+    bugfix: string;
+    fix: string;
+    feat: string;
+    refactor: string;
+    docs: string;
+    chore: string;
+  };
   createdAt: string;
 }
 
