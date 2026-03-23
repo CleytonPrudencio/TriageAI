@@ -35,6 +35,12 @@ public class PrStatusSyncService {
                 String prStatus = gitProviderService.getPrStatus(ticket.getRepoConfig(), ticket.getPrUrl());
 
                 switch (prStatus) {
+                    case "approved" -> {
+                        ticket.setPrStatus("APPROVED");
+                        ticket.setStatus(Status.CODE_REVIEW);
+                        ticketRepository.save(ticket);
+                        log.info("Ticket #{} PR approved -> CODE_REVIEW", ticket.getId());
+                    }
                     case "merged" -> {
                         ticket.setPrStatus("MERGED");
                         ticket.setStatus(Status.RESOLVIDO);

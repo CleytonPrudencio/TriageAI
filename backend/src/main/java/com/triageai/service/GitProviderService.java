@@ -316,15 +316,15 @@ public class GitProviderService {
     }
 
     /**
-     * Returns PR status: "open", "closed", or "merged"
+     * Returns PR status: "open", "approved", "closed", or "merged"
      */
+    @SuppressWarnings("unchecked")
     public String getPrStatus(RepoConfig config, String prUrl) {
         RestClient client = buildClient(config);
 
         try {
             return switch (config.getProvider()) {
                 case GITHUB -> {
-                    // Extract PR number from URL: .../pull/123
                     String prNumber = prUrl.replaceAll(".*/pull/(\\d+).*", "$1");
                     Map<?, ?> pr = client.get()
                             .uri("/repos/{owner}/{repo}/pulls/{number}",
@@ -332,13 +332,32 @@ public class GitProviderService {
                             .retrieve().body(Map.class);
                     boolean merged = Boolean.TRUE.equals(pr.get("merged"));
                     String state = pr.get("state").toString();
-                    yield merged ? "merged" : state; // "open", "closed", or "merged"
+
+                    if (merged) yield "merged";
+                    if ("closed".equals(state)) yield "closed";
+
+                    // Check if PR has approved reviews
+                    try {
+                        List<Map<String, Object>> reviews = client.get()
+                                .uri("/repos/{owner}/{repo}/pulls/{number}/reviews",
+                                        config.getRepoOwner(), config.getRepoName(), prNumber)
+                                .retrieve().body(List.class);
+                        if (reviews != null) {
+                            boolean approved = reviews.stream()
+                                    .anyMatch(r -> "APPROVED".equals(r.get("state")));
+                            if (approved) yield "approved";
+                        }
+                    } catch (Exception e) {
+                        log.debug("Could not fetch reviews for PR #{}: {}", prNumber, e.getMessage());
+                    }
+
+                    yield "open";
                 }
                 case GITLAB -> {
-                    yield "open"; // simplified
+                    yield "open"; // TODO: implement
                 }
                 case BITBUCKET -> {
-                    yield "open"; // simplified
+                    yield "open"; // TODO: implement
                 }
             };
         } catch (Exception e) {
