@@ -12,6 +12,9 @@ export interface Ticket {
   prUrl: string;
   prStatus: string;
   prSummary: string;
+  sistemaId: number | null;
+  sistemaName: string;
+  sistemaAutoFix: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -19,6 +22,7 @@ export interface Ticket {
 export interface TicketRequest {
   titulo: string;
   descricao: string;
+  sistemaId?: number;
 }
 
 export interface FeedbackRequest {

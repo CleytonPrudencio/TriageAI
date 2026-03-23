@@ -46,6 +46,10 @@ public class Ticket {
     @JoinColumn(name = "repo_config_id")
     private RepoConfig repoConfig;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sistema_id")
+    private Sistema sistema;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;

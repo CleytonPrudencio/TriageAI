@@ -20,6 +20,8 @@ public class TicketResponse {
     private String prUrl;
     private String prStatus;
     private String prSummary;
+    private Long sistemaId;
+    private String sistemaNome;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -38,6 +40,8 @@ public class TicketResponse {
         r.setPrUrl(t.getPrUrl());
         r.setPrStatus(t.getPrStatus());
         r.setPrSummary(t.getPrSummary());
+        r.setSistemaId(t.getSistema() != null ? t.getSistema().getId() : null);
+        r.setSistemaNome(t.getSistema() != null ? t.getSistema().getNome() : null);
         r.setCreatedAt(t.getCreatedAt());
         r.setUpdatedAt(t.getUpdatedAt());
         return r;

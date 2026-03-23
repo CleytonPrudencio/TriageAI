@@ -9,12 +9,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { TicketService } from '../../services/ticket.service';
+import { SistemaService, Sistema } from '../../services/sistema.service';
 
 @Component({
   selector: 'app-ticket-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule],
+  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule, MatSelectModule],
   template: `
     <div class="page-header">
       <div>
@@ -26,6 +28,23 @@ import { TicketService } from '../../services/ticket.service';
     <div class="form-layout">
       <div class="form-card">
         <form (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline">
+            <mat-label>Sistema (opcional)</mat-label>
+            <mat-select [(ngModel)]="selectedSistemaId" name="sistemaId" (selectionChange)="onSistemaChange()">
+              <mat-option [value]="null">Nenhum</mat-option>
+              <mat-option *ngFor="let s of sistemas" [value]="s.id">{{ s.nome }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="sistema-chip" *ngIf="selectedSistema">
+            <mat-icon class="sistema-chip-icon">dns</mat-icon>
+            <span>Repo: {{ selectedSistema.repoFullName || 'N/A' }}</span>
+            <span class="chip-sep">|</span>
+            <span>Branch: {{ selectedSistema.targetBranch || 'main' }}</span>
+            <span class="chip-sep">|</span>
+            <span>Auto-fix: {{ selectedSistema.autoFixEnabled ? 'Ativado' : 'Desativado' }}</span>
+          </div>
+
           <mat-form-field appearance="outline">
             <mat-label>Titulo do chamado</mat-label>
             <input matInput [(ngModel)]="titulo" name="titulo" required placeholder="Ex: Sistema fora do ar">
@@ -123,6 +142,15 @@ import { TicketService } from '../../services/ticket.service';
 
     .result-hint { margin: 20px 0 0; font-size: 12px; color: var(--text-secondary); }
 
+    .sistema-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+      padding: 8px 14px; margin-bottom: 16px; font-size: 12px; color: #1e40af;
+      flex-wrap: wrap;
+    }
+    .sistema-chip-icon { font-size: 16px; width: 16px; height: 16px; color: #3b82f6; }
+    .chip-sep { color: #93c5fd; }
+
     @media (max-width: 768px) {
       .form-layout { grid-template-columns: 1fr; }
     }
@@ -133,12 +161,30 @@ export class TicketFormComponent {
   descricao = '';
   loading = false;
   result: any = null;
+  sistemas: Sistema[] = [];
+  selectedSistemaId: number | null = null;
+  selectedSistema: Sistema | null = null;
 
-  constructor(private ticketService: TicketService, private router: Router, private snackBar: MatSnackBar) {}
+  constructor(
+    private ticketService: TicketService,
+    private sistemaService: SistemaService,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {
+    this.sistemaService.findAll().subscribe(sistemas => this.sistemas = sistemas);
+  }
+
+  onSistemaChange(): void {
+    this.selectedSistema = this.sistemas.find(s => s.id === this.selectedSistemaId) || null;
+  }
 
   onSubmit(): void {
     this.loading = true;
-    this.ticketService.create({ titulo: this.titulo, descricao: this.descricao }).subscribe({
+    const data: any = { titulo: this.titulo, descricao: this.descricao };
+    if (this.selectedSistemaId) {
+      data.sistemaId = this.selectedSistemaId;
+    }
+    this.ticketService.create(data).subscribe({
       next: (ticket) => {
         this.result = ticket;
         this.loading = false;

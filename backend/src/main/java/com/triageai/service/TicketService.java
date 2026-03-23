@@ -6,19 +6,25 @@ import com.triageai.model.User;
 import com.triageai.model.enums.Category;
 import com.triageai.model.enums.Priority;
 import com.triageai.model.enums.Status;
+import com.triageai.repository.SistemaRepository;
 import com.triageai.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final AiService aiService;
+    private final SistemaRepository sistemaRepository;
+    private final GitIntegrationService gitIntegrationService;
 
     @Value("${app.ai-service.url}")
     private String aiServiceUrl;
@@ -37,7 +43,27 @@ public class TicketService {
                 .user(user)
                 .build();
 
-        return TicketResponse.from(ticketRepository.save(ticket));
+        // Link sistema if provided
+        if (request.getSistemaId() != null) {
+            sistemaRepository.findById(request.getSistemaId()).ifPresent(sistema -> {
+                ticket.setSistema(sistema);
+                ticket.setRepoConfig(sistema.getRepoConfig());
+            });
+        }
+
+        Ticket saved = ticketRepository.save(ticket);
+
+        // Auto-fix if sistema has it enabled and ticket is TECNICO
+        if (saved.getSistema() != null
+                && saved.getSistema().isAutoFixEnabled()
+                && saved.getCategoria() == Category.TECNICO
+                && saved.getSistema().getRepoConfig() != null) {
+            saved.setStatus(Status.EM_ANDAMENTO);
+            ticketRepository.save(saved);
+            triggerAutoFixAsync(saved);
+        }
+
+        return TicketResponse.from(saved);
     }
 
     public Page<TicketResponse> findAll(Pageable pageable) {
@@ -191,5 +217,18 @@ public class TicketService {
         }
 
         return stats;
+    }
+
+    @Async
+    public void triggerAutoFixAsync(Ticket ticket) {
+        try {
+            com.triageai.model.Sistema sistema = ticket.getSistema();
+            String branchType = sistema.getDefaultBranchType() != null ? sistema.getDefaultBranchType() : "fix";
+            String branchName = "ticket-" + ticket.getId();
+            gitIntegrationService.processAutoFix(ticket.getId(), sistema.getRepoConfig().getId(), branchType, branchName);
+            log.info("Auto-fix triggered automatically for ticket #{}", ticket.getId());
+        } catch (Exception e) {
+            log.error("Auto-fix failed for ticket #{}: {}", ticket.getId(), e.getMessage());
+        }
     }
 }

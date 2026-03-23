@@ -43,6 +43,10 @@ import { AuthService } from '../services/auth.service';
             <mat-icon>settings</mat-icon>
             <span *ngIf="!sidebarCollapsed">Repositorios</span>
           </a>
+          <a routerLink="/sistemas" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Sistemas' : ''" matTooltipPosition="right">
+            <mat-icon>dns</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Sistemas</span>
+          </a>
           <a routerLink="/settings/training" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Treino IA' : ''" matTooltipPosition="right">
             <mat-icon>model_training</mat-icon>
             <span *ngIf="!sidebarCollapsed">Treino IA</span>

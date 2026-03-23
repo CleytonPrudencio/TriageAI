@@ -16,6 +16,7 @@ export const routes: Routes = [
       { path: 'tickets/:id', loadComponent: () => import('./tickets/ticket-detail/ticket-detail.component').then(m => m.TicketDetailComponent) },
       { path: 'settings/repos', loadComponent: () => import('./settings/repo-config/repo-config.component').then(m => m.RepoConfigComponent) },
       { path: 'settings/training', loadComponent: () => import('./settings/ai-training/ai-training.component').then(m => m.AiTrainingComponent) },
+      { path: 'sistemas', loadComponent: () => import('./settings/sistemas/sistemas.component').then(m => m.SistemasComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },

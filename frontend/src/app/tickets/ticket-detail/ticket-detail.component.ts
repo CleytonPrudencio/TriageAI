@@ -136,6 +136,23 @@ import { RepoConfigService } from '../../services/repo-config.service';
             </div>
           </div>
 
+          <!-- Sistema Info -->
+          <div class="sidebar-section" *ngIf="ticket.sistemaName">
+            <mat-divider></mat-divider>
+            <h3><mat-icon class="section-title-icon">dns</mat-icon> Sistema</h3>
+            <div class="sistema-info-card">
+              <div class="info-row">
+                <span class="info-label">Sistema</span>
+                <strong>{{ ticket.sistemaName }}</strong>
+              </div>
+              <div class="info-row" *ngIf="ticket.sistemaAutoFix !== undefined && ticket.sistemaAutoFix !== null">
+                <span class="info-label">Auto-Fix</span>
+                <span class="badge auto-fix-badge" *ngIf="ticket.sistemaAutoFix">Automatico</span>
+                <span class="badge" style="background:#f1f5f9;color:#94a3b8;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;" *ngIf="!ticket.sistemaAutoFix">Desativado</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Repo Info -->
           <div class="sidebar-section repo-info-section" *ngIf="prSummaryData?.repo || ticket.prUrl">
             <mat-divider></mat-divider>
@@ -389,6 +406,9 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .pr-link-btn mat-icon { font-size: 14px; width: 14px; height: 14px; margin-right: 4px; }
 
     /* Repo Info Sidebar */
+    .sistema-info-card { background: #f0fdf4; border-radius: 8px; padding: 12px; border: 1px solid #bbf7d0; }
+    .auto-fix-badge { background: #dcfce7; color: #16a34a; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
     .repo-info-section h3 { display: flex; align-items: center; gap: 6px; }
     .section-title-icon { font-size: 20px; width: 20px; height: 20px; color: #6366f1; }
     .repo-info-card { background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0; }
