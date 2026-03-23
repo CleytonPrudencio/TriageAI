@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface GitConnectionRepository extends JpaRepository<GitConnection, Long> {
     List<GitConnection> findByUserId(Long userId);
     Optional<GitConnection> findByUserIdAndProvider(Long userId, GitProvider provider);
+    Optional<GitConnection> findFirstByProvider(GitProvider provider);
 }

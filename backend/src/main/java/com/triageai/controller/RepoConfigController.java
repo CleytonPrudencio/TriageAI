@@ -2,8 +2,10 @@ package com.triageai.controller;
 
 import com.triageai.dto.RepoConfigRequest;
 import com.triageai.dto.RepoConfigResponse;
+import com.triageai.model.GitConnection;
 import com.triageai.model.RepoConfig;
 import com.triageai.model.enums.GitProvider;
+import com.triageai.repository.GitConnectionRepository;
 import com.triageai.repository.RepoConfigRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,15 +20,25 @@ import java.util.List;
 public class RepoConfigController {
 
     private final RepoConfigRepository repository;
+    private final GitConnectionRepository gitConnectionRepository;
 
     @PostMapping
     public ResponseEntity<RepoConfigResponse> create(@Valid @RequestBody RepoConfigRequest request) {
+        // If apiToken not provided, fetch from GitConnection
+        String token = request.getApiToken();
+        if (token == null || token.isBlank()) {
+            GitProvider provider = GitProvider.valueOf(request.getProvider());
+            token = gitConnectionRepository.findFirstByProvider(provider)
+                    .map(GitConnection::getApiToken)
+                    .orElse("");
+        }
+
         RepoConfig config = RepoConfig.builder()
                 .name(request.getName())
                 .provider(GitProvider.valueOf(request.getProvider()))
                 .repoOwner(request.getRepoOwner())
                 .repoName(request.getRepoName())
-                .apiToken(request.getApiToken())
+                .apiToken(token)
                 .defaultBranch(request.getDefaultBranch() != null ? request.getDefaultBranch() : "main")
                 .reviewerUsername(request.getReviewerUsername())
                 .build();

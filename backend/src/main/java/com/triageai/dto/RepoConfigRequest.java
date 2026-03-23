@@ -17,8 +17,7 @@ public class RepoConfigRequest {
     @NotBlank
     private String repoName;
 
-    @NotBlank
-    private String apiToken;
+    private String apiToken; // Optional - if empty, fetched from GitConnection
 
     private String defaultBranch = "main";
 
