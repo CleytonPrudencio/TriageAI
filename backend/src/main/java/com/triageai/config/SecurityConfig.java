@@ -46,7 +46,7 @@ public class SecurityConfig {
             )
             .headers(headers -> headers.frameOptions(fo -> fo.disable()))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterAfter(apiKeyAuthFilter, JwtAuthFilter.class);
 
         return http.build();
     }
