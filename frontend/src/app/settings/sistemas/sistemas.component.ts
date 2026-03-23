@@ -62,15 +62,44 @@ import { RepoConfig } from '../../models/repo-config.model';
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Branch alvo</mat-label>
-          <input matInput [(ngModel)]="form.targetBranch" name="targetBranch" placeholder="main">
-        </mat-form-field>
-
         <div class="toggle-row">
           <mat-slide-toggle [(ngModel)]="form.autoFixEnabled" name="autoFixEnabled" color="primary">
             Auto-fix automatico
           </mat-slide-toggle>
+        </div>
+
+        <div class="branch-mapping">
+          <h4><mat-icon>account_tree</mat-icon> Mapeamento de Branches (de onde cada tipo sai)</h4>
+          <div class="branch-grid">
+            <mat-form-field appearance="outline" class="branch-field">
+              <mat-label>hotfix (producao)</mat-label>
+              <input matInput [(ngModel)]="form.branchHotfix" name="branchHotfix" placeholder="main">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="branch-field">
+              <mat-label>bugfix</mat-label>
+              <input matInput [(ngModel)]="form.branchBugfix" name="branchBugfix" placeholder="develop">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="branch-field">
+              <mat-label>fix</mat-label>
+              <input matInput [(ngModel)]="form.branchFix" name="branchFix" placeholder="develop">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="branch-field">
+              <mat-label>feat</mat-label>
+              <input matInput [(ngModel)]="form.branchFeat" name="branchFeat" placeholder="develop">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="branch-field">
+              <mat-label>refactor</mat-label>
+              <input matInput [(ngModel)]="form.branchRefactor" name="branchRefactor" placeholder="develop">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="branch-field">
+              <mat-label>docs</mat-label>
+              <input matInput [(ngModel)]="form.branchDocs" name="branchDocs" placeholder="develop">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="branch-field">
+              <mat-label>chore</mat-label>
+              <input matInput [(ngModel)]="form.branchChore" name="branchChore" placeholder="develop">
+            </mat-form-field>
+          </div>
         </div>
       </div>
 
@@ -120,9 +149,13 @@ import { RepoConfig } from '../../models/repo-config.model';
             Sem repositorio
           </span>
 
-          <span class="badge branch-badge" *ngIf="s.targetBranch">
+          <span class="badge branch-badge" *ngIf="s.branchMapping">
+            <mat-icon class="badge-icon">smart_toy</mat-icon>
+            Branch: Auto (IA)
+          </span>
+          <span class="badge branch-badge" *ngIf="s.branchMapping" matTooltip="hotfix={{s.branchMapping.hotfix}} | bugfix={{s.branchMapping.bugfix}} | feat={{s.branchMapping.feat}}">
             <mat-icon class="badge-icon">account_tree</mat-icon>
-            {{ s.targetBranch }}
+            hotfix→{{s.branchMapping.hotfix}} | feat→{{s.branchMapping.feat}}
           </span>
 
           <span class="badge autofix-badge" [class.autofix-on]="s.autoFixEnabled" [class.autofix-off]="!s.autoFixEnabled">
@@ -217,9 +250,18 @@ import { RepoConfig } from '../../models/repo-config.model';
       text-transform: uppercase; letter-spacing: 0.5px;
     }
 
+    .branch-mapping { margin-top: 16px; }
+    .branch-mapping h4 { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #334155; margin-bottom: 12px; }
+    .branch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .branch-field { font-size: 13px; }
+
+    @media (max-width: 900px) {
+      .branch-grid { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 600px) {
       .sistemas-grid { grid-template-columns: 1fr; }
       .form-grid { grid-template-columns: 1fr; }
+      .branch-grid { grid-template-columns: 1fr; }
     }
   `]
 })
@@ -234,8 +276,14 @@ export class SistemasComponent implements OnInit {
     nome: '',
     descricao: '',
     repoConfigId: null,
-    targetBranch: 'main',
-    autoFixEnabled: false
+    autoFixEnabled: false,
+    branchHotfix: 'main',
+    branchBugfix: 'develop',
+    branchFix: 'develop',
+    branchFeat: 'develop',
+    branchRefactor: 'develop',
+    branchDocs: 'develop',
+    branchChore: 'develop'
   };
 
   constructor(
@@ -268,24 +316,29 @@ export class SistemasComponent implements OnInit {
     this.editing = false;
     this.editingId = null;
     this.form = {
-      nome: '',
-      descricao: '',
-      repoConfigId: null,
-      targetBranch: 'main',
-      autoFixEnabled: false
+      nome: '', descricao: '', repoConfigId: null, autoFixEnabled: false,
+      branchHotfix: 'main', branchBugfix: 'develop', branchFix: 'develop',
+      branchFeat: 'develop', branchRefactor: 'develop', branchDocs: 'develop', branchChore: 'develop'
     };
   }
 
-  edit(sistema: Sistema): void {
+  edit(sistema: any): void {
     this.showForm = true;
     this.editing = true;
     this.editingId = sistema.id;
+    const bm = sistema.branchMapping || {};
     this.form = {
       nome: sistema.nome,
       descricao: sistema.descricao || '',
       repoConfigId: sistema.repoConfigId,
-      targetBranch: sistema.targetBranch || 'main',
-      autoFixEnabled: sistema.autoFixEnabled || false
+      autoFixEnabled: sistema.autoFixEnabled || false,
+      branchHotfix: bm.hotfix || 'main',
+      branchBugfix: bm.bugfix || 'develop',
+      branchFix: bm.fix || 'develop',
+      branchFeat: bm.feat || 'develop',
+      branchRefactor: bm.refactor || 'develop',
+      branchDocs: bm.docs || 'develop',
+      branchChore: bm.chore || 'develop'
     };
   }
 

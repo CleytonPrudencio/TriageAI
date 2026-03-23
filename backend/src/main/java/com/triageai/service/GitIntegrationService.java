@@ -56,12 +56,20 @@ public class GitIntegrationService {
         String branchName = branchType + "/" + namePart;
 
         try {
-            // 1. Get base branch SHA
-            log.info("Getting base SHA for {}/{}", config.getRepoOwner(), config.getRepoName());
-            String baseSha = gitProvider.getDefaultBranchSha(config);
+            // 1. Determine source branch based on branch type and sistema config
+            String sourceBranch = config.getDefaultBranch();
+            if (ticket.getSistema() != null) {
+                sourceBranch = ticket.getSistema().getSourceBranch(branchType);
+                log.info("Using source branch '{}' for type '{}' (from sistema '{}')",
+                        sourceBranch, branchType, ticket.getSistema().getNome());
+            }
 
-            // 2. Create fix branch
-            log.info("Creating branch '{}'", branchName);
+            // 2. Get source branch SHA
+            log.info("Getting base SHA for {}/{} branch '{}'", config.getRepoOwner(), config.getRepoName(), sourceBranch);
+            String baseSha = gitProvider.getBranchSha(config, sourceBranch);
+
+            // 3. Create fix branch from source
+            log.info("Creating branch '{}' from '{}'", branchName, sourceBranch);
             gitProvider.createBranch(config, branchName, baseSha);
 
             // 3. Analyze code with AI

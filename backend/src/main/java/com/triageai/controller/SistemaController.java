@@ -35,10 +35,7 @@ public class SistemaController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody SistemaRequest req) {
         Sistema s = new Sistema();
-        s.setNome(req.getNome());
-        s.setDescricao(req.getDescricao());
-        s.setTargetBranch(req.getTargetBranch());
-        s.setAutoFixEnabled(req.isAutoFixEnabled());
+        applyRequest(s, req);
         if (req.getRepoConfigId() != null) {
             repoConfigRepository.findById(req.getRepoConfigId()).ifPresent(s::setRepoConfig);
         }
@@ -48,10 +45,7 @@ public class SistemaController {
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody SistemaRequest req) {
         return sistemaRepository.findById(id).map(s -> {
-            s.setNome(req.getNome());
-            s.setDescricao(req.getDescricao());
-            s.setTargetBranch(req.getTargetBranch());
-            s.setAutoFixEnabled(req.isAutoFixEnabled());
+            applyRequest(s, req);
             if (req.getRepoConfigId() != null) {
                 repoConfigRepository.findById(req.getRepoConfigId()).ifPresent(s::setRepoConfig);
             } else {
@@ -59,6 +53,19 @@ public class SistemaController {
             }
             return ResponseEntity.ok(toResponse(sistemaRepository.save(s)));
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    private void applyRequest(Sistema s, SistemaRequest req) {
+        s.setNome(req.getNome());
+        s.setDescricao(req.getDescricao());
+        s.setAutoFixEnabled(req.isAutoFixEnabled());
+        s.setBranchHotfix(req.getBranchHotfix() != null ? req.getBranchHotfix() : "main");
+        s.setBranchBugfix(req.getBranchBugfix() != null ? req.getBranchBugfix() : "develop");
+        s.setBranchFix(req.getBranchFix() != null ? req.getBranchFix() : "develop");
+        s.setBranchFeat(req.getBranchFeat() != null ? req.getBranchFeat() : "develop");
+        s.setBranchRefactor(req.getBranchRefactor() != null ? req.getBranchRefactor() : "develop");
+        s.setBranchDocs(req.getBranchDocs() != null ? req.getBranchDocs() : "develop");
+        s.setBranchChore(req.getBranchChore() != null ? req.getBranchChore() : "develop");
     }
 
     @DeleteMapping("/{id}")
@@ -72,8 +79,17 @@ public class SistemaController {
         map.put("id", s.getId());
         map.put("nome", s.getNome());
         map.put("descricao", s.getDescricao());
-        map.put("targetBranch", s.getTargetBranch());
         map.put("autoFixEnabled", s.isAutoFixEnabled());
+        // Branch mapping
+        Map<String, String> branches = new LinkedHashMap<>();
+        branches.put("hotfix", s.getBranchHotfix() != null ? s.getBranchHotfix() : "main");
+        branches.put("bugfix", s.getBranchBugfix() != null ? s.getBranchBugfix() : "develop");
+        branches.put("fix", s.getBranchFix() != null ? s.getBranchFix() : "develop");
+        branches.put("feat", s.getBranchFeat() != null ? s.getBranchFeat() : "develop");
+        branches.put("refactor", s.getBranchRefactor() != null ? s.getBranchRefactor() : "develop");
+        branches.put("docs", s.getBranchDocs() != null ? s.getBranchDocs() : "develop");
+        branches.put("chore", s.getBranchChore() != null ? s.getBranchChore() : "develop");
+        map.put("branchMapping", branches);
         map.put("createdAt", s.getCreatedAt() != null ? s.getCreatedAt().toString() : null);
         if (s.getRepoConfig() != null) {
             map.put("repoConfigId", s.getRepoConfig().getId());
@@ -90,7 +106,13 @@ public class SistemaController {
         private String nome;
         private String descricao;
         private Long repoConfigId;
-        private String targetBranch;
         private boolean autoFixEnabled;
+        private String branchHotfix;
+        private String branchBugfix;
+        private String branchFix;
+        private String branchFeat;
+        private String branchRefactor;
+        private String branchDocs;
+        private String branchChore;
     }
 }

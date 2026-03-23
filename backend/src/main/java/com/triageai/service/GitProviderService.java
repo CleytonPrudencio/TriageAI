@@ -98,13 +98,17 @@ public class GitProviderService {
     }
 
     public String getDefaultBranchSha(RepoConfig config) {
+        return getBranchSha(config, config.getDefaultBranch());
+    }
+
+    public String getBranchSha(RepoConfig config, String branchName) {
         RestClient client = buildClient(config);
 
         return switch (config.getProvider()) {
             case GITHUB -> {
                 Map<?, ?> ref = client.get()
                         .uri("/repos/{owner}/{repo}/git/ref/heads/{branch}",
-                                config.getRepoOwner(), config.getRepoName(), config.getDefaultBranch())
+                                config.getRepoOwner(), config.getRepoName(), branchName)
                         .retrieve().body(Map.class);
                 yield ((Map<?, ?>) ref.get("object")).get("sha").toString();
             }
@@ -112,14 +116,14 @@ public class GitProviderService {
                 String projectId = config.getRepoOwner() + "/" + config.getRepoName();
                 Map<?, ?> branch = client.get()
                         .uri("/projects/{id}/repository/branches/{branch}",
-                                projectId.replace("/", "%2F"), config.getDefaultBranch())
+                                projectId.replace("/", "%2F"), branchName)
                         .retrieve().body(Map.class);
                 yield ((Map<?, ?>) branch.get("commit")).get("id").toString();
             }
             case BITBUCKET -> {
                 Map<?, ?> ref = client.get()
                         .uri("/repositories/{owner}/{repo}/refs/branches/{branch}",
-                                config.getRepoOwner(), config.getRepoName(), config.getDefaultBranch())
+                                config.getRepoOwner(), config.getRepoName(), branchName)
                         .retrieve().body(Map.class);
                 yield ((Map<?, ?>) ref.get("target")).get("hash").toString();
             }
