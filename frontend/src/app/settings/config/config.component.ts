@@ -213,21 +213,21 @@ export class ConfigComponent implements OnInit {
   }
 
   loadConfig(): void {
-    this.http.get<any>('/api/config').subscribe({
+    this.http.get<any>('http://localhost:8080/api/config').subscribe({
       next: (data) => this.config = data,
       error: () => {}
     });
   }
 
   loadApiKeys(): void {
-    this.http.get<any[]>('/api/api-keys').subscribe({
+    this.http.get<any[]>('http://localhost:8080/api/api-keys').subscribe({
       next: (keys) => this.apiKeys = keys,
       error: () => {}
     });
   }
 
   checkAiService(): void {
-    this.http.get<any>('/api/dashboard').subscribe({
+    this.http.get<any>('http://localhost:8080/api/dashboard/stats').subscribe({
       next: () => this.aiOnline = true,
       error: () => this.aiOnline = false
     });
@@ -235,7 +235,7 @@ export class ConfigComponent implements OnInit {
 
   saveAnthropicKey(): void {
     this.saving = true;
-    this.http.post<any>('/api/config', { anthropic_api_key: this.anthropicKey }).subscribe({
+    this.http.post<any>('http://localhost:8080/api/config', { anthropic_api_key: this.anthropicKey }).subscribe({
       next: (res) => {
         this.saving = false;
         this.anthropicKey = '';
@@ -250,7 +250,7 @@ export class ConfigComponent implements OnInit {
   }
 
   createApiKey(): void {
-    this.http.post<any>('/api/api-keys', { name: this.newKeyName }).subscribe({
+    this.http.post<any>('http://localhost:8080/api/api-keys', { name: this.newKeyName }).subscribe({
       next: (res) => {
         this.generatedKey = res.key;
         this.newKeyName = '';
