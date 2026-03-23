@@ -179,10 +179,11 @@ import { RepoConfigService } from '../../services/repo-config.service';
 
           <!-- Re-run Auto-Fix (shown when no PR exists or after deletion) -->
           <div class="rerun-section" *ngIf="!ticket.prUrl && ticket.categoria === 'TECNICO' && repoConfigs.length > 0">
-            <button mat-raised-button class="rerun-btn" (click)="onAutoFix()" [disabled]="fixLoading">
-              <mat-icon>{{ fixLoading ? 'hourglass_empty' : 'build' }}</mat-icon>
-              {{ fixLoading ? 'Executando Auto-Fix...' : 'Executar Auto-Fix Novamente' }}
+            <button mat-raised-button class="rerun-btn" (click)="scrollToAutoFix()">
+              <mat-icon>build</mat-icon>
+              Executar Auto-Fix Novamente
             </button>
+            <p class="rerun-hint">Configure o repositorio e branch na barra lateral</p>
           </div>
         </div>
 
@@ -316,7 +317,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
 
           <mat-divider></mat-divider>
 
-          <div class="sidebar-section" *ngIf="ticket.categoria === 'TECNICO'">
+          <div class="sidebar-section" id="autofix-section" *ngIf="ticket.categoria === 'TECNICO'">
             <h3><mat-icon>build</mat-icon> Auto-Fix</h3>
             <p class="hint">Analisa o repo e cria um PR com a correcao</p>
 
@@ -595,6 +596,9 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .send-review-btn { width: 100%; margin-top: 4px; }
 
     .rerun-section { margin: 16px 0; text-align: center; }
+    .rerun-hint { color: #94a3b8; font-size: 12px; margin-top: 6px; }
+    .highlight-section { animation: highlight-pulse 2s ease-out; }
+    @keyframes highlight-pulse { 0% { box-shadow: 0 0 0 3px #6366f1; } 100% { box-shadow: none; } }
     .rerun-btn {
       background: linear-gradient(135deg, #f59e0b, #d97706) !important;
       color: white !important;
@@ -699,6 +703,18 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
         this.snackBar.open('Erro ao remover PR', 'OK', { duration: 3000 });
       }
     });
+  }
+
+  scrollToAutoFix(): void {
+    const el = document.getElementById('autofix-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('highlight-section');
+      setTimeout(() => el.classList.remove('highlight-section'), 2000);
+    }
+    if (!this.selectedRepoId) {
+      this.snackBar.open('Selecione um repositorio na secao Auto-Fix ao lado', 'OK', { duration: 4000 });
+    }
   }
 
   getFixSummaryText(): string {
