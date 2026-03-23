@@ -833,9 +833,11 @@ export class AiTrainingComponent implements OnInit {
     });
   }
 
-  getBarPercent(value: number, total: number): number {
-    if (!total) return 0;
-    return Math.round((value / total) * 100);
+  getBarPercent(value: any, total: any): number {
+    const v = Number(value) || 0;
+    const t = Number(total) || 0;
+    if (!t) return 0;
+    return Math.round((v / t) * 100);
   }
 
   get selectedCount(): number {
