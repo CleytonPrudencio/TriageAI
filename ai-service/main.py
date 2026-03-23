@@ -165,6 +165,101 @@ def version():
     return get_version()
 
 
+@app.post("/predict-branch-type")
+def predict_branch_type(body: dict):
+    """Use Claude to determine the best branch type for a ticket"""
+    text = body.get("text", "")
+    categoria = body.get("categoria", "")
+
+    api_key = get_anthropic_key()
+    if not api_key:
+        # Fallback: rule-based detection
+        return {"branchType": detect_branch_type_rules(text, categoria)}
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=50,
+            messages=[{
+                "role": "user",
+                "content": f"""Analyze this support ticket and determine the most appropriate git branch type.
+
+Ticket text: "{text}"
+Category: {categoria}
+
+Branch type options:
+- hotfix: Critical production errors, system down, data loss, security issues
+- bugfix: Bugs, errors, exceptions, incorrect behavior
+- fix: Minor fixes, small adjustments, typos
+- feat: New features, new pages, new functionality, create something that doesn't exist
+- refactor: Code restructuring, optimization, cleanup without behavior change
+- docs: Documentation only changes
+- chore: Config changes, dependency updates, maintenance
+
+Respond with ONLY the branch type word (hotfix, bugfix, fix, feat, refactor, docs, or chore). Nothing else."""
+            }]
+        )
+        branch_type = response.content[0].text.strip().lower()
+        # Validate
+        valid_types = ["hotfix", "bugfix", "fix", "feat", "refactor", "docs", "chore"]
+        if branch_type not in valid_types:
+            branch_type = detect_branch_type_rules(text, categoria)
+        return {"branchType": branch_type}
+    except Exception as e:
+        print(f"Claude branch type detection failed: {e}")
+        return {"branchType": detect_branch_type_rules(text, categoria)}
+
+
+def detect_branch_type_rules(text: str, categoria: str = "") -> str:
+    """Rule-based fallback for branch type detection"""
+    text_lower = text.lower()
+
+    # Hotfix - critical production issues
+    hotfix_keywords = ["producao", "produção", "prod", "urgente", "critico", "crítico", "fora do ar",
+                       "sistema caiu", "indisponivel", "indisponível", "emergencia", "emergência",
+                       "perda de dados", "seguranca", "segurança", "vulnerabilidade"]
+    if any(kw in text_lower for kw in hotfix_keywords):
+        return "hotfix"
+
+    # Bugfix - bugs and errors
+    bugfix_keywords = ["erro", "bug", "falha", "exception", "nao funciona", "não funciona",
+                       "quebrado", "incorreto", "problema", "defeito", "crash", "travando",
+                       "nao abre", "não abre", "nao carrega", "não carrega", "500", "404",
+                       "null", "nullpointer", "stacktrace"]
+    if any(kw in text_lower for kw in bugfix_keywords):
+        return "bugfix"
+
+    # Feature - new things
+    feat_keywords = ["criar", "novo", "nova", "adicionar", "implementar", "desenvolver",
+                     "feature", "funcionalidade", "tela", "pagina", "página", "módulo", "modulo",
+                     "integrar", "integracao", "integração", "construir"]
+    if any(kw in text_lower for kw in feat_keywords):
+        return "feat"
+
+    # Refactor
+    refactor_keywords = ["refatorar", "refactor", "otimizar", "melhorar performance",
+                         "reestruturar", "limpar", "cleanup", "reorganizar"]
+    if any(kw in text_lower for kw in refactor_keywords):
+        return "refactor"
+
+    # Docs
+    docs_keywords = ["documentacao", "documentação", "readme", "doc", "manual", "guia"]
+    if any(kw in text_lower for kw in docs_keywords):
+        return "docs"
+
+    # Chore
+    chore_keywords = ["config", "configuracao", "configuração", "dependencia", "dependência",
+                      "atualizar versao", "atualizar versão", "deploy", "ci/cd", "pipeline"]
+    if any(kw in text_lower for kw in chore_keywords):
+        return "chore"
+
+    # Default based on category
+    if categoria == "TECNICO":
+        return "fix"
+    return "fix"
+
+
 @app.post("/predict", response_model=PredictResponse)
 def predict_ticket(request: PredictRequest):
     if cat_model is None or pri_model is None:

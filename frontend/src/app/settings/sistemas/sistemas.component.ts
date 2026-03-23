@@ -67,13 +67,6 @@ import { RepoConfig } from '../../models/repo-config.model';
           <input matInput [(ngModel)]="form.targetBranch" name="targetBranch" placeholder="main">
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Tipo de branch padrao</mat-label>
-          <mat-select [(ngModel)]="form.defaultBranchType" name="defaultBranchType">
-            <mat-option *ngFor="let bt of branchTypes" [value]="bt">{{ bt }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-
         <div class="toggle-row">
           <mat-slide-toggle [(ngModel)]="form.autoFixEnabled" name="autoFixEnabled" color="primary">
             Auto-fix automatico
@@ -137,8 +130,9 @@ import { RepoConfig } from '../../models/repo-config.model';
             Auto-fix {{ s.autoFixEnabled ? 'Ativado' : 'Desativado' }}
           </span>
 
-          <span class="badge branch-type-badge" *ngIf="s.defaultBranchType">
-            {{ s.defaultBranchType }}
+          <span class="badge branch-type-badge">
+            <mat-icon class="badge-icon">smart_toy</mat-icon>
+            Branch: Auto (IA)
           </span>
         </div>
       </div>
@@ -236,14 +230,11 @@ export class SistemasComponent implements OnInit {
   editing = false;
   editingId: number | null = null;
 
-  branchTypes = ['fix', 'feat', 'hotfix', 'bugfix', 'chore', 'refactor', 'docs'];
-
   form: any = {
     nome: '',
     descricao: '',
     repoConfigId: null,
     targetBranch: 'main',
-    defaultBranchType: 'fix',
     autoFixEnabled: false
   };
 
@@ -281,7 +272,6 @@ export class SistemasComponent implements OnInit {
       descricao: '',
       repoConfigId: null,
       targetBranch: 'main',
-      defaultBranchType: 'fix',
       autoFixEnabled: false
     };
   }
@@ -295,7 +285,6 @@ export class SistemasComponent implements OnInit {
       descricao: sistema.descricao || '',
       repoConfigId: sistema.repoConfigId,
       targetBranch: sistema.targetBranch || 'main',
-      defaultBranchType: sistema.defaultBranchType || 'fix',
       autoFixEnabled: sistema.autoFixEnabled || false
     };
   }

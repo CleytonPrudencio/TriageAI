@@ -223,7 +223,10 @@ public class TicketService {
     public void triggerAutoFixAsync(Ticket ticket) {
         try {
             com.triageai.model.Sistema sistema = ticket.getSistema();
-            String branchType = sistema.getDefaultBranchType() != null ? sistema.getDefaultBranchType() : "fix";
+            String fullText = ticket.getTitulo() + " " + ticket.getDescricao();
+            String categoria = ticket.getCategoria() != null ? ticket.getCategoria().name() : "";
+            String branchType = aiService.predictBranchType(fullText, categoria);
+            log.info("AI predicted branch type '{}' for ticket #{}", branchType, ticket.getId());
             String branchName = "ticket-" + ticket.getId();
             gitIntegrationService.processAutoFix(ticket.getId(), sistema.getRepoConfig().getId(), branchType, branchName);
             log.info("Auto-fix triggered automatically for ticket #{}", ticket.getId());

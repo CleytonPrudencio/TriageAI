@@ -26,8 +26,6 @@ public class Sistema {
 
     private boolean autoFixEnabled = false; // auto-fix roda automaticamente
 
-    private String defaultBranchType = "fix"; // fix, feat, hotfix, etc
-
     private LocalDateTime createdAt;
 
     @PrePersist

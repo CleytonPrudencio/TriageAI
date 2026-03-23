@@ -13,7 +13,6 @@ export interface Sistema {
   provider: string;
   targetBranch: string;
   autoFixEnabled: boolean;
-  defaultBranchType: string;
   createdAt: string;
 }
 

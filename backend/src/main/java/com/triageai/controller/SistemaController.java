@@ -39,7 +39,6 @@ public class SistemaController {
         s.setDescricao(req.getDescricao());
         s.setTargetBranch(req.getTargetBranch());
         s.setAutoFixEnabled(req.isAutoFixEnabled());
-        s.setDefaultBranchType(req.getDefaultBranchType() != null ? req.getDefaultBranchType() : "fix");
         if (req.getRepoConfigId() != null) {
             repoConfigRepository.findById(req.getRepoConfigId()).ifPresent(s::setRepoConfig);
         }
@@ -53,7 +52,6 @@ public class SistemaController {
             s.setDescricao(req.getDescricao());
             s.setTargetBranch(req.getTargetBranch());
             s.setAutoFixEnabled(req.isAutoFixEnabled());
-            s.setDefaultBranchType(req.getDefaultBranchType() != null ? req.getDefaultBranchType() : "fix");
             if (req.getRepoConfigId() != null) {
                 repoConfigRepository.findById(req.getRepoConfigId()).ifPresent(s::setRepoConfig);
             } else {
@@ -76,7 +74,6 @@ public class SistemaController {
         map.put("descricao", s.getDescricao());
         map.put("targetBranch", s.getTargetBranch());
         map.put("autoFixEnabled", s.isAutoFixEnabled());
-        map.put("defaultBranchType", s.getDefaultBranchType());
         map.put("createdAt", s.getCreatedAt() != null ? s.getCreatedAt().toString() : null);
         if (s.getRepoConfig() != null) {
             map.put("repoConfigId", s.getRepoConfig().getId());
@@ -95,6 +92,5 @@ public class SistemaController {
         private Long repoConfigId;
         private String targetBranch;
         private boolean autoFixEnabled;
-        private String defaultBranchType;
     }
 }

@@ -266,6 +266,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
             <mat-form-field appearance="outline" *ngIf="repoConfigs.length > 0">
               <mat-label>Tipo de branch</mat-label>
               <mat-select [(ngModel)]="branchType">
+                <mat-option value="auto">auto (IA decide)</mat-option>
                 <mat-option value="fix">fix</mat-option>
                 <mat-option value="feat">feat</mat-option>
                 <mat-option value="hotfix">hotfix</mat-option>
@@ -280,7 +281,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
               <input matInput [(ngModel)]="branchNameInput">
             </mat-form-field>
             <div class="branch-preview" *ngIf="repoConfigs.length > 0">
-              <code>{{ branchType }}/{{ branchNameInput }}</code>
+              <code>{{ branchType === 'auto' ? '(IA)' : branchType }}/{{ branchNameInput }}</code>
             </div>
             <button mat-raised-button color="accent" (click)="onAutoFix()" class="full-btn autofix-btn"
                     [disabled]="!selectedRepoId || fixLoading" *ngIf="repoConfigs.length > 0 && !ticket.prUrl">
@@ -464,7 +465,7 @@ export class TicketDetailComponent implements OnInit {
   fixResult: any = null;
   prSummaryData: any = null;
   reclassifyLoading = false;
-  branchType: string = 'fix';
+  branchType: string = 'auto';
   branchNameInput: string = '';
 
   constructor(

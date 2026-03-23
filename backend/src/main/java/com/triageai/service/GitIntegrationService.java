@@ -25,6 +25,7 @@ public class GitIntegrationService {
     private final GitProviderService gitProvider;
     private final TicketRepository ticketRepository;
     private final RepoConfigRepository repoConfigRepository;
+    private final AiService aiService;
 
     @Value("${app.ai-service.url}")
     private String aiServiceUrl;
@@ -39,6 +40,14 @@ public class GitIntegrationService {
 
         RepoConfig config = repoConfigRepository.findById(repoConfigId)
                 .orElseThrow(() -> new RuntimeException("Configuracao de repositorio nao encontrada"));
+
+        // If branchType is "auto" or empty, predict it using AI
+        if (branchType == null || branchType.isBlank() || "auto".equalsIgnoreCase(branchType)) {
+            String fullText = ticket.getTitulo() + " " + ticket.getDescricao();
+            String categoria = ticket.getCategoria() != null ? ticket.getCategoria().name() : "";
+            branchType = aiService.predictBranchType(fullText, categoria);
+            log.info("AI predicted branch type '{}' for ticket #{}", branchType, ticket.getId());
+        }
 
         // Build branch name: type/name
         String namePart = (branchNameCustom != null && !branchNameCustom.isBlank())

@@ -46,6 +46,22 @@ public class AiService {
         }
     }
 
+    public String predictBranchType(String text, String categoria) {
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = restClient.post()
+                    .uri("/predict-branch-type")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("text", text, "categoria", categoria))
+                    .retrieve()
+                    .body(Map.class);
+            return result != null ? result.getOrDefault("branchType", "fix").toString() : "fix";
+        } catch (Exception e) {
+            log.warn("Failed to predict branch type: {}", e.getMessage());
+            return "fix";
+        }
+    }
+
     @Async
     public void sendFeedback(Long ticketId, String text, String categoria, String prioridade) {
         try {
