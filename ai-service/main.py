@@ -803,6 +803,7 @@ Category: {categoria}
 8. If a DTO needs a new field, ADD it to the existing DTO file.
 9. If a Controller needs authentication, ADD @PreAuthorize or SecurityContext checks to the EXISTING controller.
 10. Keep all existing functionality intact. Only change what's needed for the fix.
+11. ALL explanations MUST be in Brazilian Portuguese (pt-BR). Never write explanations in English.
 
 ## Response Format
 Respond with ONLY a valid JSON object (no markdown, no explanation outside JSON):
@@ -812,7 +813,7 @@ Respond with ONLY a valid JSON object (no markdown, no explanation outside JSON)
       "file_path": "exact/path/from/repo/FileName.java",
       "action": "modify",
       "content": "complete file content with fixes applied",
-      "explanation": "brief description of what was changed"
+      "explanation": "descricao breve em PORTUGUES do que foi alterado e por que"
     }}
   ]
 }}
@@ -824,7 +825,8 @@ Rules for the response:
 - NEVER create a file that duplicates an existing controller/service endpoint
 - NEVER invent class names, method names or field names that don't exist in the codebase
 - NEVER use root.get("fieldId") when the entity has @ManyToOne - use root.get("relation").get("id")
-- Respond ONLY with the JSON object"""
+- Respond ONLY with the JSON object
+- ALL "explanation" fields MUST be written in Brazilian Portuguese (pt-BR)"""
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
