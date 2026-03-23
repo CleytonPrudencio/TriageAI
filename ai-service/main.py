@@ -163,6 +163,154 @@ def retrain_model():
     return {"status": "retrained"}
 
 
+# ===== TRAINING MANAGEMENT =====
+
+GUIDELINES_PATH = os.path.join(os.path.dirname(__file__), 'data', 'guidelines.txt')
+
+
+class TrainingSample(BaseModel):
+    text: str
+    categoria: str
+    prioridade: str
+
+
+class TrainingAddRequest(BaseModel):
+    samples: list[TrainingSample]
+
+
+class TrainingGenerateRequest(BaseModel):
+    categoria: str
+    prioridade: str
+    quantidade: int = 20
+    diretrizes: str = ""
+    contexto: str = ""
+
+
+class GuidelinesRequest(BaseModel):
+    guidelines: str
+
+
+@app.post("/training/add")
+def add_training_data(request: TrainingAddRequest):
+    """Adiciona exemplos de treino ao dataset."""
+    added = 0
+    with open(DATA_PATH, 'a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        for sample in request.samples:
+            if sample.text.strip():
+                writer.writerow([sample.text.strip(), sample.categoria, sample.prioridade])
+                added += 1
+    return {"status": "ok", "added": added}
+
+
+@app.get("/training/dataset")
+def get_dataset_stats():
+    """Retorna estatisticas do dataset de treino."""
+    import pandas as pd
+    df = pd.read_csv(DATA_PATH)
+
+    cat_counts = df['categoria'].value_counts().to_dict()
+    pri_counts = df['prioridade'].value_counts().to_dict()
+    recent = df.tail(10).to_dict(orient='records')
+
+    return {
+        "total": len(df),
+        "byCategoria": cat_counts,
+        "byPrioridade": pri_counts,
+        "recentSamples": recent,
+    }
+
+
+@app.post("/training/generate")
+def generate_training_data(request: TrainingGenerateRequest):
+    """Usa Claude para gerar dados de treino sinteticos."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
+
+    # Load guidelines if available
+    guidelines_text = ""
+    if os.path.exists(GUIDELINES_PATH):
+        with open(GUIDELINES_PATH, 'r', encoding='utf-8') as f:
+            guidelines_text = f.read()
+
+    prompt = f"""Voce e um especialista em help desk. Gere {request.quantidade} exemplos realistas de tickets de suporte em portugues brasileiro.
+
+Categoria: {request.categoria}
+Prioridade: {request.prioridade}
+
+{f"Diretrizes de classificacao da empresa:{chr(10)}{guidelines_text}" if guidelines_text else ""}
+{f"Diretrizes especificas para esta geracao:{chr(10)}{request.diretrizes}" if request.diretrizes else ""}
+{f"Contexto adicional:{chr(10)}{request.contexto}" if request.contexto else ""}
+
+Regras:
+1. Cada ticket deve ser unico e realista - como um usuario real escreveria
+2. Varie o tom: formal, informal, com erros de digitacao, urgente, calmo
+3. Varie o comprimento: curto (5-10 palavras), medio (10-20), longo (20-40)
+4. NAO use virgulas no texto (o CSV vai quebrar)
+5. O texto deve justificar a categoria {request.categoria} e prioridade {request.prioridade}
+
+Responda SOMENTE com um JSON valido:
+{{
+  "samples": [
+    {{"text": "texto do ticket aqui", "categoria": "{request.categoria}", "prioridade": "{request.prioridade}"}},
+    ...
+  ]
+}}"""
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=4000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        response_text = message.content[0].text.strip()
+        if response_text.startswith("```"):
+            response_text = re.sub(r'^```\w*\n?', '', response_text)
+            response_text = re.sub(r'\n?```$', '', response_text)
+
+        result = json.loads(response_text)
+        return {"samples": result.get("samples", []), "count": len(result.get("samples", []))}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar dados: {str(e)}")
+
+
+@app.post("/training/save-generated")
+def save_generated_data(request: TrainingAddRequest):
+    """Salva exemplos gerados (revisados) no dataset."""
+    return add_training_data(request)
+
+
+@app.get("/training/guidelines")
+def get_guidelines():
+    """Retorna diretrizes de classificacao."""
+    if os.path.exists(GUIDELINES_PATH):
+        with open(GUIDELINES_PATH, 'r', encoding='utf-8') as f:
+            return {"guidelines": f.read()}
+    return {"guidelines": ""}
+
+
+@app.put("/training/guidelines")
+def save_guidelines(request: GuidelinesRequest):
+    """Salva diretrizes de classificacao."""
+    os.makedirs(os.path.dirname(GUIDELINES_PATH), exist_ok=True)
+    with open(GUIDELINES_PATH, 'w', encoding='utf-8') as f:
+        f.write(request.guidelines)
+    return {"status": "ok"}
+
+
+@app.post("/training/retrain")
+def retrain_training():
+    """Re-treina o modelo e retorna metricas."""
+    global cat_model, pri_model
+    metrics = train(DATA_PATH)
+    cat_model, pri_model = load_models()
+    return {"status": "retrained", "metrics": metrics}
+
+
 # ===== CODE ANALYSIS FOR AUTO-FIX =====
 
 class CodeAnalysisRequest(BaseModel):

@@ -15,6 +15,7 @@ export const routes: Routes = [
       { path: 'tickets/board', loadComponent: () => import('./tickets/ticket-board/ticket-board.component').then(m => m.TicketBoardComponent) },
       { path: 'tickets/:id', loadComponent: () => import('./tickets/ticket-detail/ticket-detail.component').then(m => m.TicketDetailComponent) },
       { path: 'settings/repos', loadComponent: () => import('./settings/repo-config/repo-config.component').then(m => m.RepoConfigComponent) },
+      { path: 'settings/training', loadComponent: () => import('./settings/ai-training/ai-training.component').then(m => m.AiTrainingComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },
