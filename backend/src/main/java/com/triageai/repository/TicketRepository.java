@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
@@ -32,4 +33,17 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Object[]> countByStatusGrouped();
 
     List<Ticket> findByPrStatus(String prStatus);
+
+    long countByCreatedAtAfter(LocalDateTime date);
+
+    @Query("SELECT COALESCE(AVG(t.aiScore), 0) FROM Ticket t WHERE t.aiScore IS NOT NULL")
+    double avgAiScore();
+
+    @Query("SELECT COUNT(t) FROM Ticket t WHERE t.prUrl IS NOT NULL")
+    long countWithPr();
+
+    @Query("SELECT t.prStatus, COUNT(t) FROM Ticket t WHERE t.prStatus IS NOT NULL GROUP BY t.prStatus")
+    List<Object[]> countByPrStatusGrouped();
+
+    List<Ticket> findTop10ByOrderByCreatedAtDesc();
 }

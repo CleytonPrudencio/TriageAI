@@ -26,6 +26,13 @@ export interface AutoFixResponse {
   filesChanged: number;
 }
 
+export interface GitConnection {
+  id: number;
+  provider: string;
+  username: string;
+  avatarUrl?: string;
+}
+
 export interface GitRepo {
   fullName: string;
   owner: string;

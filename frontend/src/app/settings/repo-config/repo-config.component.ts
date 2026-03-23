@@ -12,7 +12,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
-import { RepoConfig, RepoConfigRequest, GitRepo } from '../../models/repo-config.model';
+import { RepoConfig, RepoConfigRequest, GitRepo, GitConnection } from '../../models/repo-config.model';
 import { RepoConfigService } from '../../services/repo-config.service';
 
 @Component({
@@ -32,10 +32,33 @@ import { RepoConfigService } from '../../services/repo-config.service';
     </div>
 
     <div class="config-layout">
-      <!-- Left Side: Connection + Repo List -->
+      <!-- Left Side: Connections + Repo List -->
       <div class="left-panel">
-        <!-- Connection Form -->
-        <div class="panel-card">
+
+        <!-- Connected Providers -->
+        <div class="panel-card" *ngIf="connections.length > 0">
+          <div class="panel-header">
+            <mat-icon>cloud_done</mat-icon>
+            <h3>Provedores Conectados</h3>
+          </div>
+          <div class="connections-list">
+            <div *ngFor="let conn of connections" class="connection-badge">
+              <img *ngIf="conn.avatarUrl" [src]="conn.avatarUrl" class="connection-avatar" alt="avatar">
+              <mat-icon *ngIf="!conn.avatarUrl" class="connection-avatar-icon">account_circle</mat-icon>
+              <div class="connection-info">
+                <span class="connection-provider">{{ conn.provider }}</span>
+                <span class="connection-username">@{{ conn.username }}</span>
+              </div>
+              <button mat-icon-button class="connection-remove" (click)="disconnect(conn)"
+                      matTooltip="Desconectar">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connection Form (show if not all providers connected) -->
+        <div class="panel-card" *ngIf="availableProviders.length > 0">
           <div class="panel-header">
             <mat-icon>cloud</mat-icon>
             <h3>Conectar Provedor</h3>
@@ -45,14 +68,8 @@ import { RepoConfigService } from '../../services/repo-config.service';
             <mat-form-field appearance="outline">
               <mat-label>Provedor</mat-label>
               <mat-select [(ngModel)]="selectedProvider" name="provider">
-                <mat-option value="GITHUB">
-                  <mat-icon style="font-size: 18px; margin-right: 8px;">code</mat-icon> GitHub
-                </mat-option>
-                <mat-option value="GITLAB">
-                  <mat-icon style="font-size: 18px; margin-right: 8px;">merge_type</mat-icon> GitLab
-                </mat-option>
-                <mat-option value="BITBUCKET">
-                  <mat-icon style="font-size: 18px; margin-right: 8px;">source</mat-icon> Bitbucket
+                <mat-option *ngFor="let p of availableProviders" [value]="p.value">
+                  <mat-icon style="font-size: 18px; margin-right: 8px;">{{ p.icon }}</mat-icon> {{ p.label }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
@@ -65,71 +82,73 @@ import { RepoConfigService } from '../../services/repo-config.service';
                         matTooltip="Token pessoal com permissao de leitura de repositorios">help_outline</mat-icon>
             </mat-form-field>
 
-            <button mat-raised-button color="primary" (click)="connect()"
-                    [disabled]="!selectedProvider || !apiToken || loadingRepos"
+            <button mat-raised-button color="primary" (click)="connectProvider()"
+                    [disabled]="!selectedProvider || !apiToken || connecting"
                     class="connect-btn">
-              <mat-spinner *ngIf="loadingRepos" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
-              <mat-icon *ngIf="!loadingRepos">link</mat-icon>
-              {{ loadingRepos ? 'Conectando...' : 'Conectar' }}
+              <mat-spinner *ngIf="connecting" diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+              <mat-icon *ngIf="!connecting">link</mat-icon>
+              {{ connecting ? 'Conectando...' : 'Conectar' }}
             </button>
-          </div>
-
-          <!-- Connection Status -->
-          <div *ngIf="connected" class="connection-status">
-            <mat-icon style="color: #16a34a; font-size: 18px; width: 18px; height: 18px;">check_circle</mat-icon>
-            <span>Conectado ao {{ selectedProvider }} &mdash; {{ availableRepos.length }} repositorios encontrados</span>
           </div>
         </div>
 
         <!-- Available Repos List -->
-        <div class="panel-card" *ngIf="connected">
+        <div class="panel-card" *ngIf="availableRepos.length > 0 || loadingRepos">
           <div class="panel-header">
             <mat-icon>list</mat-icon>
             <h3>Selecionar Repositorio</h3>
+            <span class="config-count" *ngIf="availableRepos.length > 0">{{ availableRepos.length }}</span>
           </div>
 
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-label>Buscar repositorio...</mat-label>
-            <input matInput [(ngModel)]="repoSearchTerm" name="repoSearch" placeholder="Filtrar por nome...">
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
+          <div *ngIf="loadingRepos" class="loading-state">
+            <mat-spinner diameter="32"></mat-spinner>
+            <span>Carregando repositorios...</span>
+          </div>
 
-          <div class="repo-list-container">
-            <div *ngIf="filteredRepos.length === 0" class="empty-state-sm">
-              <mat-icon>search_off</mat-icon>
-              <p>Nenhum repositorio encontrado</p>
-            </div>
+          <ng-container *ngIf="!loadingRepos">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Buscar repositorio...</mat-label>
+              <input matInput [(ngModel)]="repoSearchTerm" name="repoSearch" placeholder="Filtrar por nome...">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
 
-            <div *ngFor="let repo of filteredRepos" class="available-repo-item"
-                 [class.selected]="selectedRepo?.fullName === repo.fullName"
-                 (click)="selectRepo(repo)">
-              <div class="available-repo-info">
-                <div class="available-repo-name">
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px; color: var(--text-secondary);">
-                    {{ repo.isPrivate ? 'lock' : 'lock_open' }}
-                  </mat-icon>
-                  <strong>{{ repo.fullName }}</strong>
-                </div>
-                <div class="available-repo-meta">
-                  <span class="meta-chip" *ngIf="repo.language">
-                    <mat-icon style="font-size: 12px; width: 12px; height: 12px;">circle</mat-icon>
-                    {{ repo.language }}
-                  </span>
-                  <span class="meta-chip">
-                    <mat-icon style="font-size: 12px; width: 12px; height: 12px;">call_split</mat-icon>
-                    {{ repo.defaultBranch }}
-                  </span>
-                  <span class="meta-chip" *ngIf="repo.isPrivate">
-                    <mat-icon style="font-size: 12px; width: 12px; height: 12px;">lock</mat-icon>
-                    Privado
-                  </span>
-                </div>
+            <div class="repo-list-container">
+              <div *ngIf="filteredRepos.length === 0" class="empty-state-sm">
+                <mat-icon>search_off</mat-icon>
+                <p>Nenhum repositorio encontrado</p>
               </div>
-              <mat-icon class="select-icon" *ngIf="!isAlreadyConfigured(repo)">add_circle_outline</mat-icon>
-              <mat-icon class="configured-icon" *ngIf="isAlreadyConfigured(repo)"
-                        matTooltip="Ja configurado">check_circle</mat-icon>
+
+              <div *ngFor="let repo of filteredRepos" class="available-repo-item"
+                   [class.selected]="selectedRepo?.fullName === repo.fullName"
+                   (click)="selectRepo(repo)">
+                <div class="available-repo-info">
+                  <div class="available-repo-name">
+                    <mat-icon style="font-size: 18px; width: 18px; height: 18px; color: var(--text-secondary);">
+                      {{ repo.isPrivate ? 'lock' : 'lock_open' }}
+                    </mat-icon>
+                    <strong>{{ repo.fullName }}</strong>
+                  </div>
+                  <div class="available-repo-meta">
+                    <span class="meta-chip" *ngIf="repo.language">
+                      <mat-icon style="font-size: 12px; width: 12px; height: 12px;">circle</mat-icon>
+                      {{ repo.language }}
+                    </span>
+                    <span class="meta-chip">
+                      <mat-icon style="font-size: 12px; width: 12px; height: 12px;">call_split</mat-icon>
+                      {{ repo.defaultBranch }}
+                    </span>
+                    <span class="meta-chip" *ngIf="repo.isPrivate">
+                      <mat-icon style="font-size: 12px; width: 12px; height: 12px;">lock</mat-icon>
+                      Privado
+                    </span>
+                  </div>
+                </div>
+                <mat-icon class="select-icon" *ngIf="!isAlreadyConfigured(repo)">add_circle_outline</mat-icon>
+                <mat-icon class="configured-icon" *ngIf="isAlreadyConfigured(repo)"
+                          matTooltip="Ja configurado">check_circle</mat-icon>
+              </div>
             </div>
-          </div>
+          </ng-container>
         </div>
 
         <!-- Selected Repo Confirmation -->
@@ -276,6 +295,35 @@ import { RepoConfigService } from '../../services/repo-config.service';
       padding: 2px 10px; font-size: 12px; font-weight: 600;
     }
 
+    /* Connected providers badges */
+    .connections-list { display: flex; flex-direction: column; gap: 10px; }
+    .connection-badge {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0;
+      border-radius: 10px; transition: all 0.15s;
+    }
+    .connection-badge:hover { border-color: #86efac; }
+    .connection-avatar {
+      width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+    }
+    .connection-avatar-icon {
+      font-size: 32px; width: 32px; height: 32px; color: #16a34a;
+    }
+    .connection-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .connection-provider {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      color: #15803d; letter-spacing: 0.5px;
+    }
+    .connection-username {
+      font-size: 14px; font-weight: 500; color: #166534;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .connection-remove {
+      opacity: 0.4; transition: opacity 0.15s;
+    }
+    .connection-remove:hover { opacity: 1; }
+    .connection-remove mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
     .connection-form { display: flex; flex-direction: column; gap: 0; }
     mat-form-field { width: 100%; }
 
@@ -284,10 +332,9 @@ import { RepoConfigService } from '../../services/repo-config.service';
       display: flex; align-items: center; gap: 4px;
     }
 
-    .connection-status {
-      display: flex; align-items: center; gap: 8px; margin-top: 16px;
-      padding: 12px 16px; background: #f0fdf4; border: 1px solid #bbf7d0;
-      border-radius: 8px; font-size: 13px; color: #15803d;
+    .loading-state {
+      display: flex; align-items: center; gap: 16px; padding: 24px;
+      color: var(--text-secondary); font-size: 14px;
     }
 
     .search-field { margin-bottom: 0; }
@@ -379,14 +426,21 @@ export class RepoConfigComponent implements OnInit {
   editing = false;
   editingId: number | null = null;
 
-  // Connection
-  selectedProvider = 'GITHUB';
+  // Connections
+  connections: GitConnection[] = [];
+  connecting = false;
+  selectedProvider = '';
   apiToken = '';
-  connected = false;
-  loadingRepos = false;
 
-  // Available repos
+  readonly allProviders = [
+    { value: 'GITHUB', label: 'GitHub', icon: 'code' },
+    { value: 'GITLAB', label: 'GitLab', icon: 'merge_type' },
+    { value: 'BITBUCKET', label: 'Bitbucket', icon: 'source' }
+  ];
+
+  // Available repos (aggregated from all connections)
   availableRepos: GitRepo[] = [];
+  loadingRepos = false;
   repoSearchTerm = '';
   selectedRepo: GitRepo | null = null;
 
@@ -403,7 +457,15 @@ export class RepoConfigComponent implements OnInit {
 
   constructor(private repoConfigService: RepoConfigService, private snackBar: MatSnackBar) {}
 
-  ngOnInit(): void { this.loadConfigs(); }
+  ngOnInit(): void {
+    this.loadConfigs();
+    this.loadConnections();
+  }
+
+  get availableProviders() {
+    const connectedProviders = this.connections.map(c => c.provider);
+    return this.allProviders.filter(p => !connectedProviders.includes(p.value));
+  }
 
   get filteredRepos(): GitRepo[] {
     if (!this.repoSearchTerm.trim()) return this.availableRepos;
@@ -418,29 +480,117 @@ export class RepoConfigComponent implements OnInit {
     this.repoConfigService.findAll().subscribe(configs => this.configs = configs);
   }
 
-  connect(): void {
-    if (!this.selectedProvider || !this.apiToken) return;
-    this.loadingRepos = true;
-    this.connected = false;
-    this.availableRepos = [];
-    this.selectedRepo = null;
+  loadConnections(): void {
+    this.repoConfigService.getConnections().subscribe({
+      next: (connections) => {
+        this.connections = connections;
+        if (connections.length > 0) {
+          this.loadAllRepos();
+        }
+        // Auto-select first available provider
+        if (this.availableProviders.length > 0 && !this.selectedProvider) {
+          this.selectedProvider = this.availableProviders[0].value;
+        }
+      },
+      error: () => {
+        // Silently handle - connections may not be set up yet
+      }
+    });
+  }
 
-    this.repoConfigService.listRepos(this.selectedProvider, this.apiToken).subscribe({
-      next: (repos) => {
-        this.availableRepos = repos;
-        this.connected = true;
-        this.loadingRepos = false;
+  loadAllRepos(): void {
+    this.availableRepos = [];
+    this.loadingRepos = true;
+    let pending = this.connections.length;
+    if (pending === 0) {
+      this.loadingRepos = false;
+      return;
+    }
+
+    for (const conn of this.connections) {
+      this.repoConfigService.listReposByConnection(conn.id).subscribe({
+        next: (repos) => {
+          this.availableRepos = [...this.availableRepos, ...repos];
+          pending--;
+          if (pending === 0) this.loadingRepos = false;
+        },
+        error: () => {
+          pending--;
+          if (pending === 0) this.loadingRepos = false;
+        }
+      });
+    }
+  }
+
+  connectProvider(): void {
+    if (!this.selectedProvider || !this.apiToken) return;
+    this.connecting = true;
+
+    this.repoConfigService.connect({ provider: this.selectedProvider, apiToken: this.apiToken }).subscribe({
+      next: (response) => {
+        this.connecting = false;
+        this.apiToken = '';
+
+        const newConn: GitConnection = {
+          id: response.id,
+          provider: response.provider || this.selectedProvider,
+          username: response.username,
+          avatarUrl: response.avatarUrl
+        };
+        this.connections = [...this.connections, newConn];
+
+        this.snackBar.open(
+          `Conectado ao ${newConn.provider} como @${newConn.username}`,
+          'OK', { duration: 3000 }
+        );
+
+        // Auto-select next available provider
+        if (this.availableProviders.length > 0) {
+          this.selectedProvider = this.availableProviders[0].value;
+        } else {
+          this.selectedProvider = '';
+        }
+
+        // Load repos from new connection
+        this.loadingRepos = true;
+        this.repoConfigService.listReposByConnection(newConn.id).subscribe({
+          next: (repos) => {
+            this.availableRepos = [...this.availableRepos, ...repos];
+            this.loadingRepos = false;
+          },
+          error: () => { this.loadingRepos = false; }
+        });
       },
       error: (err) => {
-        this.loadingRepos = false;
+        this.connecting = false;
         this.snackBar.open('Erro ao conectar: verifique o token e tente novamente', 'OK', { duration: 4000 });
+      }
+    });
+  }
+
+  disconnect(conn: GitConnection): void {
+    if (!confirm(`Desconectar ${conn.provider} (@${conn.username})?`)) return;
+
+    this.repoConfigService.deleteConnection(conn.id).subscribe({
+      next: () => {
+        this.connections = this.connections.filter(c => c.id !== conn.id);
+        this.snackBar.open(`${conn.provider} desconectado`, 'OK', { duration: 2000 });
+        // Reload all repos (removed repos from disconnected provider)
+        this.loadAllRepos();
+        // Update selected provider
+        if (this.availableProviders.length > 0 && !this.selectedProvider) {
+          this.selectedProvider = this.availableProviders[0].value;
+        }
+      },
+      error: () => {
+        this.snackBar.open('Erro ao desconectar', 'OK', { duration: 3000 });
       }
     });
   }
 
   isAlreadyConfigured(repo: GitRepo): boolean {
     return this.configs.some(c =>
-      c.repoOwner === repo.owner && c.repoName === repo.name && c.provider === this.selectedProvider
+      c.repoOwner === repo.owner && c.repoName === repo.name
     );
   }
 
@@ -464,12 +614,18 @@ export class RepoConfigComponent implements OnInit {
     if (!this.selectedRepo) return;
     this.savingRepo = true;
 
+    // Find the connection for this repo's provider
+    const ownerParts = this.selectedRepo.fullName.split('/');
+    const repoProvider = this.connections.find(c =>
+      this.availableRepos.some(r => r.fullName === this.selectedRepo!.fullName)
+    );
+
     const data: RepoConfigRequest = {
       name: this.repoDisplayName || this.selectedRepo.name,
-      provider: this.selectedProvider,
+      provider: repoProvider?.provider || this.connections[0]?.provider || 'GITHUB',
       repoOwner: this.selectedRepo.owner,
       repoName: this.selectedRepo.name,
-      apiToken: this.apiToken,
+      apiToken: '',
       defaultBranch: this.selectedRepo.defaultBranch,
       reviewerUsername: this.reviewerUsername || undefined
     };

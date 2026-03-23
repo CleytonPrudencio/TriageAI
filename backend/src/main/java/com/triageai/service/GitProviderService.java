@@ -34,6 +34,69 @@ public class GitProviderService {
                 .build();
     }
 
+    /**
+     * Fetches the authenticated user's info (username and avatar) from the Git provider.
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, String> getUserInfo(GitProvider provider, String token) {
+        RestClient client = switch (provider) {
+            case GITHUB -> RestClient.builder()
+                    .baseUrl("https://api.github.com")
+                    .defaultHeader("Authorization", "Bearer " + token)
+                    .defaultHeader("Accept", "application/vnd.github+json")
+                    .build();
+            case GITLAB -> RestClient.builder()
+                    .baseUrl("https://gitlab.com/api/v4")
+                    .defaultHeader("Authorization", "Bearer " + token)
+                    .defaultHeader("Accept", "application/json")
+                    .build();
+            case BITBUCKET -> RestClient.builder()
+                    .baseUrl("https://api.bitbucket.org/2.0")
+                    .defaultHeader("Authorization", "Bearer " + token)
+                    .defaultHeader("Accept", "application/json")
+                    .build();
+        };
+
+        return switch (provider) {
+            case GITHUB -> {
+                Map<String, Object> user = client.get()
+                        .uri("/user")
+                        .retrieve().body(Map.class);
+                yield Map.of(
+                        "username", (String) user.get("login"),
+                        "avatarUrl", (String) user.get("avatar_url")
+                );
+            }
+            case GITLAB -> {
+                Map<String, Object> user = client.get()
+                        .uri("/user")
+                        .retrieve().body(Map.class);
+                yield Map.of(
+                        "username", (String) user.get("username"),
+                        "avatarUrl", (String) user.get("avatar_url")
+                );
+            }
+            case BITBUCKET -> {
+                Map<String, Object> user = client.get()
+                        .uri("/user")
+                        .retrieve().body(Map.class);
+                String username = (String) user.get("username");
+                String avatarUrl = "";
+                Map<String, Object> links = (Map<String, Object>) user.get("links");
+                if (links != null) {
+                    Map<String, Object> avatar = (Map<String, Object>) links.get("avatar");
+                    if (avatar != null) {
+                        avatarUrl = (String) avatar.get("href");
+                    }
+                }
+                yield Map.of(
+                        "username", username != null ? username : "",
+                        "avatarUrl", avatarUrl
+                );
+            }
+        };
+    }
+
     public String getDefaultBranchSha(RepoConfig config) {
         RestClient client = buildClient(config);
 
