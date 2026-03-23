@@ -586,7 +586,8 @@ def find_files_in_tree(file_tree: list[str], file_paths: list[str], class_names:
     # 3. Related files - for each matched file, look for related files
     #    e.g., if ParcelService.java is matched, also look for ParcelRepository, ParcelController, Parcel.java
     related_suffixes = ['Service', 'Repository', 'Controller', 'Dto', 'DTO', 'Entity', 'Model',
-                        'Config', 'Exception', 'Mapper', 'Helper', 'Util', 'Interface']
+                        'Config', 'Exception', 'Mapper', 'Helper', 'Util', 'Interface',
+                        'Specification', 'Spec', 'Filter', 'Request', 'Response']
     base_names = set()
     for path in list(matched):
         filename = path.split('/')[-1].split('.')[0]
@@ -597,17 +598,35 @@ def find_files_in_tree(file_tree: list[str], file_paths: list[str], class_names:
                     base_names.add(base_name)
                 break
         else:
-            # File doesn't end with a known suffix, use the full name as base
             base_names.add(filename)
+
+    # Also extract base names from class names in ticket text
+    for cn in class_names:
+        for suffix in related_suffixes:
+            if cn.endswith(suffix):
+                base_name = cn[:-len(suffix)]
+                if base_name:
+                    base_names.add(base_name)
+                break
 
     for base_name in base_names:
         for repo_path in file_tree:
             filename = repo_path.split('/')[-1].split('.')[0]
-            if filename.startswith(base_name) and repo_path not in matched_set:
-                # Skip test files for related matches
-                if 'test' not in repo_path.lower() and 'spec' not in repo_path.lower():
+            # Match: filename starts with base_name OR contains base_name
+            if (filename.startswith(base_name) or base_name in filename) and repo_path not in matched_set:
+                if 'test' not in repo_path.lower() and 'spec/' not in repo_path.lower():
                     matched.append(repo_path)
                     matched_set.add(repo_path)
+
+    # 4. Also search for files mentioned in ticket by partial name (e.g., "UserController" in text)
+    #    This catches cases where class names use different prefixes (User vs Usuario)
+    for cn in class_names:
+        cn_lower = cn.lower()
+        for repo_path in file_tree:
+            filename_lower = repo_path.split('/')[-1].split('.')[0].lower()
+            if filename_lower == cn_lower and repo_path not in matched_set:
+                matched.append(repo_path)
+                matched_set.add(repo_path)
 
     return matched
 
@@ -732,14 +751,16 @@ Category: {categoria}
 {files_section}
 
 ## Instructions
-1. Analyze the bug described above
-2. Determine which of the provided files need to be modified to fix the bug
-3. Return ONLY the modified files with the complete updated content
-4. Do NOT create new files unless absolutely necessary (e.g., new interface methods)
-5. Do NOT change class names, package names, or import paths
-6. Do NOT change method signatures unless required for the fix
-7. Keep all existing functionality intact
-8. Add comments explaining what was changed and why
+1. Analyze ALL provided files carefully - understand the real class names, packages, field names and relationships
+2. Determine which files need to be modified to COMPLETELY fix the bug
+3. Return ALL modified files with COMPLETE updated content
+4. Fix EVERY file that needs changing - DTOs, Controllers, Services, Repositories, Specifications, Entities
+5. Use the EXACT class names, field names and types you see in the provided files
+6. If a DTO is missing a field, ADD IT. If a Controller needs auth, ADD IT
+7. If a JPA entity uses @ManyToOne, use root.get("entity").get("id") NOT root.get("entityId")
+8. Do NOT change class names, package names, or import paths
+9. Keep all existing functionality intact
+10. Add brief comments on changed lines explaining what was fixed
 
 ## Response Format
 Respond with ONLY a valid JSON object:
@@ -766,7 +787,7 @@ IMPORTANT:
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=16000,
+            max_tokens=32000,
             messages=[{"role": "user", "content": prompt}]
         )
 
@@ -853,8 +874,8 @@ def analyze_code(request: CodeAnalysisRequest):
         print("Claude file identification returned no results, falling back to keyword scoring...")
         target_files = score_files_fallback(file_tree, ticket_text)
 
-    # Limit to 10 files maximum
-    target_files = target_files[:10]
+    # Limit to 15 files maximum to ensure complete analysis
+    target_files = target_files[:15]
     print(f"Final target files for analysis: {target_files}")
 
     # Step 6: Fetch actual content of target files
