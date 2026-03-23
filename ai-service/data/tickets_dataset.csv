@@ -1999,3 +1999,43 @@ Dúvida sobre o dress code da empresa,OUTROS,BAIXA
 Solicitação de acesso ao módulo de compras para novo gestor (vários usuários reportando o mesmo problema),ADMINISTRATIVO,MEDIA
 Texto de ajuda na tela de cadastro está desatualizado (está impactando toda a equipe),TECNICO,BAIXA
 Todos os usuários do departamento financeiro perderam acesso ao sistema,ADMINISTRATIVO,ALTA
+Preciso criar um application em h2 pra rodar local,TECNICO,MEDIA
+Criar modelo local em banco h2 para testes,TECNICO,BAIXA
+Configurar application.properties para rodar com h2,TECNICO,BAIXA
+Subir aplicacao local com banco h2 em memoria,TECNICO,MEDIA
+Preciso de um ambiente local com h2 para desenvolvimento,TECNICO,BAIXA
+Configurar banco de dados local para o sistema,TECNICO,MEDIA
+Preciso rodar o sistema localmente com todas funcionalidades,TECNICO,MEDIA
+Criar ambiente de desenvolvimento local completo,TECNICO,MEDIA
+Configurar projeto para rodar em maquina local,TECNICO,BAIXA
+Precisamos de um setup local para desenvolvimento,TECNICO,BAIXA
+Subir ambiente de desenvolvimento com docker compose,TECNICO,MEDIA
+Configurar banco de dados PostgreSQL no servidor,TECNICO,ALTA
+Migrar banco de dados de h2 para PostgreSQL,TECNICO,ALTA
+Criar script de deploy para producao,TECNICO,ALTA
+Pipeline de CI/CD nao esta funcionando,TECNICO,ALTA
+Build do projeto falhou no Jenkins,TECNICO,ALTA
+Erro no Dockerfile da aplicacao,TECNICO,MEDIA
+Configurar variavel de ambiente no servidor,TECNICO,MEDIA
+Instalar dependencias do projeto no servidor,TECNICO,MEDIA
+Atualizar versao do Java no ambiente de producao,TECNICO,MEDIA
+Configurar SSL no servidor web,TECNICO,ALTA
+Criar backup automatico do banco de dados,TECNICO,MEDIA
+Otimizar queries do banco que estao lentas,TECNICO,ALTA
+Criar index nas tabelas do banco de dados,TECNICO,MEDIA
+Configurar cache Redis na aplicacao,TECNICO,MEDIA
+Implementar autenticacao JWT no backend,TECNICO,ALTA
+Criar endpoint REST para nova funcionalidade,TECNICO,MEDIA
+Refatorar codigo legado do modulo de pagamento,TECNICO,MEDIA
+Corrigir bug no calculo de impostos,TECNICO,ALTA
+Criar testes unitarios para o servico de usuarios,TECNICO,BAIXA
+Implementar paginacao na listagem de produtos,TECNICO,MEDIA
+Adicionar validacao nos campos do formulario,TECNICO,BAIXA
+Criar migration para nova tabela no banco,TECNICO,MEDIA
+Configurar CORS no backend Spring Boot,TECNICO,MEDIA
+Atualizar dependencias do pom.xml,TECNICO,BAIXA
+Criar dockerfile para containerizar a aplicacao,TECNICO,MEDIA
+Configurar nginx como proxy reverso,TECNICO,MEDIA
+Criar webhook para integracao com sistema externo,TECNICO,MEDIA
+Implementar websocket para notificacoes em tempo real,TECNICO,MEDIA
+Criar job agendado para limpeza de dados antigos,TECNICO,BAIXA
