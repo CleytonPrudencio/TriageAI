@@ -53,39 +53,41 @@ import { TicketService } from '../../services/ticket.service';
       </div>
     </div>
 
-    <!-- Filters -->
+    <!-- Filters inline -->
     <div class="filters-bar">
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Status</mat-label>
-        <mat-select [(ngModel)]="filterStatus" (selectionChange)="loadTickets()">
-          <mat-option value="">Todos</mat-option>
-          <mat-option value="ABERTO">Aberto</mat-option>
-          <mat-option value="EM_ANDAMENTO">Em Andamento</mat-option>
-          <mat-option value="CODE_REVIEW">Code Review</mat-option>
-          <mat-option value="RESOLVIDO">Resolvido</mat-option>
-          <mat-option value="FECHADO">Fechado</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Prioridade</mat-label>
-        <mat-select [(ngModel)]="filterPrioridade" (selectionChange)="loadTickets()">
-          <mat-option value="">Todas</mat-option>
-          <mat-option value="ALTA">Alta</mat-option>
-          <mat-option value="MEDIA">Media</mat-option>
-          <mat-option value="BAIXA">Baixa</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Categoria</mat-label>
-        <mat-select [(ngModel)]="filterCategoria" (selectionChange)="loadTickets()">
-          <mat-option value="">Todas</mat-option>
-          <mat-option value="TECNICO">Tecnico</mat-option>
-          <mat-option value="FINANCEIRO">Financeiro</mat-option>
-          <mat-option value="COMERCIAL">Comercial</mat-option>
-          <mat-option value="ADMINISTRATIVO">Administrativo</mat-option>
-          <mat-option value="OUTROS">Outros</mat-option>
-        </mat-select>
-      </mat-form-field>
+      <div class="filter-group">
+        <mat-icon class="filter-icon">filter_list</mat-icon>
+        <div class="filter-chips">
+          <button *ngFor="let s of statusOptions" class="filter-chip"
+                  [class.active]="filterStatus === s.value"
+                  (click)="filterStatus = s.value; loadTickets()">
+            {{ s.label }}
+          </button>
+        </div>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-selects">
+        <mat-form-field appearance="outline" class="filter-field-sm">
+          <mat-label>Prioridade</mat-label>
+          <mat-select [(ngModel)]="filterPrioridade" (selectionChange)="loadTickets()">
+            <mat-option value="">Todas</mat-option>
+            <mat-option value="ALTA">Alta</mat-option>
+            <mat-option value="MEDIA">Media</mat-option>
+            <mat-option value="BAIXA">Baixa</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field-sm">
+          <mat-label>Categoria</mat-label>
+          <mat-select [(ngModel)]="filterCategoria" (selectionChange)="loadTickets()">
+            <mat-option value="">Todas</mat-option>
+            <mat-option value="TECNICO">Tecnico</mat-option>
+            <mat-option value="FINANCEIRO">Financeiro</mat-option>
+            <mat-option value="COMERCIAL">Comercial</mat-option>
+            <mat-option value="ADMINISTRATIVO">Administrativo</mat-option>
+            <mat-option value="OUTROS">Outros</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
       <button mat-icon-button class="clear-filters" *ngIf="filterStatus || filterPrioridade || filterCategoria"
               (click)="clearFilters()" matTooltip="Limpar filtros">
         <mat-icon>filter_alt_off</mat-icon>
@@ -142,8 +144,14 @@ import { TicketService } from '../../services/ticket.service';
       </a>
     </div>
 
-    <mat-paginator [length]="totalElements" [pageSize]="20" (page)="onPage($event)"
-                   [hidePageSize]="true" showFirstLastButtons></mat-paginator>
+    <!-- Pagination -->
+    <div class="pagination-bar" *ngIf="tickets.length > 0">
+      <span class="pagination-info">
+        Mostrando {{ page * 20 + 1 }}-{{ Math.min((page + 1) * 20, totalElements) }} de {{ totalElements }}
+      </span>
+      <mat-paginator [length]="totalElements" [pageSize]="20" (page)="onPage($event)"
+                     [hidePageSize]="true" showFirstLastButtons></mat-paginator>
+    </div>
   `,
   styles: [`
     .page-header {
@@ -179,13 +187,28 @@ import { TicketService } from '../../services/ticket.service';
 
     /* Filters */
     .filters-bar {
-      display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+      display: flex; gap: 16px; margin-bottom: 20px; align-items: center;
       background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 12px 16px;
+      border-radius: 12px; padding: 10px 16px;
     }
-    .filter-field { width: 170px; }
-    .filter-field .mat-mdc-form-field-subscript-wrapper { display: none; }
-    .clear-filters { color: var(--text-secondary); }
+    .filter-group { display: flex; align-items: center; gap: 8px; }
+    .filter-icon { color: var(--text-secondary); font-size: 20px; width: 20px; height: 20px; }
+    .filter-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+    .filter-chip {
+      padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .filter-chip.active {
+      background: var(--primary); color: white; border-color: var(--primary);
+    }
+    .filter-divider { width: 1px; height: 28px; background: var(--border); }
+    .filter-selects { display: flex; gap: 8px; }
+    .filter-field-sm { width: 140px; }
+    .filter-field-sm .mat-mdc-form-field-subscript-wrapper { display: none; }
+    .clear-filters { color: var(--text-secondary); margin-left: auto; }
 
     /* Empty state */
     .empty-state {
@@ -264,10 +287,21 @@ import { TicketService } from '../../services/ticket.service';
     .st-resolvido { background: #d1fae5; color: #059669; }
     .st-fechado { background: #f1f5f9; color: #475569; }
 
+    /* Pagination */
+    .pagination-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 4px 16px; margin-top: 16px;
+    }
+    .pagination-info { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
     @media (max-width: 900px) {
       .page-header { flex-direction: column; gap: 16px; }
-      .filters-bar { flex-direction: column; }
-      .filter-field { width: 100%; }
+      .filters-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+      .filter-group { flex-wrap: wrap; }
+      .filter-divider { display: none; }
+      .filter-selects { flex-direction: column; }
+      .filter-field-sm { width: 100%; }
       .table-header { display: none; }
       .table-row {
         grid-template-columns: 1fr;
@@ -276,16 +310,27 @@ import { TicketService } from '../../services/ticket.service';
         margin-bottom: 8px;
       }
       .tickets-table { background: none; border: none; }
+      .pagination-bar { flex-direction: column; gap: 8px; padding: 12px; }
     }
   `]
 })
 export class TicketListComponent implements OnInit {
+  Math = Math;
   tickets: Ticket[] = [];
   totalElements = 0;
   page = 0;
   filterStatus = '';
   filterPrioridade = '';
   filterCategoria = '';
+
+  statusOptions = [
+    { value: '', label: 'Todos' },
+    { value: 'ABERTO', label: 'Aberto' },
+    { value: 'EM_ANDAMENTO', label: 'Andamento' },
+    { value: 'CODE_REVIEW', label: 'Review' },
+    { value: 'RESOLVIDO', label: 'Resolvido' },
+    { value: 'FECHADO', label: 'Fechado' },
+  ];
 
   constructor(private ticketService: TicketService, private router: Router) {}
 
