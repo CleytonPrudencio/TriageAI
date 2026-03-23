@@ -94,10 +94,14 @@ public class GitIntegrationService {
             String prUrl = gitProvider.createPullRequest(config, prTitle, prBody,
                     branchName, config.getDefaultBranch());
 
-            // 6. Update ticket with PR info and change status
+            // 6. Build PR summary
+            String prSummary = buildPrSummary(ticket, analysis, branchName, prUrl, filesChanged);
+
+            // 7. Update ticket with PR info and change status
             ticket.setPrBranch(branchName);
             ticket.setPrUrl(prUrl);
             ticket.setPrStatus("OPEN");
+            ticket.setPrSummary(prSummary);
             ticket.setStatus(com.triageai.model.enums.Status.EM_ANDAMENTO);
             ticket.setRepoConfig(config);
             ticketRepository.save(ticket);
@@ -140,6 +144,32 @@ public class GitIntegrationService {
             log.error("AI code analysis failed: {}", e.getMessage());
             return null;
         }
+    }
+
+    private String buildPrSummary(Ticket ticket, CodeAnalysisResponse analysis,
+                                    String branchName, String prUrl, int filesChanged) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"branch\": \"").append(branchName).append("\",");
+        sb.append("\"prUrl\": \"").append(prUrl).append("\",");
+        sb.append("\"filesChanged\": ").append(filesChanged).append(",");
+        sb.append("\"createdAt\": \"").append(java.time.LocalDateTime.now()).append("\",");
+        sb.append("\"repo\": \"").append(ticket.getRepoConfig() != null ?
+                ticket.getRepoConfig().getRepoOwner() + "/" + ticket.getRepoConfig().getRepoName() : "").append("\",");
+        sb.append("\"fixes\": [");
+
+        boolean first = true;
+        for (CodeAnalysisResponse.FileFix fix : analysis.getFixes()) {
+            if (!first) sb.append(",");
+            sb.append("{");
+            sb.append("\"file\": \"").append(fix.getFilePath().replace("\"", "\\\"")).append("\",");
+            sb.append("\"explanation\": \"").append(fix.getExplanation().replace("\"", "\\\"")).append("\"");
+            sb.append("}");
+            first = false;
+        }
+
+        sb.append("]}");
+        return sb.toString();
     }
 
     private String buildPrBody(Ticket ticket, CodeAnalysisResponse analysis) {

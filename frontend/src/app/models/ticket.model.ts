@@ -11,6 +11,7 @@ export interface Ticket {
   prBranch: string;
   prUrl: string;
   prStatus: string;
+  prSummary: string;
   createdAt: string;
   updatedAt: string;
 }

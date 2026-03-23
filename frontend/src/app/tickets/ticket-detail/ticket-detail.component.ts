@@ -59,17 +59,59 @@ import { RepoConfigService } from '../../services/repo-config.service';
             <p>{{ ticket.descricao }}</p>
           </div>
 
-          <!-- PR Info -->
+          <!-- PR Info Expandido -->
           <div class="pr-info" *ngIf="ticket.prUrl">
             <mat-divider></mat-divider>
-            <div class="pr-card">
-              <mat-icon>merge_type</mat-icon>
-              <div>
-                <strong>Pull Request</strong>
-                <a [href]="ticket.prUrl" target="_blank" class="pr-link">{{ ticket.prUrl }}</a>
-                <div class="pr-meta">
-                  <span class="badge st-aberto">{{ ticket.prStatus }}</span>
-                  <span>Branch: {{ ticket.prBranch }}</span>
+            <div class="pr-card-expanded">
+              <div class="pr-header">
+                <div class="pr-header-left">
+                  <mat-icon class="pr-icon">merge_type</mat-icon>
+                  <div>
+                    <strong class="pr-title">Pull Request</strong>
+                    <span class="badge pr-status-badge"
+                          [class.pr-open]="ticket.prStatus === 'OPEN'"
+                          [class.pr-merged]="ticket.prStatus === 'MERGED'"
+                          [class.pr-closed]="ticket.prStatus === 'CLOSED'">
+                      {{ ticket.prStatus }}
+                    </span>
+                  </div>
+                </div>
+                <a [href]="ticket.prUrl" target="_blank" mat-stroked-button class="pr-link-btn">
+                  <mat-icon>open_in_new</mat-icon> Ver no GitHub
+                </a>
+              </div>
+
+              <div class="pr-details">
+                <div class="pr-detail-item">
+                  <mat-icon>account_tree</mat-icon>
+                  <span class="pr-detail-label">Branch:</span>
+                  <code class="pr-branch-name">{{ ticket.prBranch }}</code>
+                </div>
+                <div class="pr-detail-item" *ngIf="prSummaryData?.repo">
+                  <mat-icon>folder</mat-icon>
+                  <span class="pr-detail-label">Repositorio:</span>
+                  <span>{{ prSummaryData.repo }}</span>
+                </div>
+                <div class="pr-detail-item" *ngIf="prSummaryData?.filesChanged">
+                  <mat-icon>description</mat-icon>
+                  <span class="pr-detail-label">Arquivos alterados:</span>
+                  <span>{{ prSummaryData.filesChanged }}</span>
+                </div>
+                <div class="pr-detail-item" *ngIf="prSummaryData?.createdAt">
+                  <mat-icon>schedule</mat-icon>
+                  <span class="pr-detail-label">Criado em:</span>
+                  <span>{{ prSummaryData.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+
+              <div class="pr-fixes" *ngIf="prSummaryData?.fixes?.length">
+                <h4><mat-icon>build_circle</mat-icon> Correcoes aplicadas</h4>
+                <div class="pr-fix-item" *ngFor="let fix of prSummaryData.fixes">
+                  <div class="pr-fix-file">
+                    <mat-icon>insert_drive_file</mat-icon>
+                    <code>{{ fix.file }}</code>
+                  </div>
+                  <p class="pr-fix-explanation">{{ fix.explanation }}</p>
                 </div>
               </div>
             </div>
@@ -246,13 +288,51 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .fix-result mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
     .pr-info { margin-top: 24px; }
-    .pr-card {
-      display: flex; gap: 12px; align-items: flex-start;
-      padding: 16px; background: #f0fdf4; border-radius: 8px; margin-top: 16px;
+    .pr-card-expanded {
+      background: #f8fffe; border: 1px solid #d1fae5; border-radius: 12px;
+      padding: 20px; margin-top: 16px;
     }
-    .pr-card mat-icon { color: #16a34a; font-size: 24px; width: 24px; height: 24px; margin-top: 2px; }
-    .pr-link { color: var(--primary); text-decoration: none; font-size: 13px; display: block; margin-top: 4px; word-break: break-all; }
-    .pr-meta { display: flex; gap: 12px; align-items: center; margin-top: 8px; font-size: 12px; color: var(--text-secondary); }
+    .pr-header {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .pr-header-left { display: flex; align-items: center; gap: 12px; }
+    .pr-icon { color: #16a34a; font-size: 28px; width: 28px; height: 28px; }
+    .pr-title { font-size: 16px; display: block; }
+    .pr-status-badge { margin-left: 8px; font-size: 10px; padding: 2px 8px; border-radius: 4px; }
+    .pr-open { background: #dbeafe; color: #1d4ed8; }
+    .pr-merged { background: #ede9fe; color: #7c3aed; }
+    .pr-closed { background: #fef2f2; color: #dc2626; }
+    .pr-link-btn { font-size: 12px; }
+    .pr-link-btn mat-icon { font-size: 14px; width: 14px; height: 14px; margin-right: 4px; }
+
+    .pr-details {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      margin-top: 16px; padding: 14px; background: white;
+      border-radius: 8px; border: 1px solid #e2e8f0;
+    }
+    .pr-detail-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+    .pr-detail-item mat-icon { font-size: 16px; width: 16px; height: 16px; color: #64748b; }
+    .pr-detail-label { color: #64748b; }
+    .pr-branch-name {
+      background: #f1f5f9; padding: 2px 8px; border-radius: 4px;
+      font-size: 12px; color: #334155;
+    }
+
+    .pr-fixes { margin-top: 16px; }
+    .pr-fixes h4 {
+      font-size: 13px; font-weight: 600; color: #334155;
+      display: flex; align-items: center; gap: 6px; margin: 0 0 12px;
+    }
+    .pr-fixes h4 mat-icon { font-size: 16px; width: 16px; height: 16px; color: #6366f1; }
+    .pr-fix-item {
+      background: white; border: 1px solid #e2e8f0; border-radius: 8px;
+      padding: 12px; margin-bottom: 8px;
+    }
+    .pr-fix-file { display: flex; align-items: center; gap: 6px; }
+    .pr-fix-file mat-icon { font-size: 16px; width: 16px; height: 16px; color: #6366f1; }
+    .pr-fix-file code { font-size: 13px; font-weight: 600; color: #1e293b; }
+    .pr-fix-explanation { font-size: 12px; color: #64748b; margin: 6px 0 0 22px; }
 
     @media (max-width: 768px) {
       .detail-layout { grid-template-columns: 1fr; }
@@ -269,6 +349,7 @@ export class TicketDetailComponent implements OnInit {
   feedbackLoading = false;
   fixLoading = false;
   fixResult: any = null;
+  prSummaryData: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -285,6 +366,7 @@ export class TicketDetailComponent implements OnInit {
       this.newStatus = ticket.status;
       this.feedbackCategoria = ticket.categoria;
       this.feedbackPrioridade = ticket.prioridade;
+      this.parsePrSummary();
     });
     this.repoConfigService.findAll().subscribe(configs => this.repoConfigs = configs);
   }
@@ -300,7 +382,10 @@ export class TicketDetailComponent implements OnInit {
         if (result.status === 'success') {
           this.snackBar.open('PR criado com sucesso!', 'OK', { duration: 4000 });
           // Reload ticket to get PR info
-          this.ticketService.findById(this.ticket!.id).subscribe(t => this.ticket = t);
+          this.ticketService.findById(this.ticket!.id).subscribe(t => {
+            this.ticket = t;
+            this.parsePrSummary();
+          });
         }
       },
       error: (err) => {
@@ -351,6 +436,16 @@ export class TicketDetailComponent implements OnInit {
         this.snackBar.open('Chamado excluido', 'OK', { duration: 2000 });
         this.router.navigate(['/tickets']);
       });
+    }
+  }
+
+  parsePrSummary(): void {
+    if (this.ticket?.prSummary) {
+      try {
+        this.prSummaryData = JSON.parse(this.ticket.prSummary);
+      } catch (e) {
+        this.prSummaryData = null;
+      }
     }
   }
 

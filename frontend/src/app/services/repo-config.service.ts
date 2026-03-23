@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { RepoConfig, RepoConfigRequest, AutoFixResponse } from '../models/repo-config.model';
+import { RepoConfig, RepoConfigRequest, AutoFixResponse, GitRepo } from '../models/repo-config.model';
 
 @Injectable({ providedIn: 'root' })
 export class RepoConfigService {
@@ -28,6 +28,12 @@ export class RepoConfigService {
   autoFix(ticketId: number, repoConfigId: number): Observable<AutoFixResponse> {
     return this.http.post<AutoFixResponse>(
       `${this.API}/git/auto-fix/${ticketId}?repoConfigId=${repoConfigId}`, {}
+    );
+  }
+
+  listRepos(provider: string, token: string): Observable<GitRepo[]> {
+    return this.http.get<GitRepo[]>(
+      `${this.API}/git/repos?provider=${provider}&token=${encodeURIComponent(token)}`
     );
   }
 }

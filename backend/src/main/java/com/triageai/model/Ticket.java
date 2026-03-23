@@ -39,6 +39,9 @@ public class Ticket {
     private String prUrl;
     private String prStatus;
 
+    @Column(columnDefinition = "TEXT")
+    private String prSummary;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "repo_config_id")
     private RepoConfig repoConfig;

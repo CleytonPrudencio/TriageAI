@@ -1,5 +1,6 @@
 package com.triageai.service;
 
+import com.triageai.dto.GitRepoResponse;
 import com.triageai.model.RepoConfig;
 import com.triageai.model.enums.GitProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -281,6 +282,106 @@ public class GitProviderService {
             log.warn("Failed to check PR status: {}", e.getMessage());
             return "unknown";
         }
+    }
+
+    /**
+     * Lista repos do usuario com acesso de escrita (push).
+     */
+    @SuppressWarnings("unchecked")
+    public List<GitRepoResponse> listUserRepos(GitProvider provider, String token) {
+        RestClient client = switch (provider) {
+            case GITHUB -> RestClient.builder()
+                    .baseUrl("https://api.github.com")
+                    .defaultHeader("Authorization", "Bearer " + token)
+                    .defaultHeader("Accept", "application/vnd.github+json")
+                    .build();
+            case GITLAB -> RestClient.builder()
+                    .baseUrl("https://gitlab.com/api/v4")
+                    .defaultHeader("Authorization", "Bearer " + token)
+                    .defaultHeader("Accept", "application/json")
+                    .build();
+            case BITBUCKET -> RestClient.builder()
+                    .baseUrl("https://api.bitbucket.org/2.0")
+                    .defaultHeader("Authorization", "Bearer " + token)
+                    .defaultHeader("Accept", "application/json")
+                    .build();
+        };
+
+        List<GitRepoResponse> repos = new ArrayList<>();
+
+        switch (provider) {
+            case GITHUB -> {
+                List<Map<String, Object>> items = client.get()
+                        .uri("/user/repos?per_page=100&sort=updated&affiliation=owner,collaborator,organization_member")
+                        .retrieve().body(List.class);
+                if (items != null) {
+                    for (Map<String, Object> item : items) {
+                        Map<String, Object> perms = (Map<String, Object>) item.get("permissions");
+                        if (perms != null && Boolean.TRUE.equals(perms.get("push"))) {
+                            Map<String, Object> owner = (Map<String, Object>) item.get("owner");
+                            repos.add(new GitRepoResponse(
+                                    (String) item.get("full_name"),
+                                    owner != null ? (String) owner.get("login") : "",
+                                    (String) item.get("name"),
+                                    (String) item.get("default_branch"),
+                                    Boolean.TRUE.equals(item.get("private")),
+                                    (String) item.get("language"),
+                                    (String) item.get("updated_at")
+                            ));
+                        }
+                    }
+                }
+            }
+            case GITLAB -> {
+                List<Map<String, Object>> items = client.get()
+                        .uri("/projects?membership=true&min_access_level=30&per_page=100&order_by=updated_at")
+                        .retrieve().body(List.class);
+                if (items != null) {
+                    for (Map<String, Object> item : items) {
+                        Map<String, Object> ns = (Map<String, Object>) item.get("namespace");
+                        repos.add(new GitRepoResponse(
+                                (String) item.get("path_with_namespace"),
+                                ns != null ? (String) ns.get("path") : "",
+                                (String) item.get("path"),
+                                (String) item.get("default_branch"),
+                                "private".equals(item.get("visibility")),
+                                null,
+                                (String) item.get("last_activity_at")
+                        ));
+                    }
+                }
+            }
+            case BITBUCKET -> {
+                Map<String, Object> response = client.get()
+                        .uri("/user/permissions/repositories?pagelen=100")
+                        .retrieve().body(Map.class);
+                if (response != null) {
+                    List<Map<String, Object>> values = (List<Map<String, Object>>) response.get("values");
+                    if (values != null) {
+                        for (Map<String, Object> item : values) {
+                            String perm = (String) item.get("permission");
+                            if ("write".equals(perm) || "admin".equals(perm)) {
+                                Map<String, Object> repo = (Map<String, Object>) item.get("repository");
+                                if (repo != null) {
+                                    repos.add(new GitRepoResponse(
+                                            (String) repo.get("full_name"),
+                                            (String) ((Map<String, Object>) repo.get("owner")).get("username"),
+                                            (String) repo.get("slug"),
+                                            "main",
+                                            Boolean.TRUE.equals(repo.get("is_private")),
+                                            (String) repo.get("language"),
+                                            (String) repo.get("updated_on")
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        log.info("Found {} repos with push access for provider {}", repos.size(), provider);
+        return repos;
     }
 
     public List<String> listFiles(RepoConfig config, String branch, String path) {

@@ -19,6 +19,7 @@ public class TicketResponse {
     private String prBranch;
     private String prUrl;
     private String prStatus;
+    private String prSummary;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -36,6 +37,7 @@ public class TicketResponse {
         r.setPrBranch(t.getPrBranch());
         r.setPrUrl(t.getPrUrl());
         r.setPrStatus(t.getPrStatus());
+        r.setPrSummary(t.getPrSummary());
         r.setCreatedAt(t.getCreatedAt());
         r.setUpdatedAt(t.getUpdatedAt());
         return r;

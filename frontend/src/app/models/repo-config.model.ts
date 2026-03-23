@@ -25,3 +25,13 @@ export interface AutoFixResponse {
   message: string;
   filesChanged: number;
 }
+
+export interface GitRepo {
+  fullName: string;
+  owner: string;
+  name: string;
+  defaultBranch: string;
+  isPrivate: boolean;
+  language: string;
+  updatedAt: string;
+}
