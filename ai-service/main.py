@@ -787,13 +787,18 @@ IMPORTANT:
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=32000,
-            messages=[{"role": "user", "content": prompt}]
-        )
 
-        response_text = message.content[0].text.strip()
+        # Use streaming to avoid timeout on large responses
+        response_text = ""
+        with client.messages.stream(
+            model="claude-sonnet-4-20250514",
+            max_tokens=16000,
+            messages=[{"role": "user", "content": prompt}]
+        ) as stream:
+            for text in stream.text_stream:
+                response_text += text
+
+        response_text = response_text.strip()
 
         # Clean response (remove markdown code blocks if present)
         if response_text.startswith("```"):
