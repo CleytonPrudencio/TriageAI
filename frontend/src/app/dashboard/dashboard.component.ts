@@ -27,7 +27,7 @@ import { DashboardStats } from '../models/dashboard.model';
 
       <!-- Row 1: Summary Cards -->
       <div class="summary-cards">
-        <div class="summary-card gradient-blue">
+        <div class="summary-card gradient-blue clickable" (click)="navigate('/tickets')">
           <div class="card-icon-wrap"><mat-icon>confirmation_number</mat-icon></div>
           <div class="card-info">
             <span class="card-value">{{ stats.totalTickets }}</span>
@@ -35,7 +35,7 @@ import { DashboardStats } from '../models/dashboard.model';
           </div>
         </div>
 
-        <div class="summary-card gradient-green">
+        <div class="summary-card gradient-green clickable" (click)="navigate('/tickets')">
           <div class="card-icon-wrap"><mat-icon>today</mat-icon></div>
           <div class="card-info">
             <span class="card-value">{{ stats.ticketsHoje }}</span>
@@ -43,7 +43,7 @@ import { DashboardStats } from '../models/dashboard.model';
           </div>
         </div>
 
-        <div class="summary-card gradient-orange">
+        <div class="summary-card gradient-orange clickable" (click)="navigate('/tickets')">
           <div class="card-icon-wrap"><mat-icon>date_range</mat-icon></div>
           <div class="card-info">
             <span class="card-value">{{ stats.ticketsSemana }}</span>
@@ -51,7 +51,7 @@ import { DashboardStats } from '../models/dashboard.model';
           </div>
         </div>
 
-        <div class="summary-card gradient-purple">
+        <div class="summary-card gradient-purple clickable" (click)="navigate('/tickets/board')">
           <div class="card-icon-wrap"><mat-icon>merge_type</mat-icon></div>
           <div class="card-info">
             <span class="card-value">{{ stats.totalPRs }}</span>
@@ -59,7 +59,7 @@ import { DashboardStats } from '../models/dashboard.model';
           </div>
         </div>
 
-        <div class="summary-card gradient-teal">
+        <div class="summary-card gradient-teal clickable" (click)="navigate('/tickets')">
           <div class="card-icon-wrap"><mat-icon>psychology</mat-icon></div>
           <div class="card-info">
             <span class="card-value">{{ (stats.mediaAiScore * 100).toFixed(0) }}%</span>
@@ -91,11 +91,13 @@ import { DashboardStats } from '../models/dashboard.model';
         <div class="chart-card">
           <h3><mat-icon>pending_actions</mat-icon> Por Status</h3>
           <div class="status-stack">
-            <div class="status-badge-row" *ngFor="let item of statusEntries">
+            <div class="status-badge-row clickable" *ngFor="let item of statusEntries"
+                 (click)="navigate('/tickets', 'status', item[0])">
               <div class="status-circle" [class]="'circle-' + item[0].toLowerCase()">
                 {{ item[1] }}
               </div>
               <span class="status-label">{{ formatStatus(item[0]) }}</span>
+              <mat-icon class="row-arrow">chevron_right</mat-icon>
             </div>
           </div>
         </div>
@@ -273,6 +275,13 @@ import { DashboardStats } from '../models/dashboard.model';
       margin-bottom: 28px;
     }
 
+    .clickable { cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+    .clickable:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .clickable:active { transform: translateY(0); }
+
+    .row-arrow { margin-left: auto; font-size: 18px; width: 18px; height: 18px; color: var(--text-secondary); opacity: 0.5; }
+    .clickable:hover .row-arrow { opacity: 1; }
+
     .summary-card {
       border-radius: var(--radius);
       padding: 22px 20px;
@@ -351,6 +360,7 @@ import { DashboardStats } from '../models/dashboard.model';
     }
     .circle-aberto       { background: linear-gradient(135deg, #3b82f6, #2563eb); }
     .circle-em_andamento { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .circle-code_review  { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
     .circle-resolvido    { background: linear-gradient(135deg, #10b981, #059669); }
     .circle-fechado      { background: linear-gradient(135deg, #94a3b8, #64748b); }
     .status-label { font-size: 14px; color: var(--text); font-weight: 500; }
@@ -463,6 +473,7 @@ import { DashboardStats } from '../models/dashboard.model';
 
     .badge-status-aberto       { background: #eff6ff; color: #2563eb; }
     .badge-status-em_andamento { background: #fffbeb; color: #d97706; }
+    .badge-status-code_review  { background: #ede9fe; color: #7c3aed; }
     .badge-status-resolvido    { background: #f0fdf4; color: #16a34a; }
     .badge-status-fechado      { background: #f8fafc; color: #64748b; }
 
@@ -517,6 +528,7 @@ export class DashboardComponent implements OnInit {
     const map: Record<string, string> = {
       'ABERTO': 'Aberto',
       'EM_ANDAMENTO': 'Em Andamento',
+      'CODE_REVIEW': 'Code Review',
       'RESOLVIDO': 'Resolvido',
       'FECHADO': 'Fechado'
     };
@@ -534,5 +546,13 @@ export class DashboardComponent implements OnInit {
 
   goToTicket(id: number): void {
     this.router.navigate(['/tickets', id]);
+  }
+
+  navigate(path: string, filterKey?: string, filterValue?: string): void {
+    if (filterKey && filterValue) {
+      this.router.navigate([path], { queryParams: { [filterKey]: filterValue } });
+    } else {
+      this.router.navigate([path]);
+    }
   }
 }
