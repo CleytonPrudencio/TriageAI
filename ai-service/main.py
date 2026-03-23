@@ -900,31 +900,72 @@ def analyze_code(request: CodeAnalysisRequest):
     if not file_tree:
         return CodeAnalysisResponseModel(fixes=[])
 
-    # Step 2: Extract file paths and class names from ticket text
-    mentioned_paths = extract_file_paths_from_text(ticket_text)
-    mentioned_classes = extract_class_names_from_text(ticket_text)
-    print(f"Extracted from ticket - paths: {mentioned_paths}, classes: {mentioned_classes}")
+    # Step 2: ALWAYS ask Claude which files to read (Claude-first approach)
+    # Claude sees the full file tree and the bug description, then decides what to read
+    api_key = get_anthropic_key()
+    target_files = []
 
-    # Step 3: Find matching files in the repo tree
-    target_files = find_files_in_tree(file_tree, mentioned_paths, mentioned_classes)
-    print(f"Matched {len(target_files)} files from ticket references")
+    if api_key:
+        print("Asking Claude to identify ALL files needed for the fix...")
+        try:
+            client = anthropic.Anthropic(api_key=api_key)
+            # Send full file tree (just paths) to Claude
+            tree_text = "\n".join(file_tree)
+            identify_prompt = f"""You are analyzing a codebase to fix a bug. Here is the complete file tree of the repository:
 
-    # Step 4: If no files matched from text extraction, use Claude to identify files
+{tree_text}
+
+Here is the bug report:
+Title: {request.ticket_title}
+Description: {request.ticket_description}
+
+List ALL files that need to be READ to understand and fix this bug. Include:
+1. Files explicitly mentioned in the bug report
+2. Entity/Model files related to the affected modules
+3. Controller files that handle the affected endpoints
+4. Service files with the business logic
+5. Repository/DAO files
+6. DTO/Request/Response files
+7. Security/Auth configuration files (if the bug involves authentication)
+8. Specification/Filter files
+9. Any other file needed to understand the full context
+
+Return ONLY a JSON array of file paths (strings), nothing else. Example:
+["path/to/File1.java", "path/to/File2.java"]
+
+Be thorough - it's better to include too many files than to miss one that's needed for the fix."""
+
+            msg = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=2000,
+                messages=[{"role": "user", "content": identify_prompt}]
+            )
+            response_text = msg.content[0].text.strip()
+            if response_text.startswith("```"):
+                response_text = re.sub(r'^```\w*\n?', '', response_text)
+                response_text = re.sub(r'\n?```$', '', response_text)
+
+            suggested = json.loads(response_text)
+            # Validate paths exist in tree
+            tree_set = set(file_tree)
+            target_files = [f for f in suggested if f in tree_set]
+            print(f"Claude identified {len(target_files)} files to read")
+        except Exception as e:
+            print(f"Claude file identification failed: {e}")
+
+    # Fallback: use regex + keyword matching if Claude didn't work
     if not target_files:
-        print("No explicit file matches found, asking Claude to identify affected files...")
-        target_files = use_claude_to_identify_files(
-            request.ticket_title, request.ticket_description,
-            request.categoria, file_tree
-        )
+        print("Falling back to regex + keyword file matching...")
+        mentioned_paths = extract_file_paths_from_text(ticket_text)
+        mentioned_classes = extract_class_names_from_text(ticket_text)
+        target_files = find_files_in_tree(file_tree, mentioned_paths, mentioned_classes)
 
-    # Step 5: Fallback to keyword scoring if still no files
     if not target_files:
-        print("Claude file identification returned no results, falling back to keyword scoring...")
         target_files = score_files_fallback(file_tree, ticket_text)
 
-    # Fetch content of up to 30 most relevant files for thorough analysis
+    # Fetch content of up to 30 files
     target_files = target_files[:30]
-    print(f"Final target files for analysis: {target_files}")
+    print(f"Final target files for analysis ({len(target_files)}): {target_files}")
 
     # Step 6: Fetch actual content of target files
     file_contents = {}
