@@ -569,8 +569,8 @@ export class RepoConfigComponent implements OnInit {
   }
 
   disconnect(conn: GitConnection): void {
-    if (!confirm(`Desconectar ${conn.provider} (@${conn.username})?`)) return;
-
+    const ref = this.snackBar.open(`Desconectar ${conn.provider} (@${conn.username})?`, 'Confirmar', { duration: 5000 });
+    ref.onAction().subscribe(() => {
     this.repoConfigService.deleteConnection(conn.id).subscribe({
       next: () => {
         this.connections = this.connections.filter(c => c.id !== conn.id);
@@ -585,6 +585,7 @@ export class RepoConfigComponent implements OnInit {
       error: () => {
         this.snackBar.open('Erro ao desconectar', 'OK', { duration: 3000 });
       }
+    });
     });
   }
 
@@ -675,12 +676,13 @@ export class RepoConfigComponent implements OnInit {
   }
 
   remove(config: RepoConfig): void {
-    if (confirm('Excluir repositorio ' + config.name + '?')) {
+    const ref = this.snackBar.open('Excluir repositorio ' + config.name + '?', 'Confirmar', { duration: 5000 });
+    ref.onAction().subscribe(() => {
       this.repoConfigService.delete(config.id).subscribe(() => {
         this.snackBar.open('Repositorio excluido', 'OK', { duration: 2000 });
         this.loadConfigs();
       });
-    }
+    });
   }
 
   cancelEdit(): void {

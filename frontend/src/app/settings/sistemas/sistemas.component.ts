@@ -391,7 +391,8 @@ export class SistemasComponent implements OnInit {
   }
 
   remove(sistema: Sistema): void {
-    if (confirm('Excluir sistema ' + sistema.nome + '?')) {
+    const ref = this.snackBar.open('Excluir sistema ' + sistema.nome + '?', 'Confirmar', { duration: 5000 });
+    ref.onAction().subscribe(() => {
       this.sistemaService.delete(sistema.id).subscribe({
         next: () => {
           this.snackBar.open('Sistema excluido', 'OK', { duration: 2000 });
