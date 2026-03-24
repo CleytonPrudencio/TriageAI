@@ -68,7 +68,15 @@ public class GitIntegrationService {
             log.info("Getting base SHA for {}/{} branch '{}'", config.getRepoOwner(), config.getRepoName(), sourceBranch);
             String baseSha = gitProvider.getBranchSha(config, sourceBranch);
 
-            // 3. Create fix branch from source
+            // 3. Create fix branch from source (add suffix if already exists)
+            try {
+                gitProvider.getBranchSha(config, branchName);
+                // Branch exists, add timestamp suffix
+                branchName = branchName + "-" + System.currentTimeMillis() % 10000;
+                log.info("Branch already exists, using '{}'", branchName);
+            } catch (Exception ignored) {
+                // Branch doesn't exist, good to go
+            }
             log.info("Creating branch '{}' from '{}'", branchName, sourceBranch);
             gitProvider.createBranch(config, branchName, baseSha);
 
