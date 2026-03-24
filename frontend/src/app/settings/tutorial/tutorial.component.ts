@@ -75,7 +75,7 @@ interface StepContent {
               </div>
             </div>
 
-            <div class="card-body" *ngIf="step.expanded" [@expandCollapse]>
+            <div class="card-body" *ngIf="step.expanded">
               <ng-container *ngFor="let content of step.content">
                 <p *ngIf="content.type === 'text'" class="content-text">{{ content.value }}</p>
 
