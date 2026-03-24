@@ -402,6 +402,6 @@ export class SistemasComponent implements OnInit {
           this.snackBar.open('Erro ao excluir sistema', 'OK', { duration: 3000 });
         }
       });
-    }
+    });
   }
 }
