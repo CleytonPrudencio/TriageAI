@@ -1058,9 +1058,14 @@ def enrich_ticket(body: dict):
 Titulo/Descricao do chamado: "{text}"{sistema_context}
 Classificacao ML: Categoria={prediction['categoria']}, Prioridade={prediction['prioridade']}
 
+Categorias possiveis: TECNICO, FINANCEIRO, COMERCIAL, ADMINISTRATIVO, SEGURANCA, OUTROS
+Prioridades possiveis: CRITICA, ALTA, MEDIA, BAIXA
+
 Retorne um JSON valido (sem markdown, sem ```json) com:
 
 {{
+  "categoria": "a categoria mais adequada das opcoes acima baseada no conteudo real do chamado",
+  "prioridade": "a prioridade mais adequada das opcoes acima",
   "descricaoEnriquecida": "Reescreva a descricao com mais detalhes tecnicos, mantendo o sentido original mas adicionando estrutura e clareza. Em portugues.",
   "perguntas": ["lista de 2-4 perguntas especificas que ajudariam a detalhar melhor o problema. Em portugues."],
   "sugestoes": ["lista de 2-3 informacoes que estao faltando na descricao. Em portugues."],
@@ -1081,7 +1086,14 @@ Responda APENAS com o JSON, sem texto adicional."""
             result_text = result_text.rsplit("```", 1)[0]
 
         enriched = json.loads(result_text)
-        enriched["classificacao"] = prediction
+        # Use Claude's classification if available, fallback to ML
+        claude_cat = enriched.pop("categoria", prediction["categoria"])
+        claude_pri = enriched.pop("prioridade", prediction["prioridade"])
+        enriched["classificacao"] = {
+            "categoria": claude_cat if claude_cat in ["TECNICO", "FINANCEIRO", "COMERCIAL", "ADMINISTRATIVO", "SEGURANCA", "OUTROS"] else prediction["categoria"],
+            "prioridade": claude_pri if claude_pri in ["CRITICA", "ALTA", "MEDIA", "BAIXA"] else prediction["prioridade"],
+            "score": prediction["score"]
+        }
         return enriched
 
     except Exception as e:
