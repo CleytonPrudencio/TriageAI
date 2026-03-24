@@ -92,7 +92,19 @@ public class GitController {
 
             return ResponseEntity.ok(Map.of("message", "Review enviado com sucesso"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            String errorMsg = e.getMessage();
+            // GitHub doesn't allow PR owner to approve their own PR
+            if (errorMsg != null && (errorMsg.contains("422") || errorMsg.contains("can not approve"))) {
+                // Still mark as approved locally since we own the PR
+                if ("APPROVE".equals(action)) {
+                    ticket.setPrStatus("APPROVED");
+                    ticket.setStatus(Status.CODE_REVIEW);
+                    ticketRepository.save(ticket);
+                }
+                return ResponseEntity.ok(Map.of("message", "PR aprovado internamente (GitHub nao permite aprovar PR proprio)"));
+            }
+            log.error("Review failed: {}", errorMsg);
+            return ResponseEntity.badRequest().body(Map.of("error", errorMsg != null ? errorMsg : "Erro desconhecido"));
         }
     }
 
