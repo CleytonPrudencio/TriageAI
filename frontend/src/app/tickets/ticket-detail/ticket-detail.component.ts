@@ -873,17 +873,19 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   doApprovePr(): void {
     if (!this.ticket) return;
     this.reviewLoading = true;
+    const reviewer = this.selectedReviewer || '';
     this.http.post<any>(`http://localhost:8080/api/git/review/${this.ticket!.id}`, {
-      action: 'APPROVE', comment: 'Approved via TriageAI'
+      action: 'APPROVE', comment: 'Approved via TriageAI', reviewer
     }).subscribe({
-      next: () => {
+      next: (res) => {
         this.reviewLoading = false;
         this.ticket!.prStatus = 'APPROVED';
-        this.snackBar.open('PR aprovado com sucesso!', 'OK', { duration: 3000 });
+        this.snackBar.open(res.message || 'PR aprovado!', 'OK', { duration: 4000 });
       },
-      error: () => {
+      error: (err) => {
         this.reviewLoading = false;
-        this.snackBar.open('Erro ao aprovar PR', 'OK', { duration: 3000 });
+        const msg = err.error?.error || err.error?.message || 'Erro ao aprovar PR';
+        this.snackBar.open(msg, 'OK', { duration: 4000 });
       }
     });
   }
