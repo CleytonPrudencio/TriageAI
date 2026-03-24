@@ -72,7 +72,7 @@ public class TicketService {
         // Auto-fix if sistema has it enabled and ticket is TECNICO
         if (saved.getSistema() != null
                 && saved.getSistema().isAutoFixEnabled()
-                && saved.getCategoria() == Category.TECNICO
+                && (saved.getCategoria() == Category.TECNICO || saved.getCategoria() == Category.SEGURANCA)
                 && saved.getSistema().getRepoConfig() != null) {
             saved.setStatus(Status.EM_ANDAMENTO);
             ticketRepository.save(saved);
