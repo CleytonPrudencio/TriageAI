@@ -54,7 +54,7 @@ import { RepoConfig } from '../../models/repo-config.model';
 
         <mat-form-field appearance="outline">
           <mat-label>Repositorio</mat-label>
-          <mat-select [(ngModel)]="form.repoConfigId" name="repoConfigId">
+          <mat-select [(ngModel)]="form.repoConfigId" name="repoConfigId" (ngModelChange)="onRepoChange($event)">
             <mat-option [value]="null">Nenhum</mat-option>
             <mat-option *ngFor="let rc of repoConfigs" [value]="rc.id">
               {{ rc.name }} ({{ rc.repoOwner }}/{{ rc.repoName }})
@@ -69,8 +69,14 @@ import { RepoConfig } from '../../models/repo-config.model';
         </div>
 
         <mat-form-field appearance="outline">
-          <mat-label>Reviewer padrao (username GitHub)</mat-label>
-          <input matInput [(ngModel)]="form.defaultReviewer" name="defaultReviewer" placeholder="ex: johndoe">
+          <mat-label>Reviewer padrao</mat-label>
+          <mat-select [(ngModel)]="form.defaultReviewer" name="defaultReviewer">
+            <mat-option value="">Nenhum</mat-option>
+            <mat-option *ngFor="let c of repoCollaborators" [value]="c.username">
+              {{ c.username }} <span style="color:#94a3b8;font-size:12px">({{ c.role }})</span>
+            </mat-option>
+          </mat-select>
+          <mat-hint *ngIf="repoCollaborators.length === 0 && form.repoConfigId">Carregando...</mat-hint>
         </mat-form-field>
 
         <div class="branch-mapping">
@@ -280,6 +286,7 @@ import { RepoConfig } from '../../models/repo-config.model';
 export class SistemasComponent implements OnInit {
   sistemas: Sistema[] = [];
   repoConfigs: RepoConfig[] = [];
+  repoCollaborators: any[] = [];
   showForm = false;
   editing = false;
   editingId: number | null = null;
@@ -354,6 +361,17 @@ export class SistemasComponent implements OnInit {
       branchDocs: bm.docs || 'develop',
       branchChore: bm.chore || 'develop'
     };
+    if (sistema.repoConfigId) this.onRepoChange(sistema.repoConfigId);
+  }
+
+  onRepoChange(repoConfigId: number): void {
+    this.repoCollaborators = [];
+    if (repoConfigId) {
+      this.repoConfigService.getCollaborators(repoConfigId).subscribe({
+        next: (collabs) => this.repoCollaborators = collabs,
+        error: () => this.repoCollaborators = []
+      });
+    }
   }
 
   cancelForm(): void {
