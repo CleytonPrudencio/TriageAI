@@ -27,10 +27,6 @@ import { AuthService } from '../services/auth.service';
         </div>
 
         <nav class="sidebar-nav">
-          <a routerLink="/tutorial" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Tutorial' : ''" matTooltipPosition="right">
-            <mat-icon>school</mat-icon>
-            <span *ngIf="!sidebarCollapsed">Tutorial</span>
-          </a>
           <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Dashboard' : ''" matTooltipPosition="right">
             <mat-icon>dashboard</mat-icon>
             <span *ngIf="!sidebarCollapsed">Dashboard</span>
@@ -62,6 +58,10 @@ import { AuthService } from '../services/auth.service';
           <a routerLink="/config" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Configuracoes' : ''" matTooltipPosition="right">
             <mat-icon>tune</mat-icon>
             <span *ngIf="!sidebarCollapsed">Configuracoes</span>
+          </a>
+          <a routerLink="/tutorial" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Tutorial' : ''" matTooltipPosition="right">
+            <mat-icon>school</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Tutorial</span>
           </a>
         </nav>
 
