@@ -108,6 +108,30 @@ public class GitController {
         }
     }
 
+    @GetMapping("/collaborators/{repoConfigId}")
+    public ResponseEntity<?> listCollaborators(@PathVariable Long repoConfigId) {
+        var config = gitIntegrationService.getRepoConfig(repoConfigId);
+        return ResponseEntity.ok(gitProviderService.listCollaborators(config));
+    }
+
+    @PostMapping("/request-reviewer/{ticketId}")
+    public ResponseEntity<?> requestReviewer(@PathVariable Long ticketId, @RequestBody Map<String, String> body) {
+        String reviewer = body.get("reviewer");
+        if (reviewer == null || reviewer.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Reviewer obrigatorio"));
+        }
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket nao encontrado"));
+
+        if (ticket.getPrUrl() == null || ticket.getRepoConfig() == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Ticket nao tem PR"));
+        }
+
+        gitProviderService.requestReviewer(ticket.getRepoConfig(), ticket.getPrUrl(), reviewer);
+        return ResponseEntity.ok(Map.of("message", "Review solicitado para " + reviewer));
+    }
+
     @GetMapping("/repos")
     public ResponseEntity<List<GitRepoResponse>> listUserRepos(
             @RequestParam String provider,

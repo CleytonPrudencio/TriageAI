@@ -531,6 +531,56 @@ public class GitProviderService {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public List<Map<String, String>> listCollaborators(RepoConfig config) {
+        RestClient client = buildClient(config);
+
+        return switch (config.getProvider()) {
+            case GITHUB -> {
+                try {
+                    List<Map<String, Object>> collabs = client.get()
+                            .uri("/repos/{owner}/{repo}/collaborators",
+                                    config.getRepoOwner(), config.getRepoName())
+                            .retrieve().body(List.class);
+                    if (collabs == null) yield List.of();
+                    yield collabs.stream()
+                            .map(c -> Map.of(
+                                    "username", String.valueOf(c.get("login")),
+                                    "avatarUrl", String.valueOf(c.getOrDefault("avatar_url", "")),
+                                    "role", String.valueOf(((Map<?, ?>) c.getOrDefault("permissions", Map.of())).getOrDefault("admin", false) ? "admin" : "collaborator")
+                            ))
+                            .toList();
+                } catch (Exception e) {
+                    log.warn("Failed to list collaborators: {}", e.getMessage());
+                    yield List.of();
+                }
+            }
+            case GITLAB, BITBUCKET -> List.of();
+        };
+    }
+
+    public void requestReviewer(RepoConfig config, String prUrl, String reviewer) {
+        RestClient client = buildClient(config);
+
+        switch (config.getProvider()) {
+            case GITHUB -> {
+                String prNumber = prUrl.replaceAll(".*/pull/(\\d+).*", "$1");
+                try {
+                    client.post()
+                            .uri("/repos/{owner}/{repo}/pulls/{number}/requested_reviewers",
+                                    config.getRepoOwner(), config.getRepoName(), prNumber)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(Map.of("reviewers", List.of(reviewer)))
+                            .retrieve().toBodilessEntity();
+                    log.info("Requested review from '{}' for PR #{}", reviewer, prNumber);
+                } catch (Exception e) {
+                    log.warn("Failed to request reviewer: {}", e.getMessage());
+                }
+            }
+            case GITLAB, BITBUCKET -> { /* TODO */ }
+        }
+    }
+
     public List<String> listFiles(RepoConfig config, String branch, String path) {
         RestClient client = buildClient(config);
 

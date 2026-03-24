@@ -144,6 +144,23 @@ import { RepoConfigService } from '../../services/repo-config.service';
               <!-- Review / Approve (para casos excepcionais) -->
               <div class="pr-review-section" *ngIf="ticket.prStatus === 'OPEN'">
                 <h4><mat-icon>rate_review</mat-icon> Review</h4>
+
+                <!-- Selecionar reviewer -->
+                <mat-form-field appearance="outline" class="reviewer-field" *ngIf="collaborators.length > 0">
+                  <mat-label>Solicitar review de</mat-label>
+                  <mat-select [(ngModel)]="selectedReviewer">
+                    <mat-option *ngFor="let c of collaborators" [value]="c.username">
+                      <img [src]="c.avatarUrl" class="reviewer-avatar" *ngIf="c.avatarUrl"> {{ c.username }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <button mat-stroked-button class="request-reviewer-btn" (click)="onRequestReviewer()"
+                        [disabled]="!selectedReviewer || reviewLoading" *ngIf="collaborators.length > 0">
+                  <mat-icon>person_add</mat-icon> Solicitar Review
+                </button>
+
+                <mat-divider *ngIf="collaborators.length > 0" class="review-divider"></mat-divider>
+
                 <div class="review-actions">
                   <button mat-raised-button class="approve-btn" (click)="approvePr()" [disabled]="reviewLoading">
                     <mat-icon>check_circle</mat-icon>
@@ -656,6 +673,10 @@ import { RepoConfigService } from '../../services/repo-config.service';
     /* Review Section */
     .pr-review-section { background: #fefce8; border: 1px solid #fde68a; border-radius: 10px; padding: 16px; margin-top: 16px; }
     .pr-review-section h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; font-size: 15px; color: #854d0e; }
+    .reviewer-field { width: 100%; margin-bottom: 8px; }
+    .reviewer-avatar { width: 20px; height: 20px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
+    .request-reviewer-btn { width: 100%; margin-bottom: 8px; }
+    .review-divider { margin: 12px 0; }
     .review-actions { display: flex; gap: 10px; }
     .approve-btn { background: #16a34a !important; color: white !important; }
     .request-changes-btn { font-size: 13px; }
@@ -707,6 +728,8 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   reviewLoading = false;
   showReviewComment = false;
   reviewComment = '';
+  collaborators: any[] = [];
+  selectedReviewer = '';
   confirmDialog: { show: boolean; title: string; message: string; action: () => void } = { show: false, title: '', message: '', action: () => {} };
   private pollingInterval: any;
 
@@ -798,6 +821,23 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
     const action = this.confirmDialog.action;
     this.closeConfirm();
     action();
+  }
+
+  onRequestReviewer(): void {
+    if (!this.ticket || !this.selectedReviewer) return;
+    this.reviewLoading = true;
+    this.http.post<any>(`http://localhost:8080/api/git/request-reviewer/${this.ticket.id}`, {
+      reviewer: this.selectedReviewer
+    }).subscribe({
+      next: (res) => {
+        this.reviewLoading = false;
+        this.snackBar.open('Review solicitado para ' + this.selectedReviewer, 'OK', { duration: 3000 });
+      },
+      error: () => {
+        this.reviewLoading = false;
+        this.snackBar.open('Erro ao solicitar review', 'OK', { duration: 3000 });
+      }
+    });
   }
 
   scrollToAutoFix(): void {
@@ -946,6 +986,18 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
         this.prSummaryData = null;
       }
     }
+    // Load collaborators if ticket has a repo config
+    if (this.ticket?.prUrl && this.selectedRepoId) {
+      this.loadCollaborators();
+    }
+  }
+
+  loadCollaborators(): void {
+    if (!this.selectedRepoId) return;
+    this.http.get<any[]>(`http://localhost:8080/api/git/collaborators/${this.selectedRepoId}`).subscribe({
+      next: (collabs) => this.collaborators = collabs,
+      error: () => this.collaborators = []
+    });
   }
 
   startPolling(): void {

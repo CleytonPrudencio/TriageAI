@@ -30,6 +30,11 @@ public class GitIntegrationService {
     @Value("${app.ai-service.url}")
     private String aiServiceUrl;
 
+    public RepoConfig getRepoConfig(Long repoConfigId) {
+        return repoConfigRepository.findById(repoConfigId)
+                .orElseThrow(() -> new RuntimeException("Configuracao de repositorio nao encontrada"));
+    }
+
     public AutoFixResponse processAutoFix(Long ticketId, Long repoConfigId) {
         return processAutoFix(ticketId, repoConfigId, "fix", null);
     }
