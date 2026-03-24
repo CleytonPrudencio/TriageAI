@@ -544,11 +544,14 @@ public class GitProviderService {
                             .retrieve().body(List.class);
                     if (collabs == null) yield List.of();
                     yield collabs.stream()
-                            .map(c -> Map.of(
-                                    "username", String.valueOf(c.get("login")),
-                                    "avatarUrl", String.valueOf(c.getOrDefault("avatar_url", "")),
-                                    "role", String.valueOf(((Map<?, ?>) c.getOrDefault("permissions", Map.of())).getOrDefault("admin", false) ? "admin" : "collaborator")
-                            ))
+                            .map(c -> {
+                                String login = String.valueOf(c.get("login"));
+                                String avatar = String.valueOf(c.getOrDefault("avatar_url", ""));
+                                Object perms = c.getOrDefault("permissions", Map.of());
+                                boolean isAdmin = perms instanceof Map && Boolean.TRUE.equals(((Map<?, ?>) perms).get("admin"));
+                                String role = isAdmin ? "admin" : "collaborator";
+                                return Map.of("username", login, "avatarUrl", avatar, "role", role);
+                            })
                             .toList();
                 } catch (Exception e) {
                     log.warn("Failed to list collaborators: {}", e.getMessage());
