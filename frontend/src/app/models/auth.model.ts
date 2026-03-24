@@ -4,9 +4,13 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
+  nomeEmpresa: string;
+  documento: string;
   name: string;
   email: string;
   password: string;
+  telefone?: string;
+  plano: string;
 }
 
 export interface AuthResponse {

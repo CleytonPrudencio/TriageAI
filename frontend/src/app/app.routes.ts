@@ -18,6 +18,8 @@ export const routes: Routes = [
       { path: 'settings/training', loadComponent: () => import('./settings/ai-training/ai-training.component').then(m => m.AiTrainingComponent) },
       { path: 'config', loadComponent: () => import('./settings/config/config.component').then(m => m.ConfigComponent) },
       { path: 'sistemas', loadComponent: () => import('./settings/sistemas/sistemas.component').then(m => m.SistemasComponent) },
+      { path: 'tutorial', loadComponent: () => import('./settings/tutorial/tutorial.component').then(m => m.TutorialComponent) },
+      { path: 'profile', loadComponent: () => import('./settings/profile/profile.component').then(m => m.ProfileComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },

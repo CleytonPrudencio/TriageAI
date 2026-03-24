@@ -26,11 +26,15 @@ public class JwtTokenProvider {
 
     public String generateToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return generateToken(userDetails.getUsername());
+    }
+
+    public String generateToken(String email) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()
-                .subject(userDetails.getUsername())
+                .subject(email)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())

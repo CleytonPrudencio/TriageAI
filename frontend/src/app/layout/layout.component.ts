@@ -27,6 +27,10 @@ import { AuthService } from '../services/auth.service';
         </div>
 
         <nav class="sidebar-nav">
+          <a routerLink="/tutorial" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Tutorial' : ''" matTooltipPosition="right">
+            <mat-icon>school</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Tutorial</span>
+          </a>
           <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Dashboard' : ''" matTooltipPosition="right">
             <mat-icon>dashboard</mat-icon>
             <span *ngIf="!sidebarCollapsed">Dashboard</span>
@@ -58,13 +62,13 @@ import { AuthService } from '../services/auth.service';
         </nav>
 
         <div class="sidebar-footer">
-          <div class="user-area" *ngIf="!sidebarCollapsed">
+          <a routerLink="/profile" class="user-area" *ngIf="!sidebarCollapsed">
             <div class="avatar">{{ userInitials }}</div>
             <div class="user-info">
               <span class="user-name">{{ userName }}</span>
               <span class="user-role">{{ userRole }}</span>
             </div>
-          </div>
+          </a>
           <button mat-icon-button (click)="logout()" class="logout-btn" matTooltip="Sair" matTooltipPosition="right">
             <mat-icon>logout</mat-icon>
           </button>
@@ -154,7 +158,12 @@ import { AuthService } from '../services/auth.service';
       gap: 12px;
     }
 
-    .user-area { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .user-area {
+      display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+      text-decoration: none; cursor: pointer; border-radius: 8px; padding: 6px;
+      margin: -6px; transition: background 0.2s;
+    }
+    .user-area:hover { background: rgba(255,255,255,0.08); }
 
     .avatar {
       width: 36px; height: 36px;

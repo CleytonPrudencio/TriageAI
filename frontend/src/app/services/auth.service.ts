@@ -21,7 +21,7 @@ export class AuthService {
   }
 
   register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API}/register`, data).pipe(
+    return this.http.post<AuthResponse>('http://localhost:8080/api/register', data).pipe(
       tap(res => this.storeAuth(res))
     );
   }
