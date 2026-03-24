@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 
 interface TutorialStep {
@@ -27,7 +28,7 @@ interface StepContent {
 @Component({
   selector: 'app-tutorial',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule, MatExpansionModule, RouterLink],
+  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule, MatExpansionModule, MatTooltipModule, RouterLink],
   template: `
     <div class="tutorial-container">
       <div class="tutorial-header">
