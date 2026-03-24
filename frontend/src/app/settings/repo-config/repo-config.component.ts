@@ -435,7 +435,13 @@ export class RepoConfigComponent implements OnInit {
   readonly allProviders = [
     { value: 'GITHUB', label: 'GitHub', icon: 'code' },
     { value: 'GITLAB', label: 'GitLab', icon: 'merge_type' },
-    { value: 'BITBUCKET', label: 'Bitbucket', icon: 'source' }
+    { value: 'BITBUCKET', label: 'Bitbucket', icon: 'source' },
+    { value: 'AZURE_DEVOPS', label: 'Azure DevOps', icon: 'cloud' },
+    { value: 'AWS_CODECOMMIT', label: 'AWS CodeCommit', icon: 'cloud_queue' },
+    { value: 'GITEA', label: 'Gitea', icon: 'dns' },
+    { value: 'GOGS', label: 'Gogs', icon: 'storage' },
+    { value: 'SOURCEHUT', label: 'SourceHut', icon: 'terminal' },
+    { value: 'CODEBERG', label: 'Codeberg', icon: 'public' }
   ];
 
   // Available repos (aggregated from all connections)
