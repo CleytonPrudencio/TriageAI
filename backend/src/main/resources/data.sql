@@ -1,20 +1,20 @@
 -- Admin (senha: admin123)
 INSERT INTO users (email, password, name, role) VALUES
-('admin@triageai.com', '$2b$10$8OBIiTN.EP94GvPkliHDgebXnGcmFfFjUSrI3yTnTWddRTw7jBLna', 'Carlos Admin', 'ADMIN')
+('admin@triageai.com', '$2a$10$pYKNBsMycL1JL.i7RLfjauuq/W3cyauhQ5Y5uF.fzAGPHtXOaaUUu', 'Carlos Admin', 'ADMIN')
 ON CONFLICT (email) DO NOTHING;
 
--- Agentes (senha: agent123)
+-- Agentes (senha: agente123)
 INSERT INTO users (email, password, name, role) VALUES
-('maria@triageai.com', '$2b$10$IXOTprAcR2lmn/QHGuQiueJSc8aeJy.JW.srI5pbYzFwuUl1Fkm9W', 'Maria Silva', 'AGENT')
+('maria@triageai.com', '$2a$10$tQxDWRBjLQq.YLbxoz4j4.LRm7ibC1/k5beKIia.mRYcyZcY1/tr2', 'Maria Silva', 'AGENT')
 ON CONFLICT (email) DO NOTHING;
 INSERT INTO users (email, password, name, role) VALUES
-('joao@triageai.com', '$2b$10$IXOTprAcR2lmn/QHGuQiueJSc8aeJy.JW.srI5pbYzFwuUl1Fkm9W', 'Joao Santos', 'AGENT')
+('joao@triageai.com', '$2a$10$tQxDWRBjLQq.YLbxoz4j4.LRm7ibC1/k5beKIia.mRYcyZcY1/tr2', 'Joao Santos', 'AGENT')
 ON CONFLICT (email) DO NOTHING;
 
--- Clientes (senha: client123)
+-- Clientes (senha: cliente123)
 INSERT INTO users (email, password, name, role) VALUES
-('ana@empresa.com', '$2b$10$yGVOoSzdTh0Mg6m5w4J6AuI9B1aiUjcPjeD.Ws.Ok5ZGpHZg63K3C', 'Ana Costa', 'CLIENT')
+('ana@empresa.com', '$2a$10$h3i5tVG0kGNURIiMWl1ZA.0F3j0dMLVKZfeUuT5DoePTff0vsf8R2', 'Ana Costa', 'CLIENT')
 ON CONFLICT (email) DO NOTHING;
 INSERT INTO users (email, password, name, role) VALUES
-('pedro@empresa.com', '$2b$10$yGVOoSzdTh0Mg6m5w4J6AuI9B1aiUjcPjeD.Ws.Ok5ZGpHZg63K3C', 'Pedro Oliveira', 'CLIENT')
+('pedro@empresa.com', '$2a$10$h3i5tVG0kGNURIiMWl1ZA.0F3j0dMLVKZfeUuT5DoePTff0vsf8R2', 'Pedro Oliveira', 'CLIENT')
 ON CONFLICT (email) DO NOTHING;
