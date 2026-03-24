@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -44,7 +45,8 @@ public class RegistrationController {
         }
 
         String tipoDoc = doc.length() == 11 ? "CPF" : "CNPJ";
-        String plano = req.getPlano() != null ? req.getPlano() : "FREE";
+        List<String> planosValidos = List.of("FREE", "PRO", "BUSINESS", "BUSINESS_CLAUDE", "ENTERPRISE");
+        String plano = req.getPlano() != null && planosValidos.contains(req.getPlano()) ? req.getPlano() : "FREE";
 
         Empresa empresa = Empresa.builder()
                 .nome(req.getNomeEmpresa())

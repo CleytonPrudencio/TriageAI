@@ -11,6 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule } from '@angular/material/dialog';
+import { RouterLink } from '@angular/router';
 
 interface ProfileData {
   name: string;
@@ -37,7 +38,7 @@ interface ProfileData {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressBarModule, MatChipsModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, RouterLink, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressBarModule, MatChipsModule, MatDialogModule],
   template: `
     <div class="profile-page" *ngIf="profile">
       <div class="page-header">
@@ -146,12 +147,12 @@ interface ProfileData {
           </div>
 
           <div class="plano-header">
-            <span class="plano-badge" [class]="'plano-' + profile.plano.tipo.toLowerCase()">
-              {{ profile.plano.tipo }}
+            <span class="plano-badge" [class]="'plano-' + profile.plano.tipo.toLowerCase().replace('_', '-')">
+              {{ getPlanDisplayName(profile.plano.tipo) }}
             </span>
-            <span class="plano-desc" *ngIf="profile.plano.tipo === 'FREE'">Plano gratuito com recursos limitados</span>
-            <span class="plano-desc" *ngIf="profile.plano.tipo === 'PREMIUM'">Acesso completo a todos os recursos</span>
+            <span class="plano-price">{{ getPlanPrice(profile.plano.tipo) }}</span>
           </div>
+          <p class="plano-desc-text">{{ getPlanDescription(profile.plano.tipo) }}</p>
 
           <div class="usage-stats">
             <div class="usage-item">
@@ -197,10 +198,16 @@ interface ProfileData {
             </div>
           </div>
 
-          <button *ngIf="profile.plano.tipo === 'FREE'" mat-raised-button class="upgrade-btn" (click)="upgradePlano()" [disabled]="upgrading">
-            <mat-icon>rocket_launch</mat-icon>
-            {{ upgrading ? 'Processando...' : 'Upgrade para Premium' }}
-          </button>
+          <div class="plano-actions">
+            <a routerLink="/plans" class="view-plans-link">
+              <mat-icon>visibility</mat-icon>
+              Ver todos os planos
+            </a>
+            <button *ngIf="profile.plano.tipo !== 'ENTERPRISE'" mat-raised-button class="upgrade-btn" (click)="upgradePlano()" [disabled]="upgrading">
+              <mat-icon>rocket_launch</mat-icon>
+              {{ upgrading ? 'Processando...' : 'Fazer upgrade' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -351,10 +358,44 @@ interface ProfileData {
       letter-spacing: 0.5px;
     }
 
-    .plano-free { background: #d1fae5; color: #065f46; }
+    .plano-free { background: #f3f4f6; color: #6b7280; }
+    .plano-pro { background: #dbeafe; color: #1d4ed8; }
+    .plano-business { background: #dcfce7; color: #15803d; }
+    .plano-business-claude { background: #ede9fe; color: #7c3aed; }
+    .plano-enterprise { background: #fef3c7; color: #b45309; }
     .plano-premium { background: #ede9fe; color: #5b21b6; }
 
-    .plano-desc { color: var(--text-secondary); font-size: 14px; }
+    .plano-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text, #111827);
+    }
+
+    .plano-desc-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin: 0 0 20px;
+    }
+
+    .plano-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .view-plans-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #6366f1;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 0;
+    }
+
+    .view-plans-link:hover { text-decoration: underline; }
+    .view-plans-link mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
     .usage-stats {
       display: flex;
@@ -536,10 +577,13 @@ export class ProfileComponent implements OnInit {
   }
 
   upgradePlano(): void {
-    if (!confirm('Deseja fazer upgrade para o plano Premium?')) return;
+    const currentPlan = this.profile?.plano.tipo || 'FREE';
+    const nextPlan = this.getNextPlan(currentPlan);
+    if (!nextPlan) return;
+    if (!confirm(`Deseja fazer upgrade para o plano ${this.getPlanDisplayName(nextPlan)}?`)) return;
     this.upgrading = true;
 
-    this.http.put(`${this.API}/plano`, { tipo: 'PREMIUM' }).subscribe({
+    this.http.put(`${this.API}/plano`, { tipo: nextPlan }).subscribe({
       next: () => {
         this.snackBar.open('Upgrade realizado com sucesso!', 'OK', { duration: 3000 });
         this.upgrading = false;
@@ -550,6 +594,41 @@ export class ProfileComponent implements OnInit {
         this.upgrading = false;
       }
     });
+  }
+
+  getPlanDisplayName(tipo: string): string {
+    const names: { [key: string]: string } = {
+      'FREE': 'Free', 'PRO': 'Pro', 'BUSINESS': 'Business',
+      'BUSINESS_CLAUDE': 'Business+Claude', 'ENTERPRISE': 'Enterprise', 'PREMIUM': 'Premium'
+    };
+    return names[tipo] || tipo;
+  }
+
+  getPlanPrice(tipo: string): string {
+    const prices: { [key: string]: string } = {
+      'FREE': 'R$0/mes', 'PRO': 'R$99/mes', 'BUSINESS': 'R$299/mes',
+      'BUSINESS_CLAUDE': 'R$500/mes', 'ENTERPRISE': 'R$999/mes', 'PREMIUM': 'R$99/mes'
+    };
+    return prices[tipo] || '';
+  }
+
+  getPlanDescription(tipo: string): string {
+    const descs: { [key: string]: string } = {
+      'FREE': 'Plano gratuito com recursos limitados',
+      'PRO': 'Auto-fix e API incluidos',
+      'BUSINESS': 'IA avancada com recursos ilimitados',
+      'BUSINESS_CLAUDE': 'Analises Claude AI incluidas',
+      'ENTERPRISE': 'Acesso completo com suporte prioritario',
+      'PREMIUM': 'Acesso completo a todos os recursos'
+    };
+    return descs[tipo] || '';
+  }
+
+  private getNextPlan(current: string): string | null {
+    const order = ['FREE', 'PRO', 'BUSINESS', 'BUSINESS_CLAUDE', 'ENTERPRISE'];
+    const idx = order.indexOf(current);
+    if (idx === -1 || idx >= order.length - 1) return null;
+    return order[idx + 1];
   }
 
   private updateStoredUser(): void {

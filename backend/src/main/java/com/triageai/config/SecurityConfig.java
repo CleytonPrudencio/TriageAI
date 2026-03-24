@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/register").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/admin/**").authenticated()
                 .requestMatchers("/api/v1/**").authenticated()
                 .anyRequest().authenticated()
             )

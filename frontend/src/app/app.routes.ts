@@ -4,6 +4,7 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
+  { path: 'plans', loadComponent: () => import('./plans/plans.component').then(m => m.PlansComponent) },
   {
     path: '',
     loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
@@ -20,6 +21,7 @@ export const routes: Routes = [
       { path: 'sistemas', loadComponent: () => import('./settings/sistemas/sistemas.component').then(m => m.SistemasComponent) },
       { path: 'tutorial', loadComponent: () => import('./settings/tutorial/tutorial.component').then(m => m.TutorialComponent) },
       { path: 'profile', loadComponent: () => import('./settings/profile/profile.component').then(m => m.ProfileComponent) },
+      { path: 'admin', loadComponent: () => import('./admin/admin-panel/admin-panel.component').then(m => m.AdminPanelComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },

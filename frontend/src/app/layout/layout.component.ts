@@ -55,6 +55,10 @@ import { AuthService } from '../services/auth.service';
             <mat-icon>model_training</mat-icon>
             <span *ngIf="!sidebarCollapsed">Treino IA</span>
           </a>
+          <a *ngIf="isAdmin" routerLink="/admin" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Admin' : ''" matTooltipPosition="right">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Admin</span>
+          </a>
           <a routerLink="/config" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Configuracoes' : ''" matTooltipPosition="right">
             <mat-icon>tune</mat-icon>
             <span *ngIf="!sidebarCollapsed">Configuracoes</span>
@@ -205,6 +209,7 @@ export class LayoutComponent {
   userName: string;
   userRole: string;
   userInitials: string;
+  isAdmin = false;
   sidebarCollapsed = false;
 
   constructor(private authService: AuthService, private router: Router) {
@@ -212,6 +217,7 @@ export class LayoutComponent {
     this.userName = user?.name || '';
     this.userRole = user?.role || '';
     this.userInitials = this.userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    this.isAdmin = this.userRole.toUpperCase() === 'ADMIN';
   }
 
   logout(): void {

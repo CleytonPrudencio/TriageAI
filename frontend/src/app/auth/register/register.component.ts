@@ -89,7 +89,7 @@ import { AuthService } from '../../services/auth.service';
 
             <div class="plan-section">
               <label class="section-label">Escolha seu plano</label>
-              <div class="plan-cards">
+              <div class="plan-cards five-plans">
                 <div class="plan-card" [class.selected]="plano === 'FREE'" (click)="plano = 'FREE'">
                   <div class="plan-header">
                     <h3>Free</h3>
@@ -99,23 +99,55 @@ import { AuthService } from '../../services/auth.service';
                     <li><mat-icon>check</mat-icon> 50 tickets/mes</li>
                     <li><mat-icon>check</mat-icon> 3 usuarios</li>
                     <li><mat-icon>check</mat-icon> 1 sistema</li>
-                    <li><mat-icon>check</mat-icon> Classificacao IA</li>
                   </ul>
                 </div>
 
-                <div class="plan-card premium" [class.selected]="plano === 'PREMIUM'" (click)="plano = 'PREMIUM'">
-                  <div class="badge-recommended">Recomendado</div>
+                <div class="plan-card" [class.selected]="plano === 'PRO'" (click)="plano = 'PRO'">
                   <div class="plan-header">
-                    <h3>Premium</h3>
+                    <h3>Pro</h3>
                     <span class="plan-price">R$ 99<small>/mes</small></span>
                   </div>
                   <ul class="plan-features">
-                    <li><mat-icon>check</mat-icon> Tickets ilimitados</li>
-                    <li><mat-icon>check</mat-icon> Usuarios ilimitados</li>
-                    <li><mat-icon>check</mat-icon> Auto-fix com IA</li>
-                    <li><mat-icon>check</mat-icon> Claude AI integrado</li>
-                    <li><mat-icon>check</mat-icon> API integracao</li>
+                    <li><mat-icon>check</mat-icon> 500 tickets/mes</li>
+                    <li><mat-icon>check</mat-icon> 10 usuarios</li>
+                    <li><mat-icon>check</mat-icon> Auto-fix</li>
+                  </ul>
+                </div>
+
+                <div class="plan-card" [class.selected]="plano === 'BUSINESS'" (click)="plano = 'BUSINESS'">
+                  <div class="plan-header">
+                    <h3>Business</h3>
+                    <span class="plan-price">R$ 299<small>/mes</small></span>
+                  </div>
+                  <ul class="plan-features">
+                    <li><mat-icon>check</mat-icon> Ilimitado</li>
+                    <li><mat-icon>check</mat-icon> IA avancada</li>
+                    <li><mat-icon>check</mat-icon> API</li>
+                  </ul>
+                </div>
+
+                <div class="plan-card premium" [class.selected]="plano === 'BUSINESS_CLAUDE'" (click)="plano = 'BUSINESS_CLAUDE'">
+                  <div class="badge-recommended">Recomendado</div>
+                  <div class="plan-header">
+                    <h3>Business+Claude</h3>
+                    <span class="plan-price">R$ 500<small>/mes</small></span>
+                  </div>
+                  <ul class="plan-features">
+                    <li><mat-icon>check</mat-icon> Ilimitado</li>
+                    <li><mat-icon>check</mat-icon> 15 analises Claude</li>
+                    <li><mat-icon>check</mat-icon> IA avancada</li>
+                  </ul>
+                </div>
+
+                <div class="plan-card enterprise" [class.selected]="plano === 'ENTERPRISE'" (click)="plano = 'ENTERPRISE'">
+                  <div class="plan-header">
+                    <h3>Enterprise</h3>
+                    <span class="plan-price">R$ 999<small>/mes</small></span>
+                  </div>
+                  <ul class="plan-features">
+                    <li><mat-icon>check</mat-icon> 100 analises Claude</li>
                     <li><mat-icon>check</mat-icon> Suporte prioritario</li>
+                    <li><mat-icon>check</mat-icon> Tudo ilimitado</li>
                   </ul>
                 </div>
               </div>
@@ -149,7 +181,7 @@ import { AuthService } from '../../services/auth.service';
 
     .register-container {
       width: 100%;
-      max-width: 600px;
+      max-width: 720px;
     }
 
     .register-card {
@@ -213,6 +245,10 @@ import { AuthService } from '../../services/auth.service';
       gap: 16px;
     }
 
+    .plan-cards.five-plans {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
     .plan-card {
       border: 2px solid #e5e7eb;
       border-radius: 12px;
@@ -266,6 +302,14 @@ import { AuthService } from '../../services/auth.service';
     .plan-price small { font-size: 13px; font-weight: 400; color: #9ca3af; }
 
     .premium .plan-price { color: #7c3aed; }
+
+    .plan-card.enterprise.selected {
+      border-color: #d97706;
+      background: #fffbeb;
+      box-shadow: 0 0 0 1px #d97706;
+    }
+
+    .enterprise .plan-price { color: #d97706; }
 
     .plan-features {
       list-style: none;
@@ -328,7 +372,7 @@ import { AuthService } from '../../services/auth.service';
     @media (max-width: 640px) {
       .register-card { padding: 24px; }
       .form-row.two-cols { grid-template-columns: 1fr; }
-      .plan-cards { grid-template-columns: 1fr; }
+      .plan-cards, .plan-cards.five-plans { grid-template-columns: 1fr; }
     }
   `]
 })
