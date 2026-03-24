@@ -13,4 +13,9 @@ public class TicketRequest {
     private String descricao;
 
     private Long sistemaId;
+
+    // Optional: pre-classification from enrich step (if provided, skip ML prediction)
+    private String categoria;
+    private String prioridade;
+    private Double aiScore;
 }

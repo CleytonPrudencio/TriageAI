@@ -808,6 +808,12 @@ export class TicketFormComponent {
     if (this.selectedSistemaId) {
       data.sistemaId = this.selectedSistemaId;
     }
+    // Pass pre-classification from enrich step so backend doesn't re-classify
+    if (this.enrichData?.classificacao) {
+      data.categoria = this.enrichData.classificacao.categoria;
+      data.prioridade = this.enrichData.classificacao.prioridade;
+      data.aiScore = this.enrichData.classificacao.score;
+    }
     this.ticketService.create(data).subscribe({
       next: (ticket) => {
         this.snackBar.open('Chamado criado com sucesso!', 'OK', { duration: 3000 });

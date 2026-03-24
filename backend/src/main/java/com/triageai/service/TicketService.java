@@ -31,16 +31,31 @@ public class TicketService {
     private String aiServiceUrl;
 
     public TicketResponse create(TicketRequest request, User user) {
-        String fullText = request.getTitulo() + " " + request.getDescricao();
-        AiPredictionResponse prediction = aiService.predict(fullText);
+        Category cat;
+        Priority pri;
+        double score;
+
+        // Use pre-classification from enrich step if provided
+        if (request.getCategoria() != null && request.getPrioridade() != null) {
+            cat = Category.valueOf(request.getCategoria());
+            pri = Priority.valueOf(request.getPrioridade());
+            score = request.getAiScore() != null ? request.getAiScore() : 0;
+        } else {
+            // Fallback: classify with ML model
+            String fullText = request.getTitulo() + " " + request.getDescricao();
+            AiPredictionResponse prediction = aiService.predict(fullText);
+            cat = Category.valueOf(prediction.getCategoria());
+            pri = Priority.valueOf(prediction.getPrioridade());
+            score = prediction.getScore();
+        }
 
         Ticket ticket = Ticket.builder()
                 .titulo(request.getTitulo())
                 .descricao(request.getDescricao())
-                .categoria(Category.valueOf(prediction.getCategoria()))
-                .prioridade(Priority.valueOf(prediction.getPrioridade()))
+                .categoria(cat)
+                .prioridade(pri)
                 .status(Status.ABERTO)
-                .aiScore(prediction.getScore())
+                .aiScore(score)
                 .user(user)
                 .build();
 
