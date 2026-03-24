@@ -19,6 +19,13 @@ spring:
     init:
       mode: always
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
 app:
   jwt:
     secret: TriageAI-Super-Secret-Key-2026-Must-Be-At-Least-256-Bits-Long!!

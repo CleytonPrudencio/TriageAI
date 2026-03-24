@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
@@ -24,6 +25,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatInputModule,
     MatDividerModule,
     MatExpansionModule,
+    MatSelectModule,
     MatSnackBarModule,
   ],
   template: `
@@ -153,6 +155,69 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
           </div>
         </mat-card-content>
       </mat-card>
+
+      <!-- API Documentation -->
+      <mat-card class="config-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="config-icon doc-icon">description</mat-icon>
+          <mat-card-title>Documentacao da API</mat-card-title>
+          <mat-card-subtitle>Swagger, Collection e ambientes</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <!-- Swagger -->
+          <div class="doc-row">
+            <div class="doc-info">
+              <mat-icon>api</mat-icon>
+              <div>
+                <strong>Swagger UI</strong>
+                <p>Documentacao interativa da API com teste direto</p>
+              </div>
+            </div>
+            <a mat-stroked-button href="http://localhost:8080/swagger-ui.html" target="_blank">
+              <mat-icon>open_in_new</mat-icon> Abrir Swagger
+            </a>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- Collection Export -->
+          <div class="doc-row">
+            <div class="doc-info">
+              <mat-icon>download</mat-icon>
+              <div>
+                <strong>Exportar Collection (Postman/Insomnia)</strong>
+                <p>Baixe a collection com todas as rotas da API</p>
+              </div>
+            </div>
+            <div class="export-controls">
+              <mat-form-field appearance="outline" class="env-select">
+                <mat-label>Ambiente</mat-label>
+                <mat-select [(ngModel)]="selectedEnv">
+                  <mat-option value="local">Local</mat-option>
+                  <mat-option value="dev">Desenvolvimento</mat-option>
+                  <mat-option value="staging">Staging</mat-option>
+                  <mat-option value="prod">Producao</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-flat-button color="primary" (click)="exportCollection()">
+                <mat-icon>download</mat-icon> Exportar
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Info -->
+          <div class="api-info-box">
+            <h4>Endpoints disponiveis</h4>
+            <div class="api-summary">
+              <span class="api-method get">GET</span>
+              <span class="api-method post">POST</span>
+              <span class="api-method put">PUT</span>
+              <span class="api-method delete">DELETE</span>
+              <span class="api-count">40+ endpoints em 8 categorias</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
   `,
   styles: [`
@@ -189,6 +254,22 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     .service-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
     .service-row:last-child { border-bottom: none; }
     .service-name { display: flex; align-items: center; gap: 8px; }
+    .doc-icon { color: #0ea5e9; }
+    .doc-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
+    .doc-info { display: flex; align-items: center; gap: 12px; }
+    .doc-info p { margin: 0; color: #64748b; font-size: 13px; }
+    .export-controls { display: flex; align-items: center; gap: 8px; }
+    .env-select { width: 160px; font-size: 13px; }
+    .env-select .mat-mdc-form-field-subscript-wrapper { display: none; }
+    .api-info-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px 16px; margin-top: 12px; }
+    .api-info-box h4 { margin: 0 0 8px; color: #0369a1; font-size: 14px; }
+    .api-summary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .api-method { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; color: white; }
+    .api-method.get { background: #22c55e; }
+    .api-method.post { background: #3b82f6; }
+    .api-method.put { background: #f59e0b; }
+    .api-method.delete { background: #ef4444; }
+    .api-count { color: #64748b; font-size: 13px; }
 
     mat-card-content { padding: 16px !important; }
   `]
@@ -199,6 +280,8 @@ export class ConfigComponent implements OnInit {
   showKey = false;
   saving = false;
   aiOnline = false;
+
+  selectedEnv = 'local';
 
   apiKeys: any[] = [];
   newKeyName = '';
@@ -279,5 +362,22 @@ export class ConfigComponent implements OnInit {
     navigator.clipboard.writeText(this.generatedKey).then(() => {
       this.snackBar.open('Chave copiada!', 'OK', { duration: 2000 });
     });
+  }
+
+  exportCollection(): void {
+    this.http.get(`http://localhost:8080/api/collection/postman?env=${this.selectedEnv}`)
+      .subscribe({
+        next: (data) => {
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `triageai-collection-${this.selectedEnv}.json`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          this.snackBar.open('Collection exportada!', 'OK', { duration: 3000 });
+        },
+        error: () => this.snackBar.open('Erro ao exportar', 'OK', { duration: 3000 })
+      });
   }
 }
