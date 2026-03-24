@@ -12,6 +12,7 @@ export interface Sistema {
   repoFullName: string;
   provider: string;
   autoFixEnabled: boolean;
+  defaultReviewer: string;
   branchMapping: {
     hotfix: string;
     bugfix: string;

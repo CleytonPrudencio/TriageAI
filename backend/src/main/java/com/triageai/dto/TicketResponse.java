@@ -22,6 +22,8 @@ public class TicketResponse {
     private String prSummary;
     private Long sistemaId;
     private String sistemaNome;
+    private Boolean sistemaAutoFix;
+    private Long repoConfigId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -42,6 +44,16 @@ public class TicketResponse {
         r.setPrSummary(t.getPrSummary());
         r.setSistemaId(t.getSistema() != null ? t.getSistema().getId() : null);
         r.setSistemaNome(t.getSistema() != null ? t.getSistema().getNome() : null);
+        r.setSistemaAutoFix(t.getSistema() != null ? t.getSistema().isAutoFixEnabled() : null);
+        try {
+            if (t.getRepoConfig() != null) {
+                r.setRepoConfigId(t.getRepoConfig().getId());
+            } else if (t.getSistema() != null && t.getSistema().getRepoConfig() != null) {
+                r.setRepoConfigId(t.getSistema().getRepoConfig().getId());
+            }
+        } catch (Exception e) {
+            // repoConfig is lazy-loaded and may not be available
+        }
         r.setCreatedAt(t.getCreatedAt());
         r.setUpdatedAt(t.getUpdatedAt());
         return r;

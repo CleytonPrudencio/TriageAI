@@ -68,6 +68,11 @@ import { RepoConfig } from '../../models/repo-config.model';
           </mat-slide-toggle>
         </div>
 
+        <mat-form-field appearance="outline">
+          <mat-label>Reviewer padrao (username GitHub)</mat-label>
+          <input matInput [(ngModel)]="form.defaultReviewer" name="defaultReviewer" placeholder="ex: johndoe">
+        </mat-form-field>
+
         <div class="branch-mapping">
           <h4><mat-icon>account_tree</mat-icon> Mapeamento de Branches (de onde cada tipo sai)</h4>
           <div class="branch-grid">
@@ -163,6 +168,11 @@ import { RepoConfig } from '../../models/repo-config.model';
             Auto-fix {{ s.autoFixEnabled ? 'Ativado' : 'Desativado' }}
           </span>
 
+          <span class="badge reviewer-badge" *ngIf="s.defaultReviewer">
+            <mat-icon class="badge-icon">person</mat-icon>
+            Reviewer: {{ s.defaultReviewer }}
+          </span>
+
           <span class="badge branch-type-badge">
             <mat-icon class="badge-icon">smart_toy</mat-icon>
             Branch: Auto (IA)
@@ -245,6 +255,8 @@ import { RepoConfig } from '../../models/repo-config.model';
     .autofix-on { background: #dcfce7; color: #16a34a; }
     .autofix-off { background: #f1f5f9; color: #94a3b8; }
 
+    .reviewer-badge { background: #fef3c7; color: #92400e; }
+
     .branch-type-badge {
       background: #ede9fe; color: #7c3aed;
       text-transform: uppercase; letter-spacing: 0.5px;
@@ -277,6 +289,7 @@ export class SistemasComponent implements OnInit {
     descricao: '',
     repoConfigId: null,
     autoFixEnabled: false,
+    defaultReviewer: '',
     branchHotfix: 'main',
     branchBugfix: 'develop',
     branchFix: 'develop',
@@ -316,7 +329,7 @@ export class SistemasComponent implements OnInit {
     this.editing = false;
     this.editingId = null;
     this.form = {
-      nome: '', descricao: '', repoConfigId: null, autoFixEnabled: false,
+      nome: '', descricao: '', repoConfigId: null, autoFixEnabled: false, defaultReviewer: '',
       branchHotfix: 'main', branchBugfix: 'develop', branchFix: 'develop',
       branchFeat: 'develop', branchRefactor: 'develop', branchDocs: 'develop', branchChore: 'develop'
     };
@@ -332,6 +345,7 @@ export class SistemasComponent implements OnInit {
       descricao: sistema.descricao || '',
       repoConfigId: sistema.repoConfigId,
       autoFixEnabled: sistema.autoFixEnabled || false,
+      defaultReviewer: sistema.defaultReviewer || '',
       branchHotfix: bm.hotfix || 'main',
       branchBugfix: bm.bugfix || 'develop',
       branchFix: bm.fix || 'develop',

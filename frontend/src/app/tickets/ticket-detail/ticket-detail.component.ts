@@ -987,14 +987,18 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       }
     }
     // Load collaborators if ticket has a repo config
-    if (this.ticket?.prUrl && this.selectedRepoId) {
-      this.loadCollaborators();
+    if (this.ticket?.prUrl) {
+      const configId = this.ticket.repoConfigId || this.selectedRepoId;
+      if (configId) {
+        this.loadCollaborators(configId);
+      }
     }
   }
 
-  loadCollaborators(): void {
-    if (!this.selectedRepoId) return;
-    this.http.get<any[]>(`http://localhost:8080/api/git/collaborators/${this.selectedRepoId}`).subscribe({
+  loadCollaborators(configId?: number): void {
+    const id = configId || this.ticket?.repoConfigId || this.selectedRepoId;
+    if (!id) return;
+    this.repoConfigService.getCollaborators(id).subscribe({
       next: (collabs) => this.collaborators = collabs,
       error: () => this.collaborators = []
     });

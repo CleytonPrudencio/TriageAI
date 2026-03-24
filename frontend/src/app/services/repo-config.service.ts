@@ -57,4 +57,8 @@ export class RepoConfigService {
   listReposByConnection(connectionId: number): Observable<GitRepo[]> {
     return this.http.get<GitRepo[]>(`${this.API}/git/repos/${connectionId}`);
   }
+
+  getCollaborators(repoConfigId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API}/git/collaborators/${repoConfigId}`);
+  }
 }

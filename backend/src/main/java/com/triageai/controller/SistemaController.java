@@ -59,6 +59,7 @@ public class SistemaController {
         s.setNome(req.getNome());
         s.setDescricao(req.getDescricao());
         s.setAutoFixEnabled(req.isAutoFixEnabled());
+        s.setDefaultReviewer(req.getDefaultReviewer());
         s.setBranchHotfix(req.getBranchHotfix() != null ? req.getBranchHotfix() : "main");
         s.setBranchBugfix(req.getBranchBugfix() != null ? req.getBranchBugfix() : "develop");
         s.setBranchFix(req.getBranchFix() != null ? req.getBranchFix() : "develop");
@@ -80,6 +81,7 @@ public class SistemaController {
         map.put("nome", s.getNome());
         map.put("descricao", s.getDescricao());
         map.put("autoFixEnabled", s.isAutoFixEnabled());
+        map.put("defaultReviewer", s.getDefaultReviewer());
         // Branch mapping
         Map<String, String> branches = new LinkedHashMap<>();
         branches.put("hotfix", s.getBranchHotfix() != null ? s.getBranchHotfix() : "main");
@@ -107,6 +109,7 @@ public class SistemaController {
         private String descricao;
         private Long repoConfigId;
         private boolean autoFixEnabled;
+        private String defaultReviewer;
         private String branchHotfix;
         private String branchBugfix;
         private String branchFix;

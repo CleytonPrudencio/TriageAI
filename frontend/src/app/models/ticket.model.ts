@@ -15,6 +15,7 @@ export interface Ticket {
   sistemaId: number | null;
   sistemaName: string;
   sistemaAutoFix: boolean;
+  repoConfigId: number | null;
   createdAt: string;
   updatedAt: string;
 }

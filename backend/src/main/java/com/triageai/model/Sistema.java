@@ -33,6 +33,8 @@ public class Sistema {
 
     private boolean autoFixEnabled = false; // auto-fix roda automaticamente
 
+    private String defaultReviewer; // username do reviewer padrao no GitHub
+
     /**
      * Retorna a branch de origem baseada no tipo de branch
      */
