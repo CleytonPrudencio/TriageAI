@@ -396,6 +396,21 @@ import { RepoConfigService } from '../../services/repo-config.service';
         </div>
       </div>
     </div>
+
+    <!-- Confirm Dialog Overlay -->
+    <div class="confirm-overlay" *ngIf="confirmDialog.show" (click)="closeConfirm()">
+      <div class="confirm-dialog" (click)="$event.stopPropagation()">
+        <div class="confirm-icon-wrap">
+          <mat-icon class="confirm-icon">warning_amber</mat-icon>
+        </div>
+        <h3 class="confirm-title">{{ confirmDialog.title }}</h3>
+        <p class="confirm-message">{{ confirmDialog.message }}</p>
+        <div class="confirm-actions">
+          <button mat-stroked-button (click)="closeConfirm()">Cancelar</button>
+          <button mat-flat-button color="primary" (click)="confirmAction()">Confirmar</button>
+        </div>
+      </div>
+    </div>
   `,
   styles: [`
     .back-btn { color: var(--text-secondary); margin-bottom: 16px; }
@@ -465,6 +480,17 @@ import { RepoConfigService } from '../../services/repo-config.service';
     }
 
     .delete-btn { width: 100%; margin-top: 8px; }
+
+    /* Confirm Dialog */
+    .confirm-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(3px); }
+    .confirm-dialog { background: white; border-radius: 16px; padding: 32px; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: dialog-in 0.2s ease-out; }
+    @keyframes dialog-in { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .confirm-icon-wrap { width: 56px; height: 56px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .confirm-icon { color: #f59e0b; font-size: 32px; width: 32px; height: 32px; }
+    .confirm-title { margin: 0 0 8px; font-size: 20px; font-weight: 700; color: #1e293b; }
+    .confirm-message { margin: 0 0 24px; color: #64748b; font-size: 14px; line-height: 1.5; }
+    .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+    .confirm-actions button { min-width: 120px; }
 
     .reclassify-btn { background: linear-gradient(135deg, #f59e0b, #ef4444) !important; color: white !important; }
     .reclassify-btn mat-spinner { margin-right: 4px; }
@@ -633,6 +659,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   reviewLoading = false;
   showReviewComment = false;
   reviewComment = '';
+  confirmDialog: { show: boolean; title: string; message: string; action: () => void } = { show: false, title: '', message: '', action: () => {} };
   private pollingInterval: any;
 
   constructor(
@@ -686,7 +713,10 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
 
   deleteAutoFix(): void {
     if (!this.ticket) return;
-    if (!confirm('Tem certeza? Isso vai fechar o PR e deletar a branch no GitHub.')) return;
+    this.showConfirm('Apagar PR e Branch', 'Isso vai fechar o PR e deletar a branch no GitHub. Deseja continuar?', () => this.doDeleteAutoFix());
+  }
+
+  doDeleteAutoFix(): void {
 
     this.deletingFix = true;
     this.repoConfigService.deleteAutoFix(this.ticket.id).subscribe({
@@ -706,6 +736,20 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
         this.snackBar.open('Erro ao remover PR', 'OK', { duration: 3000 });
       }
     });
+  }
+
+  showConfirm(title: string, message: string, action: () => void): void {
+    this.confirmDialog = { show: true, title, message, action };
+  }
+
+  closeConfirm(): void {
+    this.confirmDialog = { show: false, title: '', message: '', action: () => {} };
+  }
+
+  confirmAction(): void {
+    const action = this.confirmDialog.action;
+    this.closeConfirm();
+    action();
   }
 
   scrollToAutoFix(): void {
@@ -732,7 +776,12 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   approvePr(): void {
-    if (!this.ticket || !confirm('Aprovar este PR no GitHub?')) return;
+    if (!this.ticket) return;
+    this.showConfirm('Aprovar PR', 'Deseja aprovar este Pull Request no GitHub?', () => this.doApprovePr());
+  }
+
+  doApprovePr(): void {
+    if (!this.ticket) return;
     this.reviewLoading = true;
     this.http.post<any>(`http://localhost:8080/api/git/review/${this.ticket!.id}`, {
       action: 'APPROVE', comment: 'Approved via TriageAI'
@@ -808,12 +857,12 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
 
   onDelete(): void {
     if (!this.ticket) return;
-    if (confirm('Tem certeza que deseja excluir este chamado?')) {
-      this.ticketService.delete(this.ticket.id).subscribe(() => {
+    this.showConfirm('Excluir Chamado', 'Tem certeza que deseja excluir este chamado? Esta acao nao pode ser desfeita.', () => {
+      this.ticketService.delete(this.ticket!.id).subscribe(() => {
         this.snackBar.open('Chamado excluido', 'OK', { duration: 2000 });
         this.router.navigate(['/tickets']);
       });
-    }
+    });
   }
 
   onReclassify(): void {
