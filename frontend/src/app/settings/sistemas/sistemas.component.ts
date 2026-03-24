@@ -68,16 +68,7 @@ import { RepoConfig } from '../../models/repo-config.model';
           </mat-slide-toggle>
         </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Reviewer padrao</mat-label>
-          <mat-select [(ngModel)]="form.defaultReviewer" name="defaultReviewer">
-            <mat-option value="">Nenhum</mat-option>
-            <mat-option *ngFor="let c of repoCollaborators" [value]="c.username">
-              {{ c.username }} <span style="color:#94a3b8;font-size:12px">({{ c.role }})</span>
-            </mat-option>
-          </mat-select>
-          <mat-hint *ngIf="repoCollaborators.length === 0 && form.repoConfigId">Carregando...</mat-hint>
-        </mat-form-field>
+        <!-- Reviewer padrao removido - agora e por tipo de branch abaixo -->
 
         <div class="branch-mapping">
           <h4><mat-icon>account_tree</mat-icon> Branches e Reviewers por tipo</h4>
@@ -95,13 +86,16 @@ import { RepoConfig } from '../../models/repo-config.model';
               <mat-form-field appearance="outline" class="bt-origin-field">
                 <input matInput [(ngModel)]="form['branch' + bt.formKey]" [name]="'branch' + bt.formKey" [placeholder]="bt.default">
               </mat-form-field>
-              <mat-form-field appearance="outline" class="bt-reviewers-field">
-                <mat-select [(ngModel)]="form['reviewers' + bt.formKey]" [name]="'reviewers' + bt.formKey" multiple [placeholder]="'Opcional'">
+              <mat-form-field appearance="outline" class="bt-reviewers-field" *ngIf="repoCollaborators.length > 0">
+                <mat-select [(ngModel)]="form['reviewers' + bt.formKey]" [name]="'reviewers' + bt.formKey" multiple placeholder="Opcional">
                   <mat-option *ngFor="let c of repoCollaborators" [value]="c.username">
                     {{ c.username }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
+              <span class="no-collabs-hint" *ngIf="repoCollaborators.length === 0">
+                {{ form.repoConfigId ? 'Carregando...' : 'Selecione repo' }}
+              </span>
             </div>
           </div>
         </div>
@@ -272,6 +266,8 @@ import { RepoConfig } from '../../models/repo-config.model';
     .bt-type-label small { display: block; color: #94a3b8; font-size: 11px; }
     .bt-origin-field, .bt-reviewers-field { font-size: 13px; }
     .bt-origin-field .mat-mdc-form-field-subscript-wrapper, .bt-reviewers-field .mat-mdc-form-field-subscript-wrapper { display: none; }
+    :host ::ng-deep .cdk-overlay-pane { max-height: 250px !important; }
+    .no-collabs-hint { color: #94a3b8; font-size: 12px; font-style: italic; padding: 8px 0; }
 
     @media (max-width: 900px) {
       .branch-grid { grid-template-columns: repeat(2, 1fr); }
