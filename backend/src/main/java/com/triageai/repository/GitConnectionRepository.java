@@ -10,4 +10,7 @@ public interface GitConnectionRepository extends JpaRepository<GitConnection, Lo
     List<GitConnection> findByUserId(Long userId);
     Optional<GitConnection> findByUserIdAndProvider(Long userId, GitProvider provider);
     Optional<GitConnection> findFirstByProvider(GitProvider provider);
+
+    List<GitConnection> findByEmpresaId(Long empresaId);
+    List<GitConnection> findByOwnerUserId(Long userId);
 }

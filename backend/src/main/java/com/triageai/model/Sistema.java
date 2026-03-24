@@ -78,6 +78,14 @@ public class Sistema {
         };
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_user_id")
+    private User ownerUser;
+
     private LocalDateTime createdAt;
 
     @PrePersist

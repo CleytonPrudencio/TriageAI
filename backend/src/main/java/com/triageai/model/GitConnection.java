@@ -29,6 +29,14 @@ public class GitConnection {
     @Column(nullable = false)
     private LocalDateTime connectedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_user_id")
+    private User ownerUser;
+
     @PrePersist
     protected void onCreate() {
         connectedAt = LocalDateTime.now();

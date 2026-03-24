@@ -46,4 +46,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Object[]> countByPrStatusGrouped();
 
     List<Ticket> findTop10ByOrderByCreatedAtDesc();
+
+    // Tenant isolation: empresa-level queries
+    Page<Ticket> findByUserEmpresaId(Long empresaId, Pageable pageable);
+    Page<Ticket> findByUserEmpresaIdAndStatus(Long empresaId, Status status, Pageable pageable);
+    Page<Ticket> findByUserEmpresaIdAndPrioridade(Long empresaId, Priority prioridade, Pageable pageable);
+    Page<Ticket> findByUserEmpresaIdAndCategoria(Long empresaId, Category categoria, Pageable pageable);
 }

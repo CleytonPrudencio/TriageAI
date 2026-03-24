@@ -8,6 +8,7 @@ import com.triageai.model.GitConnection;
 import com.triageai.model.Ticket;
 import com.triageai.model.User;
 import com.triageai.model.enums.GitProvider;
+import com.triageai.model.enums.Role;
 import com.triageai.model.enums.Status;
 import com.triageai.repository.GitConnectionRepository;
 import com.triageai.repository.TicketRepository;
@@ -183,6 +184,13 @@ public class GitController {
         connection.setUsername(userInfo.get("username"));
         connection.setAvatarUrl(userInfo.get("avatarUrl"));
 
+        // Set tenant ownership
+        if (user.getEmpresa() != null) {
+            connection.setEmpresa(user.getEmpresa());
+        } else {
+            connection.setOwnerUser(user);
+        }
+
         gitConnectionRepository.save(connection);
 
         return ResponseEntity.ok(GitConnectionResponse.from(connection));
@@ -193,13 +201,16 @@ public class GitController {
     public ResponseEntity<List<GitConnectionResponse>> listConnections(
             @AuthenticationPrincipal User user) {
 
-        List<GitConnectionResponse> connections = gitConnectionRepository
-                .findByUserId(user.getId())
-                .stream()
-                .map(GitConnectionResponse::from)
-                .toList();
+        List<GitConnection> connections;
+        if (user.getRole() == Role.ADMIN) {
+            connections = gitConnectionRepository.findAll();
+        } else if (user.getEmpresa() != null) {
+            connections = gitConnectionRepository.findByEmpresaId(user.getEmpresa().getId());
+        } else {
+            connections = gitConnectionRepository.findByOwnerUserId(user.getId());
+        }
 
-        return ResponseEntity.ok(connections);
+        return ResponseEntity.ok(connections.stream().map(GitConnectionResponse::from).toList());
     }
 
     @DeleteMapping("/connections/{id}")

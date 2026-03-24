@@ -57,18 +57,19 @@ public class TicketController {
             @Parameter(description = "Filtrar por status: ABERTO, EM_ANDAMENTO, CODE_REVIEW, RESOLVIDO, FECHADO") @RequestParam(required = false) String status,
             @Parameter(description = "Filtrar por prioridade: CRITICA, ALTA, MEDIA, BAIXA") @RequestParam(required = false) String prioridade,
             @Parameter(description = "Filtrar por categoria: TECNICO, FINANCEIRO, COMERCIAL, SUPORTE, OUTROS") @RequestParam(required = false) String categoria,
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable,
+            @AuthenticationPrincipal User user) {
 
         if (status != null) {
-            return ResponseEntity.ok(ticketService.findByStatus(Status.valueOf(status), pageable));
+            return ResponseEntity.ok(ticketService.findByStatus(Status.valueOf(status), pageable, user));
         }
         if (prioridade != null) {
-            return ResponseEntity.ok(ticketService.findByPrioridade(Priority.valueOf(prioridade), pageable));
+            return ResponseEntity.ok(ticketService.findByPrioridade(Priority.valueOf(prioridade), pageable, user));
         }
         if (categoria != null) {
-            return ResponseEntity.ok(ticketService.findByCategoria(Category.valueOf(categoria), pageable));
+            return ResponseEntity.ok(ticketService.findByCategoria(Category.valueOf(categoria), pageable, user));
         }
-        return ResponseEntity.ok(ticketService.findAll(pageable));
+        return ResponseEntity.ok(ticketService.findAll(pageable, user));
     }
 
     @GetMapping("/{id}")

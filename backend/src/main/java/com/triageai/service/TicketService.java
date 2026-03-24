@@ -5,6 +5,7 @@ import com.triageai.model.Ticket;
 import com.triageai.model.User;
 import com.triageai.model.enums.Category;
 import com.triageai.model.enums.Priority;
+import com.triageai.model.enums.Role;
 import com.triageai.model.enums.Status;
 import com.triageai.repository.SistemaRepository;
 import com.triageai.repository.TicketRepository;
@@ -70,16 +71,56 @@ public class TicketService {
         return ticketRepository.findAll(pageable).map(TicketResponse::from);
     }
 
+    public Page<TicketResponse> findAll(Pageable pageable, User user) {
+        if (user == null || user.getRole() == Role.ADMIN) {
+            return ticketRepository.findAll(pageable).map(TicketResponse::from);
+        }
+        if (user.getEmpresa() != null) {
+            return ticketRepository.findByUserEmpresaId(user.getEmpresa().getId(), pageable).map(TicketResponse::from);
+        }
+        return ticketRepository.findByUserId(user.getId(), pageable).map(TicketResponse::from);
+    }
+
     public Page<TicketResponse> findByStatus(Status status, Pageable pageable) {
         return ticketRepository.findByStatus(status, pageable).map(TicketResponse::from);
+    }
+
+    public Page<TicketResponse> findByStatus(Status status, Pageable pageable, User user) {
+        if (user == null || user.getRole() == Role.ADMIN) {
+            return ticketRepository.findByStatus(status, pageable).map(TicketResponse::from);
+        }
+        if (user.getEmpresa() != null) {
+            return ticketRepository.findByUserEmpresaIdAndStatus(user.getEmpresa().getId(), status, pageable).map(TicketResponse::from);
+        }
+        return ticketRepository.findByUserId(user.getId(), pageable).map(TicketResponse::from);
     }
 
     public Page<TicketResponse> findByPrioridade(Priority prioridade, Pageable pageable) {
         return ticketRepository.findByPrioridade(prioridade, pageable).map(TicketResponse::from);
     }
 
+    public Page<TicketResponse> findByPrioridade(Priority prioridade, Pageable pageable, User user) {
+        if (user == null || user.getRole() == Role.ADMIN) {
+            return ticketRepository.findByPrioridade(prioridade, pageable).map(TicketResponse::from);
+        }
+        if (user.getEmpresa() != null) {
+            return ticketRepository.findByUserEmpresaIdAndPrioridade(user.getEmpresa().getId(), prioridade, pageable).map(TicketResponse::from);
+        }
+        return ticketRepository.findByUserId(user.getId(), pageable).map(TicketResponse::from);
+    }
+
     public Page<TicketResponse> findByCategoria(Category categoria, Pageable pageable) {
         return ticketRepository.findByCategoria(categoria, pageable).map(TicketResponse::from);
+    }
+
+    public Page<TicketResponse> findByCategoria(Category categoria, Pageable pageable, User user) {
+        if (user == null || user.getRole() == Role.ADMIN) {
+            return ticketRepository.findByCategoria(categoria, pageable).map(TicketResponse::from);
+        }
+        if (user.getEmpresa() != null) {
+            return ticketRepository.findByUserEmpresaIdAndCategoria(user.getEmpresa().getId(), categoria, pageable).map(TicketResponse::from);
+        }
+        return ticketRepository.findByUserId(user.getId(), pageable).map(TicketResponse::from);
     }
 
     public TicketResponse findById(Long id) {

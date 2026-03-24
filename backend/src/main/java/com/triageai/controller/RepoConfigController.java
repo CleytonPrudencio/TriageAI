@@ -4,14 +4,18 @@ import com.triageai.dto.RepoConfigRequest;
 import com.triageai.dto.RepoConfigResponse;
 import com.triageai.model.GitConnection;
 import com.triageai.model.RepoConfig;
+import com.triageai.model.User;
 import com.triageai.model.enums.GitProvider;
+import com.triageai.model.enums.Role;
 import com.triageai.repository.GitConnectionRepository;
 import com.triageai.repository.RepoConfigRepository;
+import com.triageai.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,10 +28,13 @@ public class RepoConfigController {
 
     private final RepoConfigRepository repository;
     private final GitConnectionRepository gitConnectionRepository;
+    private final UserRepository userRepository;
 
     @PostMapping
     @Operation(summary = "Configurar repositorio", description = "Cadastra um repositorio Git para uso no auto-fix. Se o apiToken nao for informado, usa o token da conexao Git ativa.")
     public ResponseEntity<RepoConfigResponse> create(@Valid @RequestBody RepoConfigRequest request) {
+        User user = getAuthenticatedUser();
+
         // If apiToken not provided, fetch from GitConnection
         String token = request.getApiToken();
         if (token == null || token.isBlank()) {
@@ -47,14 +54,31 @@ public class RepoConfigController {
                 .reviewerUsername(request.getReviewerUsername())
                 .build();
 
+        // Set tenant ownership
+        if (user != null && user.getEmpresa() != null) {
+            config.setEmpresa(user.getEmpresa());
+        } else if (user != null) {
+            config.setOwnerUser(user);
+        }
+
         return ResponseEntity.ok(RepoConfigResponse.from(repository.save(config)));
     }
 
     @GetMapping
     @Operation(summary = "Listar repositorios", description = "Lista todos os repositorios configurados com provider, owner, nome e branch padrao.")
     public ResponseEntity<List<RepoConfigResponse>> findAll() {
-        return ResponseEntity.ok(
-                repository.findAll().stream().map(RepoConfigResponse::from).toList());
+        User user = getAuthenticatedUser();
+        List<RepoConfig> configs;
+        if (user != null && user.getRole() == Role.ADMIN) {
+            configs = repository.findAll();
+        } else if (user != null && user.getEmpresa() != null) {
+            configs = repository.findByEmpresaId(user.getEmpresa().getId());
+        } else if (user != null) {
+            configs = repository.findByOwnerUserId(user.getId());
+        } else {
+            configs = repository.findAll();
+        }
+        return ResponseEntity.ok(configs.stream().map(RepoConfigResponse::from).toList());
     }
 
     @GetMapping("/{id}")
@@ -86,7 +110,35 @@ public class RepoConfigController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Remover repositorio", description = "Remove configuracao do repositorio. Sistemas vinculados perdem a referencia ao repo.")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
+        User user = getAuthenticatedUser();
+        if (user != null && !canManageResource(user, repository.findById(id).orElse(null))) {
+            return ResponseEntity.status(403).build();
+        }
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private User getAuthenticatedUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    private boolean canManageEmpresa(User user) {
+        if (user == null) return false;
+        Role role = user.getRole();
+        return Role.ADMIN == role || Role.GERENTE == role;
+    }
+
+    private boolean canManageResource(User user, RepoConfig config) {
+        if (user == null || config == null) return true; // fallback for missing data
+        if (user.getRole() == Role.ADMIN) return true;
+        if (config.getEmpresa() != null && user.getEmpresa() != null
+                && config.getEmpresa().getId().equals(user.getEmpresa().getId())) {
+            return canManageEmpresa(user);
+        }
+        if (config.getOwnerUser() != null && config.getOwnerUser().getId().equals(user.getId())) {
+            return true;
+        }
+        return false;
     }
 }

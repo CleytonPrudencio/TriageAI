@@ -2,12 +2,16 @@ package com.triageai.controller;
 
 import com.triageai.model.Sistema;
 import com.triageai.model.RepoConfig;
+import com.triageai.model.User;
+import com.triageai.model.enums.Role;
 import com.triageai.repository.SistemaRepository;
 import com.triageai.repository.RepoConfigRepository;
+import com.triageai.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -21,11 +25,23 @@ public class SistemaController {
 
     private final SistemaRepository sistemaRepository;
     private final RepoConfigRepository repoConfigRepository;
+    private final UserRepository userRepository;
 
     @GetMapping
     @Operation(summary = "Listar sistemas", description = "Lista todos os sistemas cadastrados ordenados por nome. Inclui configuracoes de branch, reviewers e repositorio vinculado.")
     public ResponseEntity<List<Map<String, Object>>> findAll() {
-        return ResponseEntity.ok(sistemaRepository.findAllByOrderByNomeAsc().stream()
+        User user = getAuthenticatedUser();
+        List<Sistema> sistemas;
+        if (user != null && user.getRole() == Role.ADMIN) {
+            sistemas = sistemaRepository.findAllByOrderByNomeAsc();
+        } else if (user != null && user.getEmpresa() != null) {
+            sistemas = sistemaRepository.findByEmpresaIdOrderByNomeAsc(user.getEmpresa().getId());
+        } else if (user != null) {
+            sistemas = sistemaRepository.findByOwnerUserIdOrderByNomeAsc(user.getId());
+        } else {
+            sistemas = sistemaRepository.findAllByOrderByNomeAsc();
+        }
+        return ResponseEntity.ok(sistemas.stream()
                 .map(this::toResponse).collect(Collectors.toList()));
     }
 
@@ -40,10 +56,17 @@ public class SistemaController {
     @PostMapping
     @Operation(summary = "Criar sistema", description = "Cria um novo sistema/ambiente. Configure branches destino e reviewers por tipo (hotfix, bugfix, feat, etc.) e vincule a um repositorio.")
     public ResponseEntity<?> create(@RequestBody SistemaRequest req) {
+        User user = getAuthenticatedUser();
         Sistema s = new Sistema();
         applyRequest(s, req);
         if (req.getRepoConfigId() != null) {
             repoConfigRepository.findById(req.getRepoConfigId()).ifPresent(s::setRepoConfig);
+        }
+        // Set tenant ownership
+        if (user != null && user.getEmpresa() != null) {
+            s.setEmpresa(user.getEmpresa());
+        } else if (user != null) {
+            s.setOwnerUser(user);
         }
         return ResponseEntity.ok(toResponse(sistemaRepository.save(s)));
     }
@@ -92,8 +115,36 @@ public class SistemaController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Remover sistema", description = "Remove permanentemente um sistema. Tickets vinculados nao sao afetados.")
     public ResponseEntity<?> delete(@PathVariable Long id) {
+        User user = getAuthenticatedUser();
+        if (user != null && !canManageResource(user, sistemaRepository.findById(id).orElse(null))) {
+            return ResponseEntity.status(403).body(Map.of("error", "Sem permissao para remover este sistema"));
+        }
         sistemaRepository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "Sistema removido"));
+    }
+
+    private User getAuthenticatedUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    private boolean canManageEmpresa(User user) {
+        if (user == null) return false;
+        Role role = user.getRole();
+        return Role.ADMIN == role || Role.GERENTE == role;
+    }
+
+    private boolean canManageResource(User user, Sistema sistema) {
+        if (user == null || sistema == null) return true;
+        if (user.getRole() == Role.ADMIN) return true;
+        if (sistema.getEmpresa() != null && user.getEmpresa() != null
+                && sistema.getEmpresa().getId().equals(user.getEmpresa().getId())) {
+            return canManageEmpresa(user);
+        }
+        if (sistema.getOwnerUser() != null && sistema.getOwnerUser().getId().equals(user.getId())) {
+            return true;
+        }
+        return false;
     }
 
     private Map<String, Object> toResponse(Sistema s) {
