@@ -46,4 +46,12 @@ export class TicketService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API}/${id}`);
   }
+
+  enrichTicket(data: any): Observable<any> {
+    return this.http.post<any>(`${this.API}/enrich`, data);
+  }
+
+  refineTicket(data: any): Observable<any> {
+    return this.http.post<any>(`${this.API}/refine`, data);
+  }
 }

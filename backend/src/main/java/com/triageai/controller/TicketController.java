@@ -10,12 +10,18 @@ import com.triageai.model.enums.Status;
 import com.triageai.service.TicketService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tickets")
@@ -23,6 +29,9 @@ import org.springframework.web.bind.annotation.*;
 public class TicketController {
 
     private final TicketService ticketService;
+
+    @Value("${app.ai-service.url}")
+    private String aiServiceUrl;
 
     @PostMapping
     public ResponseEntity<TicketResponse> create(
@@ -85,5 +94,41 @@ public class TicketController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         ticketService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/enrich")
+    public ResponseEntity<?> enrichTicket(@RequestBody Map<String, String> body) {
+        try {
+            Map result = RestClient.builder().baseUrl(aiServiceUrl).build()
+                    .post().uri("/enrich-ticket")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve().body(Map.class);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                    "classificacao", Map.of("categoria", "OUTROS", "prioridade", "MEDIA", "score", 0),
+                    "descricaoEnriquecida", body.getOrDefault("text", ""),
+                    "perguntas", List.of("Descreva o problema com mais detalhes"),
+                    "sugestoes", List.of("Adicione informacoes tecnicas"),
+                    "impacto", "medio",
+                    "passosReproduzir", List.of(),
+                    "componentesAfetados", List.of()
+            ));
+        }
+    }
+
+    @PostMapping("/refine")
+    public ResponseEntity<?> refineTicket(@RequestBody Map<String, Object> body) {
+        try {
+            Map result = RestClient.builder().baseUrl(aiServiceUrl).build()
+                    .post().uri("/refine-ticket")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve().body(Map.class);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("descricaoEnriquecida", body.getOrDefault("descricaoAtual", "")));
+        }
     }
 }

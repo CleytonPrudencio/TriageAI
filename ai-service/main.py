@@ -260,6 +260,13 @@ def detect_branch_type_rules(text: str, categoria: str = "") -> str:
     return "fix"
 
 
+def predict_internal(text: str) -> dict:
+    """Internal predict helper that returns a dict without requiring HTTP."""
+    if cat_model is None or pri_model is None:
+        raise Exception("Models not loaded")
+    return predict(text, cat_model, pri_model)
+
+
 @app.post("/predict", response_model=PredictResponse)
 def predict_ticket(request: PredictRequest):
     if cat_model is None or pri_model is None:
@@ -992,3 +999,152 @@ Be thorough - it's better to include too many files than to miss one that's need
 
     print(f"Total fixes from Claude: {len(fixes)}")
     return CodeAnalysisResponseModel(fixes=fixes)
+
+
+# ===== TICKET ENRICHMENT =====
+
+@app.post("/enrich-ticket")
+def enrich_ticket(body: dict):
+    text = body.get("text", "")
+    sistema = body.get("sistema", "")
+
+    # 1. Classify with ML model
+    prediction = None
+    try:
+        pred_response = predict_internal(text)
+        prediction = {
+            "categoria": pred_response.get("categoria", "OUTROS"),
+            "prioridade": pred_response.get("prioridade", "MEDIA"),
+            "score": pred_response.get("score", 0)
+        }
+    except:
+        prediction = {"categoria": "OUTROS", "prioridade": "MEDIA", "score": 0}
+
+    # 2. Enrich with Claude
+    api_key = get_anthropic_key()
+    if not api_key:
+        # Fallback without Claude
+        return {
+            "classificacao": prediction,
+            "descricaoEnriquecida": text,
+            "perguntas": [
+                "Qual mensagem de erro aparece exatamente?",
+                "Desde quando o problema ocorre?",
+                "O problema afeta todos os usuarios ou apenas alguns?",
+                "Quais passos voce seguiu antes do problema acontecer?"
+            ],
+            "sugestoes": [
+                "Adicione a mensagem de erro exata",
+                "Descreva os passos para reproduzir o problema",
+                "Indique o impacto no negocio"
+            ],
+            "impacto": "medio",
+            "passosReproduzir": [],
+            "componentesAfetados": []
+        }
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+
+        sistema_context = f"\nSistema/Ambiente: {sistema}" if sistema else ""
+
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=2000,
+            messages=[{
+                "role": "user",
+                "content": f"""Voce e um analista de suporte tecnico experiente. Analise este chamado e ajude a enriquece-lo.
+
+Titulo/Descricao do chamado: "{text}"{sistema_context}
+Classificacao ML: Categoria={prediction['categoria']}, Prioridade={prediction['prioridade']}
+
+Retorne um JSON valido (sem markdown, sem ```json) com:
+
+{{
+  "descricaoEnriquecida": "Reescreva a descricao com mais detalhes tecnicos, mantendo o sentido original mas adicionando estrutura e clareza. Em portugues.",
+  "perguntas": ["lista de 2-4 perguntas especificas que ajudariam a detalhar melhor o problema. Em portugues."],
+  "sugestoes": ["lista de 2-3 informacoes que estao faltando na descricao. Em portugues."],
+  "impacto": "baixo|medio|alto|critico",
+  "impactoJustificativa": "justificativa curta do impacto em portugues",
+  "passosReproduzir": ["lista de passos para reproduzir se aplicavel, ou lista vazia"],
+  "componentesAfetados": ["lista de componentes/modulos/servicos que podem estar afetados"]
+}}
+
+Responda APENAS com o JSON, sem texto adicional."""
+            }]
+        )
+
+        result_text = response.content[0].text.strip()
+        # Clean up potential markdown wrapping
+        if result_text.startswith("```"):
+            result_text = result_text.split("\n", 1)[1] if "\n" in result_text else result_text
+            result_text = result_text.rsplit("```", 1)[0]
+
+        enriched = json.loads(result_text)
+        enriched["classificacao"] = prediction
+        return enriched
+
+    except Exception as e:
+        print(f"Enrich failed: {e}")
+        return {
+            "classificacao": prediction,
+            "descricaoEnriquecida": text,
+            "perguntas": [
+                "Qual mensagem de erro aparece?",
+                "Desde quando o problema ocorre?",
+                "O problema afeta todos os usuarios?",
+                "Quais passos voce seguiu antes do problema?"
+            ],
+            "sugestoes": ["Adicione mais detalhes tecnicos", "Descreva o impacto no negocio"],
+            "impacto": "medio",
+            "passosReproduzir": [],
+            "componentesAfetados": []
+        }
+
+
+@app.post("/refine-ticket")
+def refine_ticket(body: dict):
+    text = body.get("text", "")
+    respostas = body.get("respostas", [])  # list of {pergunta, resposta}
+    descricao_atual = body.get("descricaoAtual", "")
+
+    api_key = get_anthropic_key()
+    if not api_key:
+        # Fallback: just append answers to description
+        extra = "\n".join([f"- {r.get('pergunta', '')}: {r.get('resposta', '')}" for r in respostas])
+        return {"descricaoEnriquecida": f"{descricao_atual}\n\nInformacoes adicionais:\n{extra}"}
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+
+        respostas_text = "\n".join([f"Pergunta: {r.get('pergunta', '')}\nResposta: {r.get('resposta', '')}" for r in respostas])
+
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1500,
+            messages=[{
+                "role": "user",
+                "content": f"""Reescreva esta descricao de chamado incorporando as respostas do usuario.
+
+Descricao atual:
+{descricao_atual}
+
+Respostas adicionais do usuario:
+{respostas_text}
+
+Gere uma descricao completa e bem estruturada em portugues que incorpore todas as informacoes.
+Retorne APENAS um JSON: {{"descricaoEnriquecida": "texto completo aqui"}}
+Sem markdown, sem ```."""
+            }]
+        )
+
+        result_text = response.content[0].text.strip()
+        if result_text.startswith("```"):
+            result_text = result_text.split("\n", 1)[1]
+            result_text = result_text.rsplit("```", 1)[0]
+
+        return json.loads(result_text)
+    except Exception as e:
+        print(f"Refine failed: {e}")
+        extra = "\n".join([f"- {r.get('pergunta', '')}: {r.get('resposta', '')}" for r in respostas])
+        return {"descricaoEnriquecida": f"{descricao_atual}\n\nInformacoes adicionais:\n{extra}"}
