@@ -4,6 +4,8 @@ import com.triageai.model.Empresa;
 import com.triageai.model.User;
 import com.triageai.repository.EmpresaRepository;
 import com.triageai.repository.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,6 +19,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
+@Tag(name = "Perfil", description = "Gerenciamento de perfil do usuario e dados da empresa")
 public class ProfileController {
 
     private final UserRepository userRepository;
@@ -24,6 +27,7 @@ public class ProfileController {
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping
+    @Operation(summary = "Meu perfil", description = "Retorna dados do usuario logado incluindo nome, email, role e informacoes da empresa (plano, limites).")
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -52,6 +56,7 @@ public class ProfileController {
     }
 
     @PutMapping
+    @Operation(summary = "Atualizar perfil", description = "Atualiza nome e/ou senha do usuario logado. Envie apenas os campos que deseja alterar.")
     public ResponseEntity<?> updateProfile(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Map<String, String> body) {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -66,6 +71,7 @@ public class ProfileController {
     }
 
     @PutMapping("/empresa")
+    @Operation(summary = "Atualizar empresa", description = "Atualiza dados da empresa do usuario logado: nome, telefone e endereco.")
     public ResponseEntity<?> updateEmpresa(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Map<String, String> body) {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -84,6 +90,7 @@ public class ProfileController {
     }
 
     @PutMapping("/plano")
+    @Operation(summary = "Upgrade de plano", description = "Faz upgrade do plano da empresa para PREMIUM com limites ilimitados de tickets, usuarios e sistemas.")
     public ResponseEntity<?> upgradePlano(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));

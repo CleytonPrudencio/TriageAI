@@ -5,6 +5,11 @@ import com.triageai.service.*;
 import com.triageai.model.*;
 import com.triageai.model.enums.*;
 import com.triageai.repository.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +22,8 @@ import java.util.*;
 @RequestMapping("/api/v1")
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "API Publica v1", description = "API para integracoes externas (Jira, Zendesk, Freshdesk, ServiceNow). Autenticacao via header X-API-Key.")
+@SecurityRequirement(name = "apiKey")
 public class PublicApiController {
 
     private final AiService aiService;
@@ -26,6 +33,11 @@ public class PublicApiController {
     // ========== CLASSIFY ==========
 
     @PostMapping("/classify")
+    @Operation(summary = "Classificar texto", description = "Classifica um texto livre retornando categoria, prioridade e score de confianca da IA. Ideal para pre-classificar tickets antes de criar.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Texto classificado com sucesso. Retorna categoria, prioridade, score e versao do modelo."),
+            @ApiResponse(responseCode = "401", description = "API Key invalida ou ausente")
+    })
     public ResponseEntity<?> classify(@RequestBody ClassifyRequest req) {
         log.info("API v1: classify request");
         AiPredictionResponse result = aiService.predict(req.getText());
@@ -40,6 +52,11 @@ public class PublicApiController {
     // ========== CREATE TICKET + CLASSIFY ==========
 
     @PostMapping("/tickets")
+    @Operation(summary = "Criar ticket via API", description = "Cria um ticket com classificacao automatica. Use para integrar sistemas externos como Jira, Zendesk, Freshdesk ou ServiceNow.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ticket criado e classificado. Retorna ID, categoria, prioridade e score."),
+            @ApiResponse(responseCode = "401", description = "API Key invalida ou ausente")
+    })
     public ResponseEntity<?> createTicket(@RequestBody CreateTicketRequest req) {
         log.info("API v1: create ticket '{}'", req.getTitulo());
 
@@ -72,6 +89,11 @@ public class PublicApiController {
     // ========== AUTO-FIX ==========
 
     @PostMapping("/tickets/{id}/auto-fix")
+    @Operation(summary = "Executar auto-fix", description = "Executa auto-fix: IA analisa o repositorio, cria branch, gera correcao e abre Pull Request automaticamente. Requer repoConfigId ou configuracao padrao.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Auto-fix executado. Retorna URL do PR, branch e resumo das alteracoes."),
+            @ApiResponse(responseCode = "400", description = "Erro ao executar auto-fix (repo nao configurado, ticket nao encontrado, etc.)")
+    })
     public ResponseEntity<?> autoFix(@PathVariable Long id, @RequestBody(required = false) AutoFixRequest req) {
         log.info("API v1: auto-fix for ticket #{}", id);
 
@@ -90,6 +112,7 @@ public class PublicApiController {
     // ========== FEEDBACK ==========
 
     @PostMapping("/tickets/{id}/feedback")
+    @Operation(summary = "Enviar feedback", description = "Envia correcao da classificacao para re-treino do modelo de IA. Informe a categoria e prioridade corretas.")
     public ResponseEntity<?> feedback(@PathVariable Long id, @RequestBody FeedbackRequest req) {
         log.info("API v1: feedback for ticket #{}", id);
 
@@ -115,6 +138,7 @@ public class PublicApiController {
     // ========== RECLASSIFY ==========
 
     @PostMapping("/tickets/{id}/reclassify")
+    @Operation(summary = "Reclassificar ticket", description = "Reclassifica o ticket com o modelo de IA mais recente. Retorna classificacao anterior e nova para comparacao.")
     public ResponseEntity<?> reclassify(@PathVariable Long id) {
         log.info("API v1: reclassify ticket #{}", id);
 
@@ -145,6 +169,7 @@ public class PublicApiController {
     // ========== GET TICKET STATUS ==========
 
     @GetMapping("/tickets/{id}")
+    @Operation(summary = "Consultar ticket", description = "Retorna detalhes completos do ticket incluindo classificacao, status e informacoes do PR (se existir).")
     public ResponseEntity<?> getTicket(@PathVariable Long id) {
         var ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
@@ -169,6 +194,7 @@ public class PublicApiController {
     // ========== WEBHOOKS (incoming from Jira/Zendesk) ==========
 
     @PostMapping("/webhooks/jira")
+    @Operation(summary = "Webhook Jira", description = "Recebe webhook do Jira quando um ticket e criado/atualizado. Configure no Jira: Settings > Webhooks > URL + header X-API-Key. Payload esperado: {issue: {key, fields: {summary, description}}}")
     public ResponseEntity<?> jiraWebhook(@RequestBody Map<String, Object> payload) {
         log.info("API v1: Jira webhook received");
 
@@ -197,6 +223,7 @@ public class PublicApiController {
     }
 
     @PostMapping("/webhooks/zendesk")
+    @Operation(summary = "Webhook Zendesk", description = "Recebe webhook do Zendesk. Configure: Admin > Webhooks > HTTP endpoint. Payload esperado: {id, subject, description}")
     public ResponseEntity<?> zendeskWebhook(@RequestBody Map<String, Object> payload) {
         log.info("API v1: Zendesk webhook received");
 
@@ -221,6 +248,7 @@ public class PublicApiController {
     }
 
     @PostMapping("/webhooks/generic")
+    @Operation(summary = "Webhook generico", description = "Webhook generico. Aceita {title, description} ou {subject, body}. Compativel com qualquer plataforma que envie POST com JSON.")
     public ResponseEntity<?> genericWebhook(@RequestBody Map<String, Object> payload) {
         log.info("API v1: Generic webhook received");
 
@@ -245,6 +273,7 @@ public class PublicApiController {
     // ========== HEALTH ==========
 
     @GetMapping("/health")
+    @Operation(summary = "Health check", description = "Verifica se a API esta respondendo. Retorna status, versao e timestamp. Nao requer autenticacao.")
     public ResponseEntity<?> health() {
         return ResponseEntity.ok(Map.of(
                 "status", "ok",

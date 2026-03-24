@@ -3,6 +3,8 @@ package com.triageai.controller;
 import com.triageai.model.ApiKey;
 import com.triageai.repository.ApiKeyRepository;
 import com.triageai.security.ApiKeyAuthFilter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +14,13 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/api-keys")
 @RequiredArgsConstructor
+@Tag(name = "API Keys", description = "Gerenciamento de chaves de API para integracoes externas")
 public class ApiKeyController {
 
     private final ApiKeyRepository apiKeyRepository;
 
     @GetMapping
+    @Operation(summary = "Listar API Keys", description = "Lista todas as API Keys ativas com prefixo, nome e data de uso. A chave completa nao e exibida por seguranca.")
     public ResponseEntity<?> listKeys() {
         List<ApiKey> keys = apiKeyRepository.findByActiveTrue();
         return ResponseEntity.ok(keys.stream().map(k -> Map.of(
@@ -29,6 +33,7 @@ public class ApiKeyController {
     }
 
     @PostMapping
+    @Operation(summary = "Criar API Key", description = "Gera uma nova API Key com prefixo trai_. A chave completa e retornada apenas nesta resposta - salve-a pois nao sera exibida novamente. Use no header X-API-Key para acessar endpoints /api/v1/*.")
     public ResponseEntity<?> createKey(@RequestBody Map<String, String> body) {
         String name = body.getOrDefault("name", "API Key");
 
@@ -61,6 +66,7 @@ public class ApiKeyController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Revogar API Key", description = "Desativa uma API Key. Requisicoes usando esta chave passam a retornar 401. Acao irreversivel.")
     public ResponseEntity<?> revokeKey(@PathVariable Long id) {
         apiKeyRepository.findById(id).ifPresent(key -> {
             key.setActive(false);

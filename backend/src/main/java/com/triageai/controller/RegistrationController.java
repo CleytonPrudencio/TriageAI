@@ -6,6 +6,10 @@ import com.triageai.model.enums.Role;
 import com.triageai.repository.EmpresaRepository;
 import com.triageai.repository.UserRepository;
 import com.triageai.security.JwtTokenProvider;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/register")
 @RequiredArgsConstructor
+@Tag(name = "Registro", description = "Cadastro de novas empresas e usuarios. Endpoint publico.")
 public class RegistrationController {
 
     private final EmpresaRepository empresaRepository;
@@ -26,6 +31,11 @@ public class RegistrationController {
     private final JwtTokenProvider tokenProvider;
 
     @PostMapping
+    @Operation(summary = "Registrar empresa e usuario", description = "Cadastra nova empresa com usuario administrador. Valida CPF/CNPJ, verifica duplicidade de documento e email. Retorna token JWT para acesso imediato. Planos disponiveis: FREE, PRO, BUSINESS, BUSINESS_CLAUDE, ENTERPRISE.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Empresa e usuario criados com sucesso. Retorna token JWT, dados do usuario e empresa."),
+            @ApiResponse(responseCode = "400", description = "CPF/CNPJ invalido, documento ja cadastrado ou email duplicado")
+    })
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         String doc = req.getDocumento().replaceAll("[^0-9]", "");
         if (doc.length() != 11 && doc.length() != 14) {

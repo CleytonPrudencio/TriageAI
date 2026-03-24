@@ -4,6 +4,8 @@ import com.triageai.model.Sistema;
 import com.triageai.model.RepoConfig;
 import com.triageai.repository.SistemaRepository;
 import com.triageai.repository.RepoConfigRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,18 +16,21 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/sistemas")
 @RequiredArgsConstructor
+@Tag(name = "Sistemas", description = "Gerenciamento de sistemas/ambientes vinculados a repositorios Git")
 public class SistemaController {
 
     private final SistemaRepository sistemaRepository;
     private final RepoConfigRepository repoConfigRepository;
 
     @GetMapping
+    @Operation(summary = "Listar sistemas", description = "Lista todos os sistemas cadastrados ordenados por nome. Inclui configuracoes de branch, reviewers e repositorio vinculado.")
     public ResponseEntity<List<Map<String, Object>>> findAll() {
         return ResponseEntity.ok(sistemaRepository.findAllByOrderByNomeAsc().stream()
                 .map(this::toResponse).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Buscar sistema por ID", description = "Retorna detalhes do sistema incluindo mapeamento de branches e reviewers por tipo de alteracao.")
     public ResponseEntity<?> findById(@PathVariable Long id) {
         return sistemaRepository.findById(id)
                 .map(s -> ResponseEntity.ok(toResponse(s)))
@@ -33,6 +38,7 @@ public class SistemaController {
     }
 
     @PostMapping
+    @Operation(summary = "Criar sistema", description = "Cria um novo sistema/ambiente. Configure branches destino e reviewers por tipo (hotfix, bugfix, feat, etc.) e vincule a um repositorio.")
     public ResponseEntity<?> create(@RequestBody SistemaRequest req) {
         Sistema s = new Sistema();
         applyRequest(s, req);
@@ -43,6 +49,7 @@ public class SistemaController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualizar sistema", description = "Atualiza configuracoes do sistema incluindo branches, reviewers e repositorio vinculado.")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody SistemaRequest req) {
         return sistemaRepository.findById(id).map(s -> {
             applyRequest(s, req);
@@ -83,6 +90,7 @@ public class SistemaController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Remover sistema", description = "Remove permanentemente um sistema. Tickets vinculados nao sao afetados.")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         sistemaRepository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "Sistema removido"));

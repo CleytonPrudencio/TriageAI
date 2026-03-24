@@ -6,6 +6,8 @@ import com.triageai.model.enums.Role;
 import com.triageai.repository.EmpresaRepository;
 import com.triageai.repository.TicketRepository;
 import com.triageai.repository.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@Tag(name = "Admin", description = "Painel administrativo para gestao de empresas, usuarios e planos")
 public class AdminController {
 
     private final EmpresaRepository empresaRepository;
@@ -31,6 +34,7 @@ public class AdminController {
 
     // ========== STATS ==========
     @GetMapping("/stats")
+    @Operation(summary = "Estatisticas do sistema", description = "Retorna dashboard administrativo: total de empresas, usuarios, tickets, receita mensal, distribuicao por plano e tickets recentes.")
     public ResponseEntity<?> getStats() {
         long totalEmpresas = empresaRepository.count();
         long empresasAtivas = empresaRepository.countByAtivoTrue();
@@ -86,6 +90,7 @@ public class AdminController {
 
     // ========== EMPRESAS CRUD ==========
     @GetMapping("/empresas")
+    @Operation(summary = "Listar empresas", description = "Lista todas as empresas cadastradas com limites do plano, contagem de usuarios e dados de contato.")
     public ResponseEntity<?> listEmpresas() {
         List<Empresa> empresas = empresaRepository.findAll();
         List<Map<String, Object>> result = empresas.stream().map(e -> {
@@ -113,6 +118,7 @@ public class AdminController {
     }
 
     @GetMapping("/empresas/{id}")
+    @Operation(summary = "Detalhes da empresa", description = "Retorna detalhes completos da empresa incluindo lista de usuarios vinculados e limites do plano.")
     public ResponseEntity<?> getEmpresa(@PathVariable Long id) {
         Empresa e = empresaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Empresa not found"));
@@ -150,6 +156,7 @@ public class AdminController {
     }
 
     @PostMapping("/empresas")
+    @Operation(summary = "Criar empresa", description = "Cria nova empresa com plano FREE por padrao. Documento (CPF/CNPJ) deve ser unico.")
     public ResponseEntity<?> createEmpresa(@RequestBody Map<String, String> body) {
         String documento = body.get("documento");
         if (documento != null && empresaRepository.existsByDocumento(documento)) {
@@ -175,6 +182,7 @@ public class AdminController {
     }
 
     @PutMapping("/empresas/{id}")
+    @Operation(summary = "Atualizar empresa", description = "Atualiza dados da empresa. Se o plano mudar, os limites sao recalculados automaticamente.")
     public ResponseEntity<?> updateEmpresa(@PathVariable Long id, @RequestBody Map<String, String> body) {
         Empresa e = empresaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Empresa not found"));
@@ -194,6 +202,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/empresas/{id}")
+    @Operation(summary = "Desativar empresa", description = "Soft-delete: desativa a empresa sem remover dados. Usuarios perdem acesso.")
     public ResponseEntity<?> deleteEmpresa(@PathVariable Long id) {
         Empresa e = empresaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Empresa not found"));
@@ -204,6 +213,7 @@ public class AdminController {
     }
 
     @PutMapping("/empresas/{id}/plano")
+    @Operation(summary = "Alterar plano da empresa", description = "Altera o plano da empresa e recalcula limites. Planos: FREE, PRO, BUSINESS, BUSINESS_CLAUDE, ENTERPRISE.")
     public ResponseEntity<?> updatePlano(@PathVariable Long id, @RequestBody Map<String, String> body) {
         Empresa e = empresaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Empresa not found"));
@@ -216,6 +226,7 @@ public class AdminController {
     }
 
     @PutMapping("/empresas/{id}/toggle")
+    @Operation(summary = "Ativar/desativar empresa", description = "Alterna o status ativo/inativo da empresa. Empresas inativas nao podem acessar o sistema.")
     public ResponseEntity<?> toggleEmpresa(@PathVariable Long id) {
         Empresa e = empresaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Empresa not found"));
@@ -230,6 +241,7 @@ public class AdminController {
 
     // ========== USUARIOS CRUD ==========
     @GetMapping("/usuarios")
+    @Operation(summary = "Listar usuarios", description = "Lista todos os usuarios do sistema com nome, email, role e empresa vinculada.")
     public ResponseEntity<?> listUsuarios() {
         List<User> users = userRepository.findAll();
         List<Map<String, Object>> result = users.stream().map(u -> {
@@ -246,6 +258,7 @@ public class AdminController {
     }
 
     @GetMapping("/usuarios/{id}")
+    @Operation(summary = "Detalhes do usuario", description = "Retorna dados completos do usuario incluindo empresa vinculada.")
     public ResponseEntity<?> getUsuario(@PathVariable Long id) {
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario not found"));
@@ -260,6 +273,7 @@ public class AdminController {
     }
 
     @PostMapping("/usuarios")
+    @Operation(summary = "Criar usuario", description = "Cria novo usuario vinculado a uma empresa. Roles disponiveis: ADMIN, AGENT, CLIENT.")
     public ResponseEntity<?> createUsuario(@RequestBody Map<String, String> body) {
         String email = body.get("email");
         if (userRepository.existsByEmail(email)) {
@@ -289,6 +303,7 @@ public class AdminController {
     }
 
     @PutMapping("/usuarios/{id}")
+    @Operation(summary = "Atualizar usuario", description = "Atualiza dados do usuario: nome, email, role e empresa. Apenas campos enviados sao alterados.")
     public ResponseEntity<?> updateUsuario(@PathVariable Long id, @RequestBody Map<String, String> body) {
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario not found"));
@@ -314,6 +329,7 @@ public class AdminController {
     }
 
     @PutMapping("/usuarios/{id}/reset-password")
+    @Operation(summary = "Resetar senha", description = "Redefine a senha do usuario. Nova senha deve ter no minimo 6 caracteres.")
     public ResponseEntity<?> resetPassword(@PathVariable Long id, @RequestBody Map<String, String> body) {
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario not found"));
@@ -328,6 +344,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/usuarios/{id}")
+    @Operation(summary = "Excluir usuario", description = "Remove permanentemente o usuario do sistema.")
     public ResponseEntity<?> deleteUsuario(@PathVariable Long id) {
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario not found"));
@@ -337,6 +354,7 @@ public class AdminController {
     }
 
     @PutMapping("/usuarios/{id}/role")
+    @Operation(summary = "Alterar role do usuario", description = "Altera a role do usuario. Roles: ADMIN, AGENT, CLIENT.")
     public ResponseEntity<?> changeRole(@PathVariable Long id, @RequestBody Map<String, String> body) {
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario not found"));
@@ -349,6 +367,7 @@ public class AdminController {
 
     // ========== EMPRESAS USUARIOS (kept for backward compat) ==========
     @GetMapping("/empresas/{empresaId}/usuarios")
+    @Operation(summary = "Usuarios por empresa", description = "Lista usuarios vinculados a uma empresa especifica.")
     public ResponseEntity<?> listUsuariosByEmpresa(@PathVariable Long empresaId) {
         List<User> users = userRepository.findByEmpresaId(empresaId);
         return ResponseEntity.ok(users.stream().map(u -> {
@@ -363,6 +382,7 @@ public class AdminController {
 
     // ========== PLANOS ==========
     @GetMapping("/planos")
+    @Operation(summary = "Listar planos", description = "Retorna definicao de todos os planos com limites, precos e features. Inclui contagem de empresas por plano.")
     public ResponseEntity<?> listPlanos() {
         List<Map<String, Object>> planos = new ArrayList<>();
 

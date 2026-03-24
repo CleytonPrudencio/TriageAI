@@ -13,6 +13,11 @@ import com.triageai.repository.GitConnectionRepository;
 import com.triageai.repository.TicketRepository;
 import com.triageai.service.GitIntegrationService;
 import com.triageai.service.GitProviderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +32,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/git")
 @RequiredArgsConstructor
+@Tag(name = "Git Integration", description = "Integracao com GitHub, GitLab e Bitbucket. Auto-fix, PR management, code review.")
 public class GitController {
 
     private final GitIntegrationService gitIntegrationService;
@@ -35,6 +41,11 @@ public class GitController {
     private final TicketRepository ticketRepository;
 
     @PostMapping("/auto-fix/{ticketId}")
+    @Operation(summary = "Executar auto-fix", description = "IA analisa o ticket, busca no repositorio, cria branch, gera correcao de codigo e abre Pull Request automaticamente.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Auto-fix executado com sucesso. Retorna URL do PR, branch e resumo."),
+            @ApiResponse(responseCode = "400", description = "Ticket nao encontrado ou repositorio nao configurado")
+    })
     public ResponseEntity<AutoFixResponse> autoFix(
             @PathVariable Long ticketId,
             @RequestParam Long repoConfigId,
@@ -45,6 +56,7 @@ public class GitController {
     }
 
     @DeleteMapping("/auto-fix/{ticketId}")
+    @Operation(summary = "Desfazer auto-fix", description = "Fecha o PR no provedor Git, deleta a branch criada e reseta o ticket para status ABERTO.")
     public ResponseEntity<?> deleteAutoFix(@PathVariable Long ticketId) {
         log.info("Deleting auto-fix for ticket #{}", ticketId);
 
@@ -68,6 +80,7 @@ public class GitController {
     }
 
     @PostMapping("/review/{ticketId}")
+    @Operation(summary = "Review do PR", description = "Envia review (APPROVE ou REQUEST_CHANGES) para o PR do ticket. Atualiza status do ticket para CODE_REVIEW se aprovado.")
     public ResponseEntity<?> reviewPr(@PathVariable Long ticketId, @RequestBody Map<String, String> body) {
         log.info("PR review for ticket #{}: {}", ticketId, body.get("action"));
 
@@ -109,12 +122,14 @@ public class GitController {
     }
 
     @GetMapping("/collaborators/{repoConfigId}")
+    @Operation(summary = "Listar colaboradores", description = "Lista colaboradores do repositorio para selecao de reviewer. Retorna username e avatar de cada colaborador.")
     public ResponseEntity<?> listCollaborators(@PathVariable Long repoConfigId) {
         var config = gitIntegrationService.getRepoConfig(repoConfigId);
         return ResponseEntity.ok(gitProviderService.listCollaborators(config));
     }
 
     @PostMapping("/request-reviewer/{ticketId}")
+    @Operation(summary = "Solicitar reviewer", description = "Solicita review de um colaborador especifico para o PR do ticket. O reviewer recebe notificacao no provedor Git.")
     public ResponseEntity<?> requestReviewer(@PathVariable Long ticketId, @RequestBody Map<String, String> body) {
         String reviewer = body.get("reviewer");
         if (reviewer == null || reviewer.isBlank()) {
@@ -133,6 +148,7 @@ public class GitController {
     }
 
     @GetMapping("/repos")
+    @Operation(summary = "Listar repositorios", description = "Lista repositorios do usuario no provedor Git. Requer token de acesso valido.")
     public ResponseEntity<List<GitRepoResponse>> listUserRepos(
             @RequestParam String provider,
             @RequestParam String token) {
@@ -144,6 +160,7 @@ public class GitController {
     // ── Connection management ──────────────────────────────────────────
 
     @PostMapping("/connect")
+    @Operation(summary = "Conectar provedor Git", description = "Conecta conta do GitHub, GitLab ou Bitbucket. Salva token e busca informacoes do usuario (username, avatar).")
     public ResponseEntity<GitConnectionResponse> connect(
             @Valid @RequestBody GitConnectionRequest request,
             @AuthenticationPrincipal User user) {
@@ -172,6 +189,7 @@ public class GitController {
     }
 
     @GetMapping("/connections")
+    @Operation(summary = "Listar conexoes Git", description = "Lista todas as conexoes Git do usuario autenticado (GitHub, GitLab, Bitbucket).")
     public ResponseEntity<List<GitConnectionResponse>> listConnections(
             @AuthenticationPrincipal User user) {
 
@@ -185,6 +203,7 @@ public class GitController {
     }
 
     @DeleteMapping("/connections/{id}")
+    @Operation(summary = "Remover conexao Git", description = "Remove uma conexao Git do usuario. Nao afeta repositorios ja configurados.")
     public ResponseEntity<Void> deleteConnection(
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
@@ -197,6 +216,7 @@ public class GitController {
     }
 
     @GetMapping("/repos/{connectionId}")
+    @Operation(summary = "Listar repos por conexao", description = "Lista repositorios disponiveis em uma conexao Git especifica do usuario.")
     public ResponseEntity<List<GitRepoResponse>> listReposByConnection(
             @PathVariable Long connectionId,
             @AuthenticationPrincipal User user) {

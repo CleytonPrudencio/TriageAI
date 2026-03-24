@@ -8,6 +8,11 @@ import com.triageai.model.enums.Category;
 import com.triageai.model.enums.Priority;
 import com.triageai.model.enums.Status;
 import com.triageai.service.TicketService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +31,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/tickets")
 @RequiredArgsConstructor
+@Tag(name = "Tickets", description = "Gerenciamento de chamados com classificacao automatica por IA")
 public class TicketController {
 
     private final TicketService ticketService;
@@ -34,6 +40,11 @@ public class TicketController {
     private String aiServiceUrl;
 
     @PostMapping
+    @Operation(summary = "Criar chamado", description = "Cria um novo chamado. A IA classifica automaticamente a categoria e prioridade baseado no texto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Chamado criado e classificado pela IA"),
+            @ApiResponse(responseCode = "400", description = "Dados invalidos")
+    })
     public ResponseEntity<TicketResponse> create(
             @Valid @RequestBody TicketRequest request,
             @AuthenticationPrincipal User user) {
@@ -41,10 +52,11 @@ public class TicketController {
     }
 
     @GetMapping
+    @Operation(summary = "Listar chamados", description = "Lista todos os chamados do usuario com paginacao e filtros. Pode filtrar por status, prioridade ou categoria.")
     public ResponseEntity<Page<TicketResponse>> findAll(
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String prioridade,
-            @RequestParam(required = false) String categoria,
+            @Parameter(description = "Filtrar por status: ABERTO, EM_ANDAMENTO, CODE_REVIEW, RESOLVIDO, FECHADO") @RequestParam(required = false) String status,
+            @Parameter(description = "Filtrar por prioridade: CRITICA, ALTA, MEDIA, BAIXA") @RequestParam(required = false) String prioridade,
+            @Parameter(description = "Filtrar por categoria: TECNICO, FINANCEIRO, COMERCIAL, SUPORTE, OUTROS") @RequestParam(required = false) String categoria,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
 
         if (status != null) {
@@ -60,11 +72,13 @@ public class TicketController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Buscar chamado por ID", description = "Busca um chamado pelo ID com detalhes completos incluindo info do PR")
     public ResponseEntity<TicketResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.findById(id));
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualizar chamado", description = "Atualiza titulo e descricao do chamado. A IA reclassifica automaticamente se o texto mudar.")
     public ResponseEntity<TicketResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody TicketRequest request) {
@@ -72,6 +86,7 @@ public class TicketController {
     }
 
     @PutMapping("/{id}/status")
+    @Operation(summary = "Alterar status", description = "Altera o status do chamado (ABERTO, EM_ANDAMENTO, CODE_REVIEW, RESOLVIDO, FECHADO)")
     public ResponseEntity<TicketResponse> updateStatus(
             @PathVariable Long id,
             @RequestParam String status) {
@@ -79,6 +94,7 @@ public class TicketController {
     }
 
     @PutMapping("/{id}/feedback")
+    @Operation(summary = "Feedback da classificacao", description = "Envia correcao da classificacao da IA para re-treino do modelo. Informe a categoria e prioridade corretas.")
     public ResponseEntity<TicketResponse> feedback(
             @PathVariable Long id,
             @RequestBody FeedbackRequest request) {
@@ -86,17 +102,20 @@ public class TicketController {
     }
 
     @PutMapping("/{id}/reclassify")
+    @Operation(summary = "Reclassificar chamado", description = "Reclassifica o chamado com o modelo de IA mais recente. Util apos re-treino do modelo.")
     public ResponseEntity<TicketResponse> reclassify(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.reclassify(id));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Excluir chamado", description = "Remove permanentemente um chamado pelo ID")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         ticketService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/enrich")
+    @Operation(summary = "Enriquecer chamado com IA", description = "Analisa o texto do chamado com IA e retorna descricao enriquecida, perguntas para detalhar, impacto estimado e componentes afetados")
     public ResponseEntity<?> enrichTicket(@RequestBody Map<String, String> body) {
         try {
             Map result = RestClient.builder().baseUrl(aiServiceUrl).build()
@@ -119,6 +138,7 @@ public class TicketController {
     }
 
     @PostMapping("/refine")
+    @Operation(summary = "Refinar descricao do chamado", description = "Refina a descricao do chamado incorporando respostas do usuario as perguntas da IA. Envia descricao atual + respostas e recebe descricao melhorada.")
     public ResponseEntity<?> refineTicket(@RequestBody Map<String, Object> body) {
         try {
             Map result = RestClient.builder().baseUrl(aiServiceUrl).build()
