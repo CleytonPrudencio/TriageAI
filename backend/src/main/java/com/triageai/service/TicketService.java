@@ -186,7 +186,68 @@ public class TicketService {
         ticketRepository.deleteById(id);
     }
 
-    public DashboardStats getStats() {
+    public DashboardStats getStats(User currentUser) {
+        // If not ADMIN and has empresa/user context, filter tickets
+        if (currentUser != null && !"ADMIN".equals(currentUser.getRole().name())) {
+            return getFilteredStats(currentUser);
+        }
+        return getGlobalStats();
+    }
+
+    private DashboardStats getFilteredStats(User currentUser) {
+        java.util.List<Ticket> tickets;
+        if (currentUser.getEmpresa() != null) {
+            tickets = ticketRepository.findAll().stream()
+                    .filter(t -> t.getUser() != null && t.getUser().getEmpresa() != null
+                            && t.getUser().getEmpresa().getId().equals(currentUser.getEmpresa().getId()))
+                    .toList();
+        } else {
+            tickets = ticketRepository.findAll().stream()
+                    .filter(t -> t.getUser() != null && t.getUser().getId().equals(currentUser.getId()))
+                    .toList();
+        }
+
+        DashboardStats stats = new DashboardStats();
+        stats.setTotalTickets(tickets.size());
+
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        stats.setTicketsHoje((long) tickets.stream().filter(t -> t.getCreatedAt() != null && t.getCreatedAt().isAfter(now.toLocalDate().atStartOfDay())).toList().size());
+        stats.setTicketsSemana((long) tickets.stream().filter(t -> t.getCreatedAt() != null && t.getCreatedAt().isAfter(now.minusDays(7))).toList().size());
+        stats.setTicketsMes((long) tickets.stream().filter(t -> t.getCreatedAt() != null && t.getCreatedAt().isAfter(now.minusDays(30))).toList().size());
+
+        stats.setByCategoria(new java.util.LinkedHashMap<>());
+        tickets.stream().collect(java.util.stream.Collectors.groupingBy(t -> t.getCategoria().name(), java.util.stream.Collectors.counting()))
+                .forEach((k, v) -> stats.getByCategoria().put(k, v));
+
+        stats.setByPrioridade(new java.util.LinkedHashMap<>());
+        tickets.stream().collect(java.util.stream.Collectors.groupingBy(t -> t.getPrioridade().name(), java.util.stream.Collectors.counting()))
+                .forEach((k, v) -> stats.getByPrioridade().put(k, v));
+
+        stats.setByStatus(new java.util.LinkedHashMap<>());
+        tickets.stream().collect(java.util.stream.Collectors.groupingBy(t -> t.getStatus().name(), java.util.stream.Collectors.counting()))
+                .forEach((k, v) -> stats.getByStatus().put(k, v));
+
+        stats.setMediaAiScore(tickets.stream().mapToDouble(Ticket::getAiScore).average().orElse(0));
+        stats.setTotalPRs(tickets.stream().filter(t -> t.getPrUrl() != null).count());
+
+        long merged = tickets.stream().filter(t -> "MERGED".equals(t.getPrStatus())).count();
+        long open = tickets.stream().filter(t -> "OPEN".equals(t.getPrStatus())).count();
+        long closed = tickets.stream().filter(t -> "CLOSED".equals(t.getPrStatus())).count();
+        stats.setPrsMerged(merged);
+        stats.setPrsOpen(open);
+        stats.setPrsClosed(closed);
+
+        stats.setTicketsRecentes(tickets.stream()
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .limit(10).map(TicketResponse::from).toList());
+
+        // AI model metrics (shared - not tenant specific)
+        loadAiMetrics(stats);
+
+        return stats;
+    }
+
+    private DashboardStats getGlobalStats() {
         DashboardStats stats = new DashboardStats();
         stats.setTotalTickets(ticketRepository.count());
 
@@ -227,7 +288,12 @@ public class TicketService {
                         .stream().map(TicketResponse::from).toList()
         );
 
-        // AI model metrics from Python service
+        loadAiMetrics(stats);
+
+        return stats;
+    }
+
+    private void loadAiMetrics(DashboardStats stats) {
         try {
             org.springframework.web.client.RestClient client =
                     org.springframework.web.client.RestClient.builder().baseUrl(aiServiceUrl).build();
@@ -251,13 +317,10 @@ public class TicketService {
                 stats.setIaModelVersion(((Number) version.getOrDefault("version", 0)).intValue());
             }
         } catch (Exception e) {
-            // AI service may be offline
             stats.setIaModelVersion(0);
             stats.setIaAccuracy(0);
             stats.setIaF1Score(0);
         }
-
-        return stats;
     }
 
     @Async
