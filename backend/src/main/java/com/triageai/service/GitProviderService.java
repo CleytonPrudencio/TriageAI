@@ -19,12 +19,14 @@ public class GitProviderService {
             case GITHUB -> "https://api.github.com";
             case GITLAB -> "https://gitlab.com/api/v4";
             case BITBUCKET -> "https://api.bitbucket.org/2.0";
+            case AZURE_DEVOPS -> "https://dev.azure.com";
+            case GITEA, GOGS, CODEBERG -> config.getApiToken(); // Self-hosted URL in token field
+            default -> "https://api.github.com";
         };
 
         String authHeader = switch (config.getProvider()) {
-            case GITHUB -> "Bearer " + config.getApiToken();
-            case GITLAB -> "Bearer " + config.getApiToken();
-            case BITBUCKET -> "Bearer " + config.getApiToken();
+            case GITHUB, GITLAB, BITBUCKET, AZURE_DEVOPS -> "Bearer " + config.getApiToken();
+            default -> "Bearer " + config.getApiToken();
         };
 
         return RestClient.builder()
@@ -52,6 +54,11 @@ public class GitProviderService {
                     .build();
             case BITBUCKET -> RestClient.builder()
                     .baseUrl("https://api.bitbucket.org/2.0")
+                    .defaultHeader("Authorization", "Bearer " + token)
+                    .defaultHeader("Accept", "application/json")
+                    .build();
+            default -> RestClient.builder()
+                    .baseUrl("https://api.github.com")
                     .defaultHeader("Authorization", "Bearer " + token)
                     .defaultHeader("Accept", "application/json")
                     .build();
@@ -94,6 +101,7 @@ public class GitProviderService {
                         "avatarUrl", avatarUrl
                 );
             }
+            default -> throw new UnsupportedOperationException("Provider not yet supported");
         };
     }
 
@@ -127,6 +135,7 @@ public class GitProviderService {
                         .retrieve().body(Map.class);
                 yield ((Map<?, ?>) ref.get("target")).get("hash").toString();
             }
+            default -> throw new UnsupportedOperationException("Provider not yet supported");
         };
     }
 
@@ -155,6 +164,7 @@ public class GitProviderService {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Map.of("name", branchName, "target", Map.of("hash", baseSha)))
                     .retrieve().toBodilessEntity();
+            default -> { /* Provider not yet supported */ }
         }
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("422")) {
@@ -196,6 +206,7 @@ public class GitProviderService {
                         .retrieve().body(String.class);
                 yield Map.of("content", content, "sha", "");
             }
+            default -> throw new UnsupportedOperationException("Provider not yet supported");
         };
     }
 
@@ -240,6 +251,7 @@ public class GitProviderService {
                         .body(filePath + "=" + content + "&message=" + commitMessage + "&branch=" + branch)
                         .retrieve().toBodilessEntity();
             }
+            default -> { /* Provider not yet supported */ }
         }
 
         log.info("File '{}' updated on branch '{}'", filePath, branch);
@@ -316,6 +328,7 @@ public class GitProviderService {
                         .retrieve().body(Map.class);
                 yield ((Map<?, ?>) pr.get("links")).get("html").toString();
             }
+            default -> throw new UnsupportedOperationException("Provider not yet supported");
         };
     }
 
@@ -363,6 +376,7 @@ public class GitProviderService {
                 case BITBUCKET -> {
                     yield "open"; // TODO: implement
                 }
+                default -> throw new UnsupportedOperationException("Provider not yet supported");
             };
         } catch (Exception e) {
             log.warn("Failed to check PR status: {}", e.getMessage());
@@ -391,6 +405,7 @@ public class GitProviderService {
                     .defaultHeader("Authorization", "Bearer " + token)
                     .defaultHeader("Accept", "application/json")
                     .build();
+            default -> throw new UnsupportedOperationException("Provider not yet supported");
         };
 
         List<GitRepoResponse> repos = new ArrayList<>();
@@ -464,6 +479,7 @@ public class GitProviderService {
                     }
                 }
             }
+            default -> { /* Provider not yet supported */ }
         }
 
         log.info("Found {} repos with push access for provider {}", repos.size(), provider);
@@ -506,6 +522,7 @@ public class GitProviderService {
             }
             case GITLAB -> { /* TODO */ }
             case BITBUCKET -> { /* TODO */ }
+            default -> { /* Provider not yet supported */ }
         }
     }
 
@@ -528,6 +545,7 @@ public class GitProviderService {
             }
             case GITLAB -> { /* TODO */ }
             case BITBUCKET -> { /* TODO */ }
+            default -> { /* Provider not yet supported */ }
         }
     }
 
@@ -558,7 +576,7 @@ public class GitProviderService {
                     yield List.of();
                 }
             }
-            case GITLAB, BITBUCKET -> List.of();
+            default -> List.of();
         };
     }
 
@@ -580,7 +598,7 @@ public class GitProviderService {
                     log.warn("Failed to request reviewer: {}", e.getMessage());
                 }
             }
-            case GITLAB, BITBUCKET -> { /* TODO */ }
+            default -> { /* TODO: implement for other providers */ }
         }
     }
 
@@ -607,6 +625,7 @@ public class GitProviderService {
                 // Simplified: return empty for now, GitHub is the primary target
                 yield List.of();
             }
+            default -> throw new UnsupportedOperationException("Provider not yet supported");
         };
     }
 }
