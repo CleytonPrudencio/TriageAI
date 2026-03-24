@@ -1025,9 +1025,9 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   get isPrOwner(): boolean {
-    if (!this.connectedGitUser || !this.ticket?.prUrl) return true;
-    // PR URL contains the owner: github.com/OWNER/repo/pull/N
-    return this.ticket.prUrl.toLowerCase().includes(this.connectedGitUser.toLowerCase());
+    // If we have a connected git user, the PR was created with that same token
+    // So the current user IS the PR owner and cannot approve their own PR
+    return !!this.connectedGitUser;
   }
 
   startPolling(): void {
