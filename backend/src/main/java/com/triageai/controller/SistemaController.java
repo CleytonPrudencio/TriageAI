@@ -67,6 +67,19 @@ public class SistemaController {
         s.setBranchRefactor(req.getBranchRefactor() != null ? req.getBranchRefactor() : "develop");
         s.setBranchDocs(req.getBranchDocs() != null ? req.getBranchDocs() : "develop");
         s.setBranchChore(req.getBranchChore() != null ? req.getBranchChore() : "develop");
+        // Reviewers por tipo (lista vira string separada por virgula)
+        s.setReviewersHotfix(joinList(req.getReviewersHotfix()));
+        s.setReviewersBugfix(joinList(req.getReviewersBugfix()));
+        s.setReviewersFix(joinList(req.getReviewersFix()));
+        s.setReviewersFeat(joinList(req.getReviewersFeat()));
+        s.setReviewersRefactor(joinList(req.getReviewersRefactor()));
+        s.setReviewersDocs(joinList(req.getReviewersDocs()));
+        s.setReviewersChore(joinList(req.getReviewersChore()));
+    }
+
+    private String joinList(List<String> list) {
+        if (list == null || list.isEmpty()) return null;
+        return String.join(",", list);
     }
 
     @DeleteMapping("/{id}")
@@ -92,6 +105,16 @@ public class SistemaController {
         branches.put("docs", s.getBranchDocs() != null ? s.getBranchDocs() : "develop");
         branches.put("chore", s.getBranchChore() != null ? s.getBranchChore() : "develop");
         map.put("branchMapping", branches);
+        // Reviewer mapping
+        Map<String, List<String>> reviewers = new LinkedHashMap<>();
+        reviewers.put("hotfix", s.getReviewers("hotfix"));
+        reviewers.put("bugfix", s.getReviewers("bugfix"));
+        reviewers.put("fix", s.getReviewers("fix"));
+        reviewers.put("feat", s.getReviewers("feat"));
+        reviewers.put("refactor", s.getReviewers("refactor"));
+        reviewers.put("docs", s.getReviewers("docs"));
+        reviewers.put("chore", s.getReviewers("chore"));
+        map.put("reviewerMapping", reviewers);
         map.put("createdAt", s.getCreatedAt() != null ? s.getCreatedAt().toString() : null);
         if (s.getRepoConfig() != null) {
             map.put("repoConfigId", s.getRepoConfig().getId());
@@ -117,5 +140,12 @@ public class SistemaController {
         private String branchRefactor;
         private String branchDocs;
         private String branchChore;
+        private List<String> reviewersHotfix;
+        private List<String> reviewersBugfix;
+        private List<String> reviewersFix;
+        private List<String> reviewersFeat;
+        private List<String> reviewersRefactor;
+        private List<String> reviewersDocs;
+        private List<String> reviewersChore;
     }
 }

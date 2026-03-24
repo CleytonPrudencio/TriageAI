@@ -35,6 +35,33 @@ public class Sistema {
 
     private String defaultReviewer; // username do reviewer padrao no GitHub
 
+    // Reviewers por tipo de branch (JSON: "user1,user2")
+    private String reviewersHotfix;
+    private String reviewersBugfix;
+    private String reviewersFix;
+    private String reviewersFeat;
+    private String reviewersRefactor;
+    private String reviewersDocs;
+    private String reviewersChore;
+
+    /**
+     * Retorna os reviewers para um tipo de branch
+     */
+    public java.util.List<String> getReviewers(String branchType) {
+        String reviewers = switch (branchType) {
+            case "hotfix" -> reviewersHotfix;
+            case "bugfix" -> reviewersBugfix;
+            case "fix" -> reviewersFix;
+            case "feat" -> reviewersFeat;
+            case "refactor" -> reviewersRefactor;
+            case "docs" -> reviewersDocs;
+            case "chore" -> reviewersChore;
+            default -> null;
+        };
+        if (reviewers == null || reviewers.isBlank()) return java.util.List.of();
+        return java.util.Arrays.asList(reviewers.split(","));
+    }
+
     /**
      * Retorna a branch de origem baseada no tipo de branch
      */

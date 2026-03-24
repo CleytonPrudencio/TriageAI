@@ -22,6 +22,15 @@ export interface Sistema {
     docs: string;
     chore: string;
   };
+  reviewerMapping?: {
+    hotfix?: string[];
+    bugfix?: string[];
+    fix?: string[];
+    feat?: string[];
+    refactor?: string[];
+    docs?: string[];
+    chore?: string[];
+  };
   createdAt: string;
 }
 

@@ -80,36 +80,29 @@ import { RepoConfig } from '../../models/repo-config.model';
         </mat-form-field>
 
         <div class="branch-mapping">
-          <h4><mat-icon>account_tree</mat-icon> Mapeamento de Branches (de onde cada tipo sai)</h4>
-          <div class="branch-grid">
-            <mat-form-field appearance="outline" class="branch-field">
-              <mat-label>hotfix (producao)</mat-label>
-              <input matInput [(ngModel)]="form.branchHotfix" name="branchHotfix" placeholder="main">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="branch-field">
-              <mat-label>bugfix</mat-label>
-              <input matInput [(ngModel)]="form.branchBugfix" name="branchBugfix" placeholder="develop">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="branch-field">
-              <mat-label>fix</mat-label>
-              <input matInput [(ngModel)]="form.branchFix" name="branchFix" placeholder="develop">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="branch-field">
-              <mat-label>feat</mat-label>
-              <input matInput [(ngModel)]="form.branchFeat" name="branchFeat" placeholder="develop">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="branch-field">
-              <mat-label>refactor</mat-label>
-              <input matInput [(ngModel)]="form.branchRefactor" name="branchRefactor" placeholder="develop">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="branch-field">
-              <mat-label>docs</mat-label>
-              <input matInput [(ngModel)]="form.branchDocs" name="branchDocs" placeholder="develop">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="branch-field">
-              <mat-label>chore</mat-label>
-              <input matInput [(ngModel)]="form.branchChore" name="branchChore" placeholder="develop">
-            </mat-form-field>
+          <h4><mat-icon>account_tree</mat-icon> Branches e Reviewers por tipo</h4>
+          <div class="branch-table">
+            <div class="branch-table-header">
+              <span class="bt-type">Tipo</span>
+              <span class="bt-origin">Branch origem</span>
+              <span class="bt-reviewers">Reviewers</span>
+            </div>
+            <div class="branch-table-row" *ngFor="let bt of branchTypes">
+              <span class="bt-type-label">
+                <code>{{ bt.key }}/</code>
+                <small>{{ bt.hint }}</small>
+              </span>
+              <mat-form-field appearance="outline" class="bt-origin-field">
+                <input matInput [(ngModel)]="form['branch' + bt.formKey]" [name]="'branch' + bt.formKey" [placeholder]="bt.default">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="bt-reviewers-field">
+                <mat-select [(ngModel)]="form['reviewers' + bt.formKey]" [name]="'reviewers' + bt.formKey" multiple [placeholder]="'Opcional'">
+                  <mat-option *ngFor="let c of repoCollaborators" [value]="c.username">
+                    {{ c.username }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
         </div>
       </div>
@@ -272,6 +265,13 @@ import { RepoConfig } from '../../models/repo-config.model';
     .branch-mapping h4 { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #334155; margin-bottom: 12px; }
     .branch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     .branch-field { font-size: 13px; }
+    .branch-table { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+    .branch-table-header { display: grid; grid-template-columns: 130px 1fr 1fr; gap: 8px; padding: 8px 12px; background: #f1f5f9; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; }
+    .branch-table-row { display: grid; grid-template-columns: 130px 1fr 1fr; gap: 8px; padding: 4px 12px; border-top: 1px solid #f1f5f9; align-items: center; }
+    .bt-type-label code { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+    .bt-type-label small { display: block; color: #94a3b8; font-size: 11px; }
+    .bt-origin-field, .bt-reviewers-field { font-size: 13px; }
+    .bt-origin-field .mat-mdc-form-field-subscript-wrapper, .bt-reviewers-field .mat-mdc-form-field-subscript-wrapper { display: none; }
 
     @media (max-width: 900px) {
       .branch-grid { grid-template-columns: repeat(2, 1fr); }
@@ -287,6 +287,15 @@ export class SistemasComponent implements OnInit {
   sistemas: Sistema[] = [];
   repoConfigs: RepoConfig[] = [];
   repoCollaborators: any[] = [];
+  branchTypes = [
+    { key: 'hotfix', formKey: 'Hotfix', hint: 'producao', default: 'main' },
+    { key: 'bugfix', formKey: 'Bugfix', hint: 'bugs', default: 'develop' },
+    { key: 'fix', formKey: 'Fix', hint: 'ajustes', default: 'develop' },
+    { key: 'feat', formKey: 'Feat', hint: 'features', default: 'develop' },
+    { key: 'refactor', formKey: 'Refactor', hint: 'refatoracao', default: 'develop' },
+    { key: 'docs', formKey: 'Docs', hint: 'documentacao', default: 'develop' },
+    { key: 'chore', formKey: 'Chore', hint: 'manutencao', default: 'develop' },
+  ];
   showForm = false;
   editing = false;
   editingId: number | null = null;
@@ -303,7 +312,14 @@ export class SistemasComponent implements OnInit {
     branchFeat: 'develop',
     branchRefactor: 'develop',
     branchDocs: 'develop',
-    branchChore: 'develop'
+    branchChore: 'develop',
+    reviewersHotfix: [] as string[],
+    reviewersBugfix: [] as string[],
+    reviewersFix: [] as string[],
+    reviewersFeat: [] as string[],
+    reviewersRefactor: [] as string[],
+    reviewersDocs: [] as string[],
+    reviewersChore: [] as string[],
   };
 
   constructor(
@@ -359,7 +375,14 @@ export class SistemasComponent implements OnInit {
       branchFeat: bm.feat || 'develop',
       branchRefactor: bm.refactor || 'develop',
       branchDocs: bm.docs || 'develop',
-      branchChore: bm.chore || 'develop'
+      branchChore: bm.chore || 'develop',
+      reviewersHotfix: (sistema.reviewerMapping?.hotfix || []),
+      reviewersBugfix: (sistema.reviewerMapping?.bugfix || []),
+      reviewersFix: (sistema.reviewerMapping?.fix || []),
+      reviewersFeat: (sistema.reviewerMapping?.feat || []),
+      reviewersRefactor: (sistema.reviewerMapping?.refactor || []),
+      reviewersDocs: (sistema.reviewerMapping?.docs || []),
+      reviewersChore: (sistema.reviewerMapping?.chore || []),
     };
     if (sistema.repoConfigId) this.onRepoChange(sistema.repoConfigId);
   }
