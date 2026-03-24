@@ -141,44 +141,38 @@ import { RepoConfigService } from '../../services/repo-config.service';
                 </p>
               </div>
 
-              <!-- Review / Approve (para casos excepcionais) -->
-              <div class="pr-review-section" *ngIf="ticket.prStatus === 'OPEN'">
-                <h4><mat-icon>rate_review</mat-icon> Review</h4>
-
-                <!-- Selecionar reviewer -->
-                <mat-form-field appearance="outline" class="reviewer-field" *ngIf="collaborators.length > 0">
-                  <mat-label>Solicitar review de</mat-label>
-                  <mat-select [(ngModel)]="selectedReviewer">
-                    <mat-option *ngFor="let c of collaborators" [value]="c.username">
-                      <img [src]="c.avatarUrl" class="reviewer-avatar" *ngIf="c.avatarUrl"> {{ c.username }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <button mat-stroked-button class="request-reviewer-btn" (click)="onRequestReviewer()"
-                        [disabled]="!selectedReviewer || reviewLoading" *ngIf="collaborators.length > 0">
-                  <mat-icon>person_add</mat-icon> Solicitar Review
-                </button>
-
-                <mat-divider *ngIf="collaborators.length > 0" class="review-divider"></mat-divider>
-
-                <div class="review-actions">
-                  <button mat-raised-button class="approve-btn" (click)="approvePr()" [disabled]="reviewLoading">
-                    <mat-icon>check_circle</mat-icon>
-                    {{ reviewLoading ? 'Enviando...' : 'Aprovar PR' }}
+              <!-- Review -->
+              <div class="pr-review-compact" *ngIf="ticket.prStatus === 'OPEN'">
+                <div class="review-row">
+                  <mat-form-field appearance="outline" class="review-select" *ngIf="collaborators.length > 0">
+                    <mat-label>Reviewer</mat-label>
+                    <mat-select [(ngModel)]="selectedReviewer">
+                      <mat-option *ngFor="let c of collaborators" [value]="c.username">
+                        {{ c.username }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <button mat-icon-button color="primary" matTooltip="Solicitar Review"
+                          (click)="onRequestReviewer()" [disabled]="!selectedReviewer || reviewLoading"
+                          *ngIf="collaborators.length > 0">
+                    <mat-icon>person_add</mat-icon>
                   </button>
-                  <button mat-stroked-button color="warn" class="request-changes-btn" (click)="requestChangesPr()" [disabled]="reviewLoading">
-                    <mat-icon>feedback</mat-icon>
-                    Solicitar Alteracoes
+                  <span class="review-spacer"></span>
+                  <button mat-flat-button class="approve-btn-sm" (click)="approvePr()" [disabled]="reviewLoading">
+                    <mat-icon>check</mat-icon> Aprovar
+                  </button>
+                  <button mat-stroked-button color="warn" class="changes-btn-sm" (click)="requestChangesPr()" [disabled]="reviewLoading">
+                    <mat-icon>edit</mat-icon> Alteracoes
                   </button>
                 </div>
-                <mat-form-field appearance="outline" class="review-comment-field" *ngIf="showReviewComment">
-                  <mat-label>Comentario (opcional)</mat-label>
-                  <textarea matInput [(ngModel)]="reviewComment" rows="3"></textarea>
-                </mat-form-field>
-                <button mat-flat-button color="warn" class="send-review-btn" *ngIf="showReviewComment"
-                        (click)="submitRequestChanges()" [disabled]="reviewLoading">
-                  <mat-icon>send</mat-icon> Enviar Review
-                </button>
+                <div *ngIf="showReviewComment" class="review-comment-row">
+                  <mat-form-field appearance="outline" class="review-comment-inline">
+                    <input matInput [(ngModel)]="reviewComment" placeholder="Comentario...">
+                  </mat-form-field>
+                  <button mat-flat-button color="warn" (click)="submitRequestChanges()" [disabled]="reviewLoading">
+                    <mat-icon>send</mat-icon>
+                  </button>
+                </div>
               </div>
 
               <div class="pr-fixes" *ngIf="prSummaryData?.fixes?.length">
@@ -671,8 +665,16 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .summary-explanation { display: block; font-size: 12px; color: #64748b; line-height: 1.4; }
 
     /* Review Section */
-    .pr-review-section { background: #fefce8; border: 1px solid #fde68a; border-radius: 10px; padding: 16px; margin-top: 16px; }
-    .pr-review-section h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; font-size: 15px; color: #854d0e; }
+    .pr-review-compact { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-top: 12px; }
+    .review-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .review-select { width: 180px; font-size: 13px; }
+    .review-select .mat-mdc-form-field-subscript-wrapper { display: none; }
+    .review-spacer { flex: 1; }
+    .approve-btn-sm { background: #16a34a !important; color: white !important; font-size: 12px !important; height: 36px !important; }
+    .changes-btn-sm { font-size: 12px !important; height: 36px !important; }
+    .review-comment-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+    .review-comment-inline { flex: 1; font-size: 13px; }
+    .review-comment-inline .mat-mdc-form-field-subscript-wrapper { display: none; }
     .reviewer-field { width: 100%; margin-bottom: 8px; }
     .reviewer-avatar { width: 20px; height: 20px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
     .request-reviewer-btn { width: 100%; margin-bottom: 8px; }
