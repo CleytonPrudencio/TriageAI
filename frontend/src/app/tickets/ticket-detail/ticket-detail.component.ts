@@ -179,11 +179,13 @@ import { RepoConfigService } from '../../services/repo-config.service';
 
           <!-- Re-run Auto-Fix (shown when no PR exists or after deletion) -->
           <div class="rerun-section" *ngIf="!ticket.prUrl && ticket.categoria === 'TECNICO' && repoConfigs.length > 0">
-            <button mat-raised-button class="rerun-btn" (click)="scrollToAutoFix()">
-              <mat-icon>build</mat-icon>
-              Executar Auto-Fix Novamente
+            <button mat-raised-button class="rerun-btn" (click)="scrollToAutoFix()" [disabled]="fixLoading">
+              <mat-spinner *ngIf="fixLoading" diameter="18"></mat-spinner>
+              <mat-icon *ngIf="!fixLoading">build</mat-icon>
+              {{ fixLoading ? 'Analisando e criando PR...' : 'Executar Auto-Fix Novamente' }}
             </button>
-            <p class="rerun-hint">Configure o repositorio e branch na barra lateral</p>
+            <p class="rerun-hint" *ngIf="!fixLoading">Configure o repositorio e branch na barra lateral</p>
+            <p class="rerun-hint processing" *ngIf="fixLoading">Aguarde, a IA esta analisando o codigo...</p>
           </div>
         </div>
 
@@ -597,6 +599,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
 
     .rerun-section { margin: 16px 0; text-align: center; }
     .rerun-hint { color: #94a3b8; font-size: 12px; margin-top: 6px; }
+    .rerun-hint.processing { color: #f59e0b; font-weight: 500; }
     .highlight-section { animation: highlight-pulse 2s ease-out; }
     @keyframes highlight-pulse { 0% { box-shadow: 0 0 0 3px #6366f1; } 100% { box-shadow: none; } }
     .rerun-btn {
