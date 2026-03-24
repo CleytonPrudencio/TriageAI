@@ -177,15 +177,54 @@ import { RepoConfigService } from '../../services/repo-config.service';
             </div>
           </div>
 
-          <!-- Re-run Auto-Fix (shown when no PR exists or after deletion) -->
-          <div class="rerun-section" *ngIf="!ticket.prUrl && ticket.categoria === 'TECNICO' && repoConfigs.length > 0">
-            <button mat-raised-button class="rerun-btn" (click)="scrollToAutoFix()" [disabled]="fixLoading">
-              <mat-spinner *ngIf="fixLoading" diameter="18"></mat-spinner>
-              <mat-icon *ngIf="!fixLoading">build</mat-icon>
-              {{ fixLoading ? 'Analisando e criando PR...' : 'Executar Auto-Fix Novamente' }}
-            </button>
-            <p class="rerun-hint" *ngIf="!fixLoading">Configure o repositorio e branch na barra lateral</p>
-            <p class="rerun-hint processing" *ngIf="fixLoading">Aguarde, a IA esta analisando o codigo...</p>
+          <!-- Auto-Fix inline (shown when no PR exists) -->
+          <div class="autofix-inline" *ngIf="!ticket.prUrl && ticket.categoria === 'TECNICO' && repoConfigs.length > 0">
+            <div class="autofix-inline-header">
+              <mat-icon>build</mat-icon>
+              <div>
+                <h4>Auto-Fix</h4>
+                <p>Selecione o repositorio e execute para gerar a correcao automaticamente</p>
+              </div>
+            </div>
+            <div class="autofix-inline-form">
+              <mat-form-field appearance="outline">
+                <mat-label>Repositorio *</mat-label>
+                <mat-select [(ngModel)]="selectedRepoId">
+                  <mat-option *ngFor="let rc of repoConfigs" [value]="rc.id">
+                    {{ rc.name }} ({{ rc.repoOwner }}/{{ rc.repoName }})
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div class="autofix-inline-row">
+                <mat-form-field appearance="outline" class="inline-field">
+                  <mat-label>Tipo</mat-label>
+                  <mat-select [(ngModel)]="branchType">
+                    <mat-option value="auto">auto (IA)</mat-option>
+                    <mat-option value="fix">fix</mat-option>
+                    <mat-option value="feat">feat</mat-option>
+                    <mat-option value="hotfix">hotfix</mat-option>
+                    <mat-option value="bugfix">bugfix</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="inline-field">
+                  <mat-label>Nome *</mat-label>
+                  <input matInput [(ngModel)]="branchNameInput">
+                </mat-form-field>
+              </div>
+              <div class="branch-preview" *ngIf="selectedRepoId && branchNameInput">
+                <code>{{ branchType === 'auto' ? '(IA)' : branchType }}/{{ branchNameInput }}</code>
+              </div>
+              <button mat-raised-button class="autofix-inline-btn" (click)="onAutoFix()"
+                      [disabled]="!selectedRepoId || !branchNameInput || fixLoading">
+                <mat-spinner *ngIf="fixLoading" diameter="18"></mat-spinner>
+                <mat-icon *ngIf="!fixLoading">rocket_launch</mat-icon>
+                {{ fixLoading ? 'Analisando e criando PR...' : 'Executar Auto-Fix' }}
+              </button>
+            </div>
+            <div *ngIf="fixResult" class="fix-result" [class.success]="fixResult.status === 'success'" [class.error]="fixResult.status === 'error'">
+              <mat-icon>{{ fixResult.status === 'success' ? 'check_circle' : 'error' }}</mat-icon>
+              <span>{{ fixResult.message }}</span>
+            </div>
           </div>
         </div>
 
@@ -623,9 +662,18 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .review-comment-field { width: 100%; margin-top: 12px; }
     .send-review-btn { width: 100%; margin-top: 4px; }
 
-    .rerun-section { margin: 16px 0; text-align: center; }
-    .rerun-hint { color: #94a3b8; font-size: 12px; margin-top: 6px; }
-    .rerun-hint.processing { color: #f59e0b; font-weight: 500; }
+    /* Auto-Fix Inline (no corpo do ticket) */
+    .autofix-inline { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 20px 0; }
+    .autofix-inline-header { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px; }
+    .autofix-inline-header mat-icon { color: #6366f1; font-size: 28px; width: 28px; height: 28px; margin-top: 2px; }
+    .autofix-inline-header h4 { margin: 0; font-size: 16px; color: #1e293b; }
+    .autofix-inline-header p { margin: 4px 0 0; font-size: 13px; color: #64748b; }
+    .autofix-inline-form { display: flex; flex-direction: column; gap: 4px; }
+    .autofix-inline-row { display: flex; gap: 12px; }
+    .inline-field { flex: 1; }
+    .autofix-inline-btn { background: linear-gradient(135deg, #6366f1, #06b6d4) !important; color: white !important; width: 100%; padding: 10px; font-size: 15px; }
+    .autofix-inline-btn:disabled { opacity: 0.5; }
+    .autofix-inline-btn mat-spinner { margin-right: 8px; }
     .highlight-section { animation: highlight-pulse 2s ease-out; }
     @keyframes highlight-pulse { 0% { box-shadow: 0 0 0 3px #6366f1; } 100% { box-shadow: none; } }
     .rerun-btn {
