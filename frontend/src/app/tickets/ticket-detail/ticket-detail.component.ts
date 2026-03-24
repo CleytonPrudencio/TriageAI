@@ -158,12 +158,17 @@ import { RepoConfigService } from '../../services/repo-config.service';
                     <mat-icon>person_add</mat-icon>
                   </button>
                   <span class="review-spacer"></span>
-                  <button mat-flat-button class="approve-btn-sm" (click)="approvePr()" [disabled]="reviewLoading">
+                  <button mat-flat-button class="approve-btn-sm" (click)="approvePr()" [disabled]="reviewLoading"
+                          *ngIf="!isPrOwner">
                     <mat-icon>check</mat-icon> Aprovar
                   </button>
-                  <button mat-stroked-button color="warn" class="changes-btn-sm" (click)="requestChangesPr()" [disabled]="reviewLoading">
+                  <button mat-stroked-button color="warn" class="changes-btn-sm" (click)="requestChangesPr()" [disabled]="reviewLoading"
+                          *ngIf="!isPrOwner">
                     <mat-icon>edit</mat-icon> Alteracoes
                   </button>
+                  <span class="owner-hint" *ngIf="isPrOwner && collaborators.length > 0">
+                    Solicite review de um colaborador
+                  </span>
                 </div>
                 <div *ngIf="showReviewComment" class="review-comment-row">
                   <mat-form-field appearance="outline" class="review-comment-inline">
@@ -675,6 +680,7 @@ import { RepoConfigService } from '../../services/repo-config.service';
     .review-comment-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
     .review-comment-inline { flex: 1; font-size: 13px; }
     .review-comment-inline .mat-mdc-form-field-subscript-wrapper { display: none; }
+    .owner-hint { color: #94a3b8; font-size: 12px; font-style: italic; }
     .reviewer-field { width: 100%; margin-bottom: 8px; }
     .reviewer-avatar { width: 20px; height: 20px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
     .request-reviewer-btn { width: 100%; margin-bottom: 8px; }
@@ -732,6 +738,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   reviewComment = '';
   collaborators: any[] = [];
   selectedReviewer = '';
+  connectedGitUser = '';
   confirmDialog: { show: boolean; title: string; message: string; action: () => void } = { show: false, title: '', message: '', action: () => {} };
   private pollingInterval: any;
 
@@ -1006,6 +1013,21 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       next: (collabs) => this.collaborators = collabs,
       error: () => this.collaborators = []
     });
+    // Load connected git username to know if current user is PR owner
+    if (!this.connectedGitUser) {
+      this.repoConfigService.getConnections().subscribe({
+        next: (conns) => {
+          if (conns.length > 0) this.connectedGitUser = conns[0].username;
+        },
+        error: () => {}
+      });
+    }
+  }
+
+  get isPrOwner(): boolean {
+    if (!this.connectedGitUser || !this.ticket?.prUrl) return true;
+    // PR URL contains the owner: github.com/OWNER/repo/pull/N
+    return this.ticket.prUrl.toLowerCase().includes(this.connectedGitUser.toLowerCase());
   }
 
   startPolling(): void {
