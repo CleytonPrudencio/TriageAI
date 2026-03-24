@@ -767,7 +767,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   doDeleteAutoFix(): void {
 
     this.deletingFix = true;
-    this.repoConfigService.deleteAutoFix(this.ticket.id).subscribe({
+    this.repoConfigService.deleteAutoFix(this.ticket!.id).subscribe({
       next: () => {
         this.deletingFix = false;
         this.ticket!.prUrl = null as any;
