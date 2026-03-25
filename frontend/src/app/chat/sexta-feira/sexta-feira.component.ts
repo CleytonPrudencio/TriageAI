@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewChecked, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -50,11 +50,18 @@ interface ChatMessage {
 
       <!-- Avatar Area -->
       <div class="avatar-area">
-        <div class="sf-avatar" [class.thinking]="isThinking">
-          <span class="sf-avatar-icon">&#10024;</span>
+        <div class="sf-avatar-container" [class.thinking]="isThinking" [class.speaking]="isSpeaking">
+          <canvas #particleCanvas class="particle-canvas" width="120" height="120"></canvas>
+          <div class="sf-core"></div>
+          <div class="sf-ring ring-1"></div>
+          <div class="sf-ring ring-2"></div>
+          <div class="sf-ring ring-3"></div>
+          <div class="sf-particles">
+            <span *ngFor="let p of particles" class="particle" [style.--delay]="p.delay + 's'" [style.--angle]="p.angle + 'deg'" [style.--distance]="p.distance + 'px'" [style.--size]="p.size + 'px'" [style.--duration]="p.duration + 's'"></span>
+          </div>
         </div>
-        <span class="avatar-label">Sexta-Feira</span>
-        <span class="avatar-sublabel">IA Local do TriageAI</span>
+        <div class="sf-name">SEXTA-FEIRA</div>
+        <div class="sf-subtitle">{{ isThinking ? 'Analisando...' : isSpeaking ? 'Respondendo...' : 'IA Local \u2022 Online' }}</div>
       </div>
 
       <!-- Messages -->
@@ -98,25 +105,39 @@ interface ChatMessage {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 56px;
-      height: 56px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
       border: none;
       cursor: pointer;
       z-index: 1001;
       padding: 0;
-      background: linear-gradient(135deg, #8b5cf6, #6366f1);
-      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
-      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
       animation: fab-pulse 2s infinite;
+      transition: transform 0.2s;
     }
     .sf-fab:hover {
       transform: scale(1.1);
-      box-shadow: 0 6px 25px rgba(139, 92, 246, 0.6);
+    }
+    .sf-fab::before {
+      content: '';
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      animation: fab-ring 3s linear infinite;
     }
     .sf-fab.open {
       animation: none;
       background: linear-gradient(135deg, #4b5563, #374151);
+    }
+    .sf-fab.open::before {
+      display: none;
     }
     .sf-fab-inner {
       display: flex;
@@ -132,8 +153,12 @@ interface ChatMessage {
       height: 26px;
     }
     @keyframes fab-pulse {
-      0%, 100% { box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
-      50% { box-shadow: 0 4px 25px rgba(139, 92, 246, 0.7); }
+      0%, 100% { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5); }
+      50% { box-shadow: 0 4px 30px rgba(139, 92, 246, 0.8); }
+    }
+    @keyframes fab-ring {
+      from { transform: rotate(0deg) scale(1); opacity: 0.5; }
+      to { transform: rotate(360deg) scale(1.2); opacity: 0; }
     }
 
     /* Chat Panel */
@@ -241,40 +266,128 @@ interface ChatMessage {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 16px 12px;
+      padding: 8px 16px 8px;
     }
-    .sf-avatar {
-      width: 80px;
-      height: 80px;
+
+    /* Jarvis-style Avatar Container */
+    .sf-avatar-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 8px auto 4px;
+    }
+    .particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 120px;
+      height: 120px;
+    }
+    .sf-core {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, #c4b5fd, #8b5cf6);
       border-radius: 50%;
-      background: radial-gradient(circle, #8b5cf6, #6366f1, #4f46e5);
-      box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.3);
-      animation: pulse-glow 2s infinite;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 12px;
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+      animation: core-pulse 2s infinite;
     }
-    .sf-avatar.thinking {
-      animation: pulse-glow 0.5s infinite;
+    .thinking .sf-core {
+      animation: core-pulse 0.4s infinite;
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.9);
     }
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.3); transform: scale(1); }
-      50% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.5); transform: scale(1.05); }
+    .speaking .sf-core {
+      animation: core-speak 0.3s infinite;
+      width: 16px;
+      height: 16px;
+      box-shadow: 0 0 30px rgba(139, 92, 246, 1);
     }
-    .sf-avatar-icon {
-      font-size: 36px;
-      color: white;
+    @keyframes core-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+      50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
     }
-    .avatar-label {
-      color: white;
-      font-weight: 600;
-      font-size: 16px;
-      margin-bottom: 2px;
+    @keyframes core-speak {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      25% { transform: translate(-50%, -50%) scale(1.5); }
+      75% { transform: translate(-50%, -50%) scale(0.8); }
     }
-    .avatar-sublabel {
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 12px;
+    .sf-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 50%;
+      animation: ring-rotate 8s linear infinite;
+    }
+    .ring-1 {
+      width: 50px; height: 50px;
+      margin: -25px 0 0 -25px;
+      border-color: rgba(139, 92, 246, 0.15);
+      animation-duration: 6s;
+    }
+    .ring-2 {
+      width: 75px; height: 75px;
+      margin: -37.5px 0 0 -37.5px;
+      border-color: rgba(99, 102, 241, 0.1);
+      animation-duration: 10s;
+      animation-direction: reverse;
+    }
+    .ring-3 {
+      width: 100px; height: 100px;
+      margin: -50px 0 0 -50px;
+      border-color: rgba(139, 92, 246, 0.08);
+      animation-duration: 15s;
+    }
+    .thinking .sf-ring { animation-duration: 1s !important; border-color: rgba(139, 92, 246, 0.4); }
+    .speaking .sf-ring { animation-duration: 2s !important; border-color: rgba(139, 92, 246, 0.3); }
+    @keyframes ring-rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .sf-particles {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .particle {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: var(--size);
+      height: var(--size);
+      background: rgba(139, 92, 246, 0.6);
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(139, 92, 246, 0.4);
+      animation: particle-orbit var(--duration) linear infinite;
+      animation-delay: var(--delay);
+      transform-origin: 0 0;
+    }
+    @keyframes particle-orbit {
+      0% { transform: rotate(var(--angle)) translateX(var(--distance)) rotate(calc(-1 * var(--angle))); opacity: 0.2; }
+      25% { opacity: 0.8; }
+      50% { transform: rotate(calc(var(--angle) + 180deg)) translateX(var(--distance)) rotate(calc(-1 * (var(--angle) + 180deg))); opacity: 0.4; }
+      75% { opacity: 0.9; }
+      100% { transform: rotate(calc(var(--angle) + 360deg)) translateX(var(--distance)) rotate(calc(-1 * (var(--angle) + 360deg))); opacity: 0.2; }
+    }
+    .thinking .particle { animation-duration: 1s !important; background: rgba(139, 92, 246, 0.9); }
+    .speaking .particle { animation-duration: 1.5s !important; box-shadow: 0 0 8px rgba(139, 92, 246, 0.8); }
+
+    /* Name and subtitle */
+    .sf-name {
+      text-align: center;
+      color: #c4b5fd;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .sf-subtitle {
+      text-align: center;
+      color: #64748b;
+      font-size: 11px;
+      margin-top: 2px;
     }
 
     /* Messages Area */
@@ -431,18 +544,29 @@ interface ChatMessage {
     }
   `]
 })
-export class SextaFeiraComponent implements AfterViewChecked {
+export class SextaFeiraComponent implements AfterViewChecked, AfterViewInit, OnDestroy {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+  @ViewChild('particleCanvas') canvasRef!: ElementRef<HTMLCanvasElement>;
 
   messages: ChatMessage[] = [];
   isOpen = false;
   isThinking = false;
+  isSpeaking = false;
   inputText = '';
+  particles: {delay: number, angle: number, distance: number, size: number, duration: number}[] = [];
   private hasGreeted = false;
   private shouldScroll = false;
   private aiServiceUrl = 'http://localhost:8000';
+  private animationId: any;
 
   constructor(private http: HttpClient) {}
+
+  ngAfterViewInit(): void {
+    this.generateParticles();
+    if (this.isOpen) {
+      this.startCanvasAnimation();
+    }
+  }
 
   ngAfterViewChecked(): void {
     if (this.shouldScroll) {
@@ -451,19 +575,165 @@ export class SextaFeiraComponent implements AfterViewChecked {
     }
   }
 
+  ngOnDestroy(): void {
+    this.stopCanvasAnimation();
+  }
+
+  generateParticles(): void {
+    this.particles = [];
+    for (let i = 0; i < 40; i++) {
+      this.particles.push({
+        delay: Math.random() * 3,
+        angle: Math.random() * 360,
+        distance: 25 + Math.random() * 35,
+        size: 1 + Math.random() * 3,
+        duration: 2 + Math.random() * 4
+      });
+    }
+  }
+
+  startCanvasAnimation(): void {
+    setTimeout(() => {
+      const canvas = this.canvasRef?.nativeElement;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      let time = 0;
+      const dots: {x: number, y: number, vx: number, vy: number, r: number, alpha: number}[] = [];
+
+      // Create floating dots
+      for (let i = 0; i < 80; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 15 + Math.random() * 35;
+        dots.push({
+          x: cx + Math.cos(angle) * dist,
+          y: cy + Math.sin(angle) * dist,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          r: 0.5 + Math.random() * 2,
+          alpha: 0.3 + Math.random() * 0.7
+        });
+      }
+
+      const animate = () => {
+        ctx.clearRect(0, 0, w, h);
+        time += 0.02;
+
+        const speaking = this.isSpeaking;
+        const thinking = this.isThinking;
+        const speed = speaking ? 3 : thinking ? 2 : 1;
+        const intensity = speaking ? 1.5 : thinking ? 1.2 : 1;
+
+        // Draw connections between nearby dots
+        for (let i = 0; i < dots.length; i++) {
+          for (let j = i + 1; j < dots.length; j++) {
+            const dx = dots[i].x - dots[j].x;
+            const dy = dots[i].y - dots[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 30) {
+              ctx.beginPath();
+              ctx.moveTo(dots[i].x, dots[i].y);
+              ctx.lineTo(dots[j].x, dots[j].y);
+              ctx.strokeStyle = `rgba(139, 92, 246, ${0.15 * (1 - dist/30) * intensity})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+
+        // Update and draw dots
+        dots.forEach((dot, i) => {
+          // Orbit around center
+          const angle = Math.atan2(dot.y - cy, dot.x - cx);
+          const dist = Math.sqrt((dot.x - cx) ** 2 + (dot.y - cy) ** 2);
+
+          // Add orbital motion
+          const orbitSpeed = (0.003 + (i % 3) * 0.002) * speed;
+          const newAngle = angle + orbitSpeed;
+          const targetDist = 15 + (Math.sin(time * 0.5 + i) + 1) * 20 * intensity;
+
+          dot.x = cx + Math.cos(newAngle) * (dist + (targetDist - dist) * 0.02);
+          dot.y = cy + Math.sin(newAngle) * (dist + (targetDist - dist) * 0.02);
+
+          // Add some randomness when speaking
+          if (speaking) {
+            dot.x += (Math.random() - 0.5) * 2;
+            dot.y += (Math.random() - 0.5) * 2;
+          }
+
+          // Keep within bounds
+          const maxDist = speaking ? 55 : 45;
+          const currentDist = Math.sqrt((dot.x - cx) ** 2 + (dot.y - cy) ** 2);
+          if (currentDist > maxDist) {
+            dot.x = cx + ((dot.x - cx) / currentDist) * maxDist;
+            dot.y = cy + ((dot.y - cy) / currentDist) * maxDist;
+          }
+
+          // Draw dot
+          const glowSize = dot.r * intensity;
+          const gradient = ctx.createRadialGradient(dot.x, dot.y, 0, dot.x, dot.y, glowSize * 3);
+          gradient.addColorStop(0, `rgba(139, 92, 246, ${dot.alpha * intensity})`);
+          gradient.addColorStop(0.5, `rgba(99, 102, 241, ${dot.alpha * 0.3 * intensity})`);
+          gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+          ctx.beginPath();
+          ctx.arc(dot.x, dot.y, glowSize * 3, 0, Math.PI * 2);
+          ctx.fillStyle = gradient;
+          ctx.fill();
+
+          // Core dot
+          ctx.beginPath();
+          ctx.arc(dot.x, dot.y, glowSize * 0.8, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(200, 180, 255, ${dot.alpha * intensity})`;
+          ctx.fill();
+        });
+
+        // Draw center glow
+        const centerGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 20 * intensity);
+        centerGlow.addColorStop(0, `rgba(139, 92, 246, ${0.3 * intensity})`);
+        centerGlow.addColorStop(0.5, `rgba(139, 92, 246, ${0.1 * intensity})`);
+        centerGlow.addColorStop(1, 'rgba(139, 92, 246, 0)');
+        ctx.beginPath();
+        ctx.arc(cx, cy, 20 * intensity, 0, Math.PI * 2);
+        ctx.fillStyle = centerGlow;
+        ctx.fill();
+
+        this.animationId = requestAnimationFrame(animate);
+      };
+
+      animate();
+    }, 100);
+  }
+
+  stopCanvasAnimation(): void {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
+  }
+
   toggleChat(): void {
     this.isOpen = !this.isOpen;
-    if (this.isOpen && !this.hasGreeted) {
-      this.hasGreeted = true;
-      setTimeout(() => {
-        this.messages.push({
-          text: 'Ola! Eu sou a **Sexta-Feira**, a IA local do TriageAI!\n\nMe pergunte sobre classificacao de chamados, metricas do modelo ou como estou aprendendo. Como posso ajudar?',
-          sender: 'sf',
-          type: 'greeting',
-          timestamp: new Date()
-        });
-        this.shouldScroll = true;
-      }, 300);
+    if (this.isOpen) {
+      if (!this.hasGreeted) {
+        this.hasGreeted = true;
+        setTimeout(() => {
+          this.messages.push({
+            text: 'Ola! Eu sou a **Sexta-Feira**, a IA local do TriageAI!\n\nMe pergunte sobre classificacao de chamados, metricas do modelo ou como estou aprendendo. Como posso ajudar?',
+            sender: 'sf',
+            type: 'greeting',
+            timestamp: new Date()
+          });
+          this.shouldScroll = true;
+        }, 300);
+      }
+      setTimeout(() => this.startCanvasAnimation(), 200);
+    } else {
+      this.stopCanvasAnimation();
     }
   }
 
@@ -487,6 +757,8 @@ export class SextaFeiraComponent implements AfterViewChecked {
           timestamp: new Date()
         });
         this.shouldScroll = true;
+        this.isSpeaking = true;
+        setTimeout(() => this.isSpeaking = false, 2000 + res.response.length * 20);
       },
       error: () => {
         this.isThinking = false;
