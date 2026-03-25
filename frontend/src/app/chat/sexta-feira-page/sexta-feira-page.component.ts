@@ -288,85 +288,66 @@ export class SextaFeiraPageComponent implements OnInit, AfterViewInit, OnDestroy
       const speaking = this.isSpeaking;
       const thinking = this.isThinking;
       const recording = this.isRecording;
-      const intensity = speaking ? 1.8 : thinking ? 1.4 : recording ? 1.6 : 1;
-      const speedMult = speaking ? 3 : thinking ? 2 : recording ? 2.5 : 1;
+      const intensity = speaking ? 1.3 : thinking ? 1.15 : recording ? 1.2 : 1;
+      const speedMult = speaking ? 2 : thinking ? 1.5 : recording ? 1.8 : 1;
 
       // Update particles
       particles.forEach((p, i) => {
         p.baseAngle += p.speed * speedMult;
-
-        // Breathing effect
-        const breathe = Math.sin(time * 0.5 + p.phase) * 10 * intensity;
-        // Audio reactivity when speaking/recording
-        const audioReact = (speaking || recording) ? Math.sin(time * 8 + i * 0.5) * 15 * this.audioLevel : 0;
-
+        const breathe = Math.sin(time * 0.3 + p.phase) * 5 * intensity;
+        const audioReact = (speaking || recording) ? Math.sin(time * 4 + i * 0.3) * 8 * this.audioLevel : 0;
         const dist = p.baseDist + breathe + audioReact;
         p.x = cx + Math.cos(p.baseAngle) * dist;
         p.y = cy + Math.sin(p.baseAngle) * dist;
-
-        // Random jitter when speaking
         if (speaking) {
-          p.x += (Math.random() - 0.5) * 3;
-          p.y += (Math.random() - 0.5) * 3;
+          p.x += (Math.random() - 0.5) * 1.5;
+          p.y += (Math.random() - 0.5) * 1.5;
         }
       });
 
-      // Draw connections
+      // Draw connections (thin, subtle)
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          const maxDist = speaking ? 50 : 35;
+          const maxDist = speaking ? 45 : 30;
           if (dist < maxDist) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            const alpha = 0.12 * (1 - dist / maxDist) * intensity;
-            ctx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(120, 100, 200, ${0.06 * (1 - dist / maxDist) * intensity})`;
+            ctx.lineWidth = 0.3;
             ctx.stroke();
           }
         }
       }
 
-      // Draw particles
+      // Draw particles (clean dots, no glow)
       particles.forEach(p => {
-        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4 * intensity);
-        glow.addColorStop(0, `rgba(167, 139, 250, ${p.alpha * intensity})`);
-        glow.addColorStop(0.4, `rgba(139, 92, 246, ${p.alpha * 0.4 * intensity})`);
-        glow.addColorStop(1, 'rgba(139, 92, 246, 0)');
+        const size = p.r * 0.8 * intensity;
+        const alpha = p.alpha * 0.5 * intensity;
+        // Simple dot
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r * 4 * intensity, 0, Math.PI * 2);
-        ctx.fillStyle = glow;
-        ctx.fill();
-
-        // Core
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r * intensity, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(220, 200, 255, ${p.alpha * intensity})`;
+        ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(160, 140, 220, ${alpha})`;
         ctx.fill();
       });
 
-      // Center glow
-      const coreSize = 25 * intensity;
-      const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreSize);
-      core.addColorStop(0, `rgba(167, 139, 250, ${0.5 * intensity})`);
-      core.addColorStop(0.3, `rgba(139, 92, 246, ${0.2 * intensity})`);
-      core.addColorStop(1, 'rgba(139, 92, 246, 0)');
+      // Subtle center dot
       ctx.beginPath();
-      ctx.arc(cx, cy, coreSize, 0, Math.PI * 2);
-      ctx.fillStyle = core;
+      ctx.arc(cx, cy, 3 * intensity, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(160, 140, 220, ${0.4 * intensity})`;
       ctx.fill();
 
-      // Rings
+      // Rings (very subtle)
       for (let r = 0; r < 3; r++) {
-        const ringRadius = 60 + r * 40;
-        const ringAngle = time * (0.3 - r * 0.1) * speedMult;
+        const ringRadius = 50 + r * 45;
+        const ringAngle = time * (0.2 - r * 0.05) * speedMult;
         ctx.beginPath();
-        ctx.arc(cx, cy, ringRadius, ringAngle, ringAngle + Math.PI * 1.5);
-        ctx.strokeStyle = `rgba(139, 92, 246, ${0.08 * intensity})`;
-        ctx.lineWidth = 1;
+        ctx.arc(cx, cy, ringRadius, ringAngle, ringAngle + Math.PI * 1.2);
+        ctx.strokeStyle = `rgba(120, 100, 200, ${0.04 * intensity})`;
+        ctx.lineWidth = 0.5;
         ctx.stroke();
       }
 

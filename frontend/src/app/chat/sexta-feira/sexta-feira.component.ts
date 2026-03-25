@@ -692,33 +692,18 @@ export class SextaFeiraComponent implements AfterViewChecked, AfterViewInit, OnD
             dot.y = cy + ((dot.y - cy) / currentDist) * maxDist;
           }
 
-          // Draw dot
-          const glowSize = dot.r * intensity;
-          const gradient = ctx.createRadialGradient(dot.x, dot.y, 0, dot.x, dot.y, glowSize * 3);
-          gradient.addColorStop(0, `rgba(139, 92, 246, ${dot.alpha * intensity})`);
-          gradient.addColorStop(0.5, `rgba(99, 102, 241, ${dot.alpha * 0.3 * intensity})`);
-          gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
-
+          // Clean dot (no glow)
+          const size = dot.r * 0.7 * intensity;
           ctx.beginPath();
-          ctx.arc(dot.x, dot.y, glowSize * 3, 0, Math.PI * 2);
-          ctx.fillStyle = gradient;
-          ctx.fill();
-
-          // Core dot
-          ctx.beginPath();
-          ctx.arc(dot.x, dot.y, glowSize * 0.8, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(200, 180, 255, ${dot.alpha * intensity})`;
+          ctx.arc(dot.x, dot.y, size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(160, 140, 220, ${dot.alpha * 0.5 * intensity})`;
           ctx.fill();
         });
 
-        // Draw center glow
-        const centerGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 20 * intensity);
-        centerGlow.addColorStop(0, `rgba(139, 92, 246, ${0.3 * intensity})`);
-        centerGlow.addColorStop(0.5, `rgba(139, 92, 246, ${0.1 * intensity})`);
-        centerGlow.addColorStop(1, 'rgba(139, 92, 246, 0)');
+        // Subtle center dot
         ctx.beginPath();
-        ctx.arc(cx, cy, 20 * intensity, 0, Math.PI * 2);
-        ctx.fillStyle = centerGlow;
+        ctx.arc(cx, cy, 2 * intensity, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(160, 140, 220, ${0.4 * intensity})`;
         ctx.fill();
 
         this.animationId = requestAnimationFrame(animate);
