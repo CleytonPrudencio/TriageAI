@@ -6,6 +6,8 @@ import re
 import csv
 import threading
 import base64
+import time
+from datetime import datetime
 from contextlib import asynccontextmanager
 from typing import Optional
 
@@ -62,7 +64,14 @@ async def lifespan(app: FastAPI):
         train(DATA_PATH)
         cat_model, pri_model = load_models()
         print("Models trained and loaded")
+
+    # Start autonomous learning loop
+    start_learning()
+
     yield
+
+    # Stop learning on shutdown
+    stop_learning()
 
 
 app = FastAPI(title="TriageAI - AI Service", version="2.0.0", lifespan=lifespan)
@@ -1160,3 +1169,222 @@ Sem markdown, sem ```."""
         print(f"Refine failed: {e}")
         extra = "\n".join([f"- {r.get('pergunta', '')}: {r.get('resposta', '')}" for r in respostas])
         return {"descricaoEnriquecida": f"{descricao_atual}\n\nInformacoes adicionais:\n{extra}"}
+
+
+# ============================================================
+#  AUTONOMOUS LEARNING LOOP - ML <-> Claude conversation
+# ============================================================
+
+LEARNING_LOG_PATH = os.path.join(os.path.dirname(__file__), 'data', 'learning_log.json')
+LEARNING_INTERVAL = 3600  # 1 hour
+SAMPLES_PER_CYCLE = 50
+learning_running = False
+learning_stats = {"cycles": 0, "corrections": 0, "last_run": None, "last_accuracy": 0}
+
+
+def load_learning_log():
+    if os.path.exists(LEARNING_LOG_PATH):
+        with open(LEARNING_LOG_PATH, "r") as f:
+            return json.load(f)
+    return {"cycles": [], "total_corrections": 0, "total_evaluated": 0}
+
+
+def save_learning_log(log):
+    os.makedirs(os.path.dirname(LEARNING_LOG_PATH), exist_ok=True)
+    with open(LEARNING_LOG_PATH, "w") as f:
+        json.dump(log, f, indent=2, default=str)
+
+
+def run_learning_cycle():
+    """ML e Claude conversam: Claude gera chamados, ML classifica, divergencias viram treino."""
+    global cat_model, pri_model, learning_stats
+
+    api_key = get_anthropic_key()
+    if not api_key:
+        print("[LEARNING] Sem API key do Claude. Pulando ciclo.")
+        return {"status": "skipped", "reason": "no_api_key"}
+
+    if cat_model is None:
+        print("[LEARNING] Modelos nao carregados. Pulando ciclo.")
+        return {"status": "skipped", "reason": "no_models"}
+
+    print(f"[LEARNING] Iniciando ciclo em {datetime.now().isoformat()}")
+
+    # Step 1: Claude gera chamados realistas e classifica
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=4000,
+            messages=[{
+                "role": "user",
+                "content": f"""Gere {SAMPLES_PER_CYCLE} chamados de suporte tecnico realistas em portugues brasileiro.
+Varie entre: problemas tecnicos de microservicos; erros de banco de dados; falhas de API;
+problemas financeiros como boletos e pagamentos; questoes comerciais de precos e planos;
+tarefas administrativas; vulnerabilidades de seguranca; e outros.
+
+Classifique cada um com:
+- categoria: TECNICO ou FINANCEIRO ou COMERCIAL ou ADMINISTRATIVO ou SEGURANCA ou OUTROS
+- prioridade: CRITICA ou ALTA ou MEDIA ou BAIXA
+
+Responda SOMENTE com JSON array valido. Cada item:
+{{"texto": "descricao do chamado sem virgulas", "categoria": "CATEGORIA", "prioridade": "PRIORIDADE"}}
+
+Use ponto-e-virgula dentro dos textos em vez de virgula."""
+            }]
+        )
+
+        result_text = response.content[0].text.strip()
+        if result_text.startswith("```"):
+            result_text = result_text.split("\n", 1)[1]
+            result_text = result_text.rsplit("```", 1)[0].strip()
+        claude_samples = json.loads(result_text)
+    except Exception as e:
+        print(f"[LEARNING] Erro ao gerar amostras: {e}")
+        return {"status": "error", "reason": str(e)}
+
+    # Step 2: ML classifica os mesmos textos e compara
+    corrections = []
+    agreements = 0
+
+    for sample in claude_samples:
+        texto = sample.get("texto", "")
+        claude_cat = sample.get("categoria", "OUTROS")
+        claude_pri = sample.get("prioridade", "MEDIA")
+        if not texto:
+            continue
+
+        try:
+            ml_result = predict_internal(texto)
+            ml_cat = ml_result.get("categoria", "OUTROS")
+        except Exception:
+            ml_cat = "OUTROS"
+
+        if ml_cat == claude_cat:
+            agreements += 1
+        else:
+            corrections.append({
+                "texto": texto.replace(",", ";"),
+                "categoria": claude_cat,
+                "prioridade": claude_pri
+            })
+
+    # Step 3: Adiciona correcoes ao dataset
+    if corrections:
+        with open(DATA_PATH, "a", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f)
+            for c in corrections:
+                writer.writerow([c["texto"], c["categoria"], c["prioridade"]])
+        print(f"[LEARNING] {len(corrections)} correcoes adicionadas ao dataset")
+
+    # Step 4: Re-treina se teve correcoes suficientes
+    retrained = False
+    if len(corrections) >= 5:
+        print("[LEARNING] Re-treinando modelo...")
+        with retrain_lock:
+            try:
+                train(DATA_PATH)
+                new_cat, new_pri = load_models()
+                cat_model = new_cat
+                pri_model = new_pri
+                retrained = True
+            except Exception as e:
+                print(f"[LEARNING] Erro no re-treino: {e}")
+
+    # Step 5: Log
+    total = agreements + len(corrections)
+    accuracy = agreements / total if total > 0 else 0
+    cycle_result = {
+        "timestamp": datetime.now().isoformat(),
+        "evaluated": total,
+        "agreements": agreements,
+        "corrections": len(corrections),
+        "accuracy_vs_claude": round(accuracy * 100, 1),
+        "retrained": retrained
+    }
+
+    log = load_learning_log()
+    log["cycles"].append(cycle_result)
+    log["total_corrections"] += len(corrections)
+    log["total_evaluated"] += total
+    save_learning_log(log)
+
+    learning_stats.update({
+        "cycles": learning_stats["cycles"] + 1,
+        "corrections": learning_stats["corrections"] + len(corrections),
+        "last_run": datetime.now().isoformat(),
+        "last_accuracy": round(accuracy * 100, 1)
+    })
+
+    print(f"[LEARNING] Ciclo completo: {agreements}/{total} concordaram ({accuracy:.0%}), {len(corrections)} correcoes, re-treinou={retrained}")
+    return cycle_result
+
+
+def learning_loop_thread():
+    """Thread que roda ciclos de aprendizado a cada hora."""
+    global learning_running
+    learning_running = True
+    print(f"[LEARNING] Aprendizado autonomo iniciado (intervalo: {LEARNING_INTERVAL}s)")
+    time.sleep(60)  # Espera 1 min apos startup
+    while learning_running:
+        try:
+            run_learning_cycle()
+        except Exception as e:
+            print(f"[LEARNING] Erro no ciclo: {e}")
+        for _ in range(LEARNING_INTERVAL):
+            if not learning_running:
+                break
+            time.sleep(1)
+
+
+_learning_thread = None
+
+
+def start_learning():
+    global _learning_thread
+    config = load_config()
+    if config.get("auto_learning_enabled", True):
+        _learning_thread = threading.Thread(target=learning_loop_thread, daemon=True)
+        _learning_thread.start()
+
+
+def stop_learning():
+    global learning_running
+    learning_running = False
+
+
+@app.get("/learning/status")
+def learning_status():
+    log = load_learning_log()
+    recent = log.get("cycles", [])[-10:]
+    return {
+        "running": learning_running,
+        "stats": learning_stats,
+        "total_cycles": len(log.get("cycles", [])),
+        "total_corrections": log.get("total_corrections", 0),
+        "total_evaluated": log.get("total_evaluated", 0),
+        "recent_cycles": recent
+    }
+
+
+@app.post("/learning/run-now")
+def learning_run_now():
+    result = run_learning_cycle()
+    return result
+
+
+@app.post("/learning/toggle")
+def learning_toggle(body: dict):
+    global learning_running
+    enabled = body.get("enabled", True)
+    config = load_config()
+    config["auto_learning_enabled"] = enabled
+    save_config_file(config)
+
+    if enabled and not learning_running:
+        start_learning()
+        return {"message": "Aprendizado autonomo ativado", "running": True}
+    elif not enabled:
+        stop_learning()
+        return {"message": "Aprendizado autonomo desativado", "running": False}
+    return {"running": learning_running}
