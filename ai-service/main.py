@@ -170,7 +170,7 @@ def save_config(body: dict):
     config = load_config()
     if "anthropic_api_key" in body and body["anthropic_api_key"]:
         config["anthropic_api_key"] = body["anthropic_api_key"]
-    for key in ["learning_interval", "learning_samples", "learning_retrain_threshold", "auto_learning_enabled"]:
+    for key in ["learning_interval", "learning_samples", "learning_retrain_threshold", "auto_learning_enabled", "sexta_feira_use_claude"]:
         if key in body:
             config[key] = body[key]
     if "learning_interval" in body:
