@@ -8,11 +8,12 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../services/auth.service';
+import { SextaFeiraComponent } from '../chat/sexta-feira/sexta-feira.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule, MatIconModule, MatSidenavModule, MatListModule, MatTooltipModule],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule, MatIconModule, MatSidenavModule, MatListModule, MatTooltipModule, SextaFeiraComponent],
   template: `
     <div class="app-layout">
       <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
@@ -82,6 +83,8 @@ import { AuthService } from '../services/auth.service';
       <main class="main-content">
         <router-outlet></router-outlet>
       </main>
+
+      <app-sexta-feira></app-sexta-feira>
     </div>
   `,
   styles: [`

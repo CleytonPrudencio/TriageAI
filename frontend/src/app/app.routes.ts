@@ -22,6 +22,7 @@ export const routes: Routes = [
       { path: 'tutorial', loadComponent: () => import('./settings/tutorial/tutorial.component').then(m => m.TutorialComponent) },
       { path: 'profile', loadComponent: () => import('./settings/profile/profile.component').then(m => m.ProfileComponent) },
       { path: 'admin', loadComponent: () => import('./admin/admin-panel/admin-panel.component').then(m => m.AdminPanelComponent) },
+      { path: 'chat', loadComponent: () => import('./chat/sexta-feira/sexta-feira.component').then(m => m.SextaFeiraComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ]
   },

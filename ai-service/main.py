@@ -15,6 +15,7 @@ import json
 import requests
 import anthropic
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from model.classifier import load_models, predict, train, get_metrics, get_version
@@ -75,6 +76,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="TriageAI - AI Service", version="2.0.0", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class PredictRequest(BaseModel):
@@ -291,6 +300,95 @@ def predict_ticket(request: PredictRequest):
 
     result = predict(request.text, cat_model, pri_model)
     return PredictResponse(**result)
+
+
+@app.post("/chat")
+def chat_with_sextafeira(body: dict):
+    """Chat with Sexta-Feira - the local AI assistant (NO Claude API)."""
+    import random
+
+    message = body.get("message", "")
+    msg_lower = message.lower()
+
+    # Intent: Classify a text
+    if any(kw in msg_lower for kw in ["classific", "categoriz", "prioriz", "qual categoria", "que tipo"]):
+        try:
+            result = predict_internal(message)
+            return {
+                "response": f"Analisei o texto e classifiquei como **{result['categoria']}** com prioridade **{result['prioridade']}** (confianca: {float(result['score'])*100:.0f}%). Posso ajudar com mais alguma coisa?",
+                "type": "classification",
+                "data": result
+            }
+        except Exception:
+            return {"response": "Ainda nao estou treinada. Preciso ser treinada primeiro!", "type": "error"}
+
+    # Intent: Ask about stats/metrics
+    if any(kw in msg_lower for kw in ["metricas", "accuracy", "precisao", "como esta", "status", "modelo"]):
+        try:
+            metrics = get_metrics()
+            version = get_version()
+            return {
+                "response": f"Estou na versao **v{version.get('version', 0)}**! Minha acuracia atual esta em **{metrics.get('categoria_accuracy', 0)*100:.1f}%** para categorias. Tenho **{metrics.get('dataset_size', 0)}** amostras no meu dataset. Estou sempre aprendendo!",
+                "type": "metrics",
+                "data": metrics
+            }
+        except Exception:
+            return {"response": "Ainda nao tenho metricas disponiveis. Preciso ser treinada primeiro!", "type": "info"}
+
+    # Intent: Learning status
+    if any(kw in msg_lower for kw in ["aprendizado", "treinamento", "learning", "treino"]):
+        log = load_learning_log()
+        cycles = len(log.get("cycles", []))
+        corrections = log.get("total_corrections", 0)
+        return {
+            "response": f"Ja completei **{cycles}** ciclos de aprendizado autonomo e recebi **{corrections}** correcoes. " +
+                       ("Estou cada vez mais inteligente!" if cycles > 5 else "Ainda estou no comeco, mas aprendendo rapido!"),
+            "type": "learning"
+        }
+
+    # Intent: Help / What can you do
+    if any(kw in msg_lower for kw in ["ajuda", "help", "o que voce", "pode fazer", "quem e voce", "quem é"]):
+        return {
+            "response": "Ola! Eu sou a **Sexta-Feira**, a IA local do TriageAI!\n\nPosso te ajudar com:\n- **Classificar chamados** - me envie um texto e eu classifico\n- **Ver metricas** - pergunte sobre minha precisao\n- **Aprendizado** - saiba como estou evoluindo\n- **Analisar tickets** - pergunte sobre categorias e prioridades\n- **Conversar** - sobre o sistema e chamados\n\nO que precisa?",
+            "type": "help"
+        }
+
+    # Intent: Greeting
+    if any(kw in msg_lower for kw in ["oi", "ola", "olá", "hey", "bom dia", "boa tarde", "boa noite", "e ai"]):
+        greetings = [
+            "Ola! Eu sou a Sexta-Feira! Como posso ajudar?",
+            "Oi! Tudo bem? Estou aqui pra ajudar com seus chamados!",
+            "E ai! Sexta-Feira na area! O que precisa?",
+            "Ola! Pronta pra classificar e resolver! O que manda?"
+        ]
+        return {"response": random.choice(greetings), "type": "greeting"}
+
+    # Intent: Thank you
+    if any(kw in msg_lower for kw in ["obrigado", "obrigada", "valeu", "thanks", "brigado"]):
+        return {"response": "De nada! Estou sempre aqui pra ajudar. Precisa de mais alguma coisa?", "type": "greeting"}
+
+    # Default: Try to classify whatever text they sent
+    try:
+        result = predict_internal(message)
+        score = float(result.get('score', 0))
+
+        if score > 0.7:
+            confidence = "tenho bastante confianca"
+        elif score > 0.4:
+            confidence = "tenho confianca moderada"
+        else:
+            confidence = "nao estou muito segura"
+
+        return {
+            "response": f"Hmm, analisando... {confidence} que isso seria **{result['categoria']}** com prioridade **{result['prioridade']}** (score: {score*100:.0f}%).\n\nQuer que eu explique por que classifiquei assim?",
+            "type": "classification",
+            "data": result
+        }
+    except Exception:
+        return {
+            "response": "Desculpe, nao consegui processar sua mensagem. Tente perguntar sobre classificacao de chamados, metricas ou aprendizado!",
+            "type": "error"
+        }
 
 
 @app.post("/feedback")
