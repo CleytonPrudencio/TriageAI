@@ -1,6 +1,7 @@
 import { Component, ElementRef, ViewChild, AfterViewChecked, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,7 +18,7 @@ interface ChatMessage {
 @Component({
   selector: 'app-sexta-feira',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, MatTooltipModule],
+  imports: [CommonModule, FormsModule, RouterLink, MatIconModule, MatButtonModule, MatTooltipModule],
   template: `
     <!-- Floating Chat Button -->
     <button class="sf-fab" (click)="toggleChat()" [class.open]="isOpen" matTooltip="Sexta-Feira IA" matTooltipPosition="left">
@@ -43,6 +44,9 @@ interface ChatMessage {
             </span>
           </div>
         </div>
+        <a class="expand-btn" routerLink="/sexta-feira" matTooltip="Tela cheia">
+          <mat-icon>fullscreen</mat-icon>
+        </a>
         <button class="close-btn" (click)="toggleChat()">
           <mat-icon>close</mat-icon>
         </button>
@@ -234,6 +238,20 @@ interface ChatMessage {
     .close-btn:hover {
       background: rgba(255, 255, 255, 0.1);
       color: white;
+    }
+    .expand-btn {
+      color: rgba(255, 255, 255, 0.5);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .expand-btn:hover {
+      color: #a78bfa;
+      background: rgba(255, 255, 255, 0.1);
     }
 
     /* Avatar Small (header) */

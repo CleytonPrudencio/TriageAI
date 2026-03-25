@@ -5,6 +5,7 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
   { path: 'plans', loadComponent: () => import('./plans/plans.component').then(m => m.PlansComponent) },
+  { path: 'sexta-feira', loadComponent: () => import('./chat/sexta-feira-page/sexta-feira-page.component').then(m => m.SextaFeiraPageComponent) },
   {
     path: '',
     loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
