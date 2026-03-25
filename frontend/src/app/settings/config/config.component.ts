@@ -528,7 +528,7 @@ export class ConfigComponent implements OnInit {
   }
 
   revokeKey(id: number): void {
-    this.http.delete<any>(`/api/api-keys/${id}`).subscribe({
+    this.http.delete<any>(`http://localhost:8080/api/api-keys/${id}`).subscribe({
       next: () => {
         this.loadApiKeys();
         this.snackBar.open('API Key revogada', 'OK', { duration: 3000 });
