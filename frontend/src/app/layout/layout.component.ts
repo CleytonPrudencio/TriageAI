@@ -60,6 +60,10 @@ import { SextaFeiraComponent } from '../chat/sexta-feira/sexta-feira.component';
             <mat-icon>tune</mat-icon>
             <span *ngIf="!sidebarCollapsed">Configuracoes</span>
           </a>
+          <a (click)="goToSextaFeira()" class="nav-item" style="cursor: pointer;" [matTooltip]="sidebarCollapsed ? 'Sexta-Feira' : ''" matTooltipPosition="right">
+            <mat-icon>smart_toy</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Sexta-Feira</span>
+          </a>
           <a routerLink="/tutorial" routerLinkActive="active" class="nav-item" [matTooltip]="sidebarCollapsed ? 'Tutorial' : ''" matTooltipPosition="right">
             <mat-icon>school</mat-icon>
             <span *ngIf="!sidebarCollapsed">Tutorial</span>
@@ -221,6 +225,10 @@ export class LayoutComponent {
     this.userRole = user?.role || '';
     this.userInitials = this.userName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     this.isAdmin = this.userRole.toUpperCase() === 'ADMIN';
+  }
+
+  goToSextaFeira(): void {
+    window.location.href = '/sexta-feira';
   }
 
   logout(): void {

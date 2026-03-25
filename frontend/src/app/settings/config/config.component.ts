@@ -201,6 +201,20 @@ import { MatTooltipModule } from '@angular/material/tooltip';
             </div>
           </div>
 
+          <!-- Claude para Sexta-Feira -->
+          <div class="learning-header" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(139,92,246,0.1);">
+            <div class="learning-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" [checked]="sextaFeiraUseClaude" (change)="toggleSextaFeiraClaude($event)">
+                <span class="toggle-slider"></span>
+              </label>
+              <div>
+                <span class="toggle-label">Sexta-Feira usa Claude</span>
+                <p style="margin: 0; font-size: 12px; color: #64748b;">Quando ativado, Sexta-Feira compara suas respostas com o Claude e aprende as diferencas</p>
+              </div>
+            </div>
+          </div>
+
           <!-- Config -->
           <mat-divider></mat-divider>
           <div class="learning-config">
@@ -442,6 +456,9 @@ export class ConfigComponent implements OnInit {
   newKeyName = '';
   generatedKey = '';
 
+  // Sexta-Feira Claude
+  sextaFeiraUseClaude = false;
+
   // Learning
   learningRunning = false;
   learningCycleRunning = false;
@@ -560,6 +577,7 @@ export class ConfigComponent implements OnInit {
         if (cfg.learning_interval) this.learningInterval = cfg.learning_interval;
         if (cfg.learning_samples) this.learningSamples = cfg.learning_samples;
         if (cfg.learning_retrain_threshold) this.learningRetrainThreshold = cfg.learning_retrain_threshold;
+        if (cfg.sexta_feira_use_claude !== undefined) this.sextaFeiraUseClaude = cfg.sexta_feira_use_claude;
       },
       error: () => {}
     });
@@ -592,6 +610,14 @@ export class ConfigComponent implements OnInit {
         this.learningCycleRunning = false;
         this.snackBar.open('Erro no ciclo de aprendizado', 'OK', { duration: 3000 });
       }
+    });
+  }
+
+  toggleSextaFeiraClaude(event: any): void {
+    this.sextaFeiraUseClaude = event.target.checked;
+    this.http.post<any>('http://localhost:8000/config', { sexta_feira_use_claude: this.sextaFeiraUseClaude }).subscribe({
+      next: () => this.snackBar.open(this.sextaFeiraUseClaude ? 'Sexta-Feira agora aprende com Claude!' : 'Sexta-Feira usando apenas modelo local', 'OK', { duration: 3000 }),
+      error: () => {}
     });
   }
 

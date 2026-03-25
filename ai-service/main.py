@@ -403,7 +403,50 @@ def chat_with_sextafeira(body: dict):
     # Default: Try to classify whatever text they sent
     try:
         result = predict_internal(message)
+        ml_cat = result.get("categoria", "OUTROS")
+        ml_pri = result.get("prioridade", "MEDIA")
         score = float(result.get('score', 0))
+
+        config = load_config()
+        use_claude = config.get("sexta_feira_use_claude", False)
+
+        # If Claude learning is enabled, compare with Claude
+        claude_insight = ""
+        if use_claude:
+            api_key = get_anthropic_key()
+            if api_key:
+                try:
+                    client = anthropic.Anthropic(api_key=api_key)
+                    claude_response = client.messages.create(
+                        model="claude-sonnet-4-20250514",
+                        max_tokens=200,
+                        messages=[{
+                            "role": "user",
+                            "content": f"Classifique este chamado de suporte em UMA categoria (TECNICO, FINANCEIRO, COMERCIAL, ADMINISTRATIVO, SEGURANCA, OUTROS) e prioridade (CRITICA, ALTA, MEDIA, BAIXA). Responda SOMENTE com JSON: {{\"categoria\": \"X\", \"prioridade\": \"Y\"}}\n\nChamado: {message}"
+                        }]
+                    )
+                    claude_text = claude_response.content[0].text.strip()
+                    if claude_text.startswith("```"):
+                        claude_text = claude_text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+                    claude_result = json.loads(claude_text)
+                    claude_cat = claude_result.get("categoria", ml_cat)
+                    claude_pri = claude_result.get("prioridade", ml_pri)
+
+                    # Compare and learn
+                    if claude_cat != ml_cat:
+                        # Add to dataset as correction
+                        with open(DATA_PATH, "a", encoding="utf-8", newline="") as f:
+                            writer = csv.writer(f)
+                            writer.writerow([message.replace(",", ";"), claude_cat, claude_pri])
+                        claude_insight = f"\n\n_Aprendi algo novo! Claude sugeriu **{claude_cat}** e eu disse **{ml_cat}**. Guardei pra melhorar._"
+                        print(f"[SEXTA-FEIRA] Aprendeu: ML={ml_cat} vs Claude={claude_cat} -> Corrigiu para {claude_cat}")
+                        # Use Claude's classification
+                        ml_cat = claude_cat
+                        ml_pri = claude_pri
+                    else:
+                        claude_insight = "\n\n_Conferi com Claude e concordamos na classificacao!_"
+                except Exception as e:
+                    print(f"[SEXTA-FEIRA] Claude comparison failed: {e}")
 
         if score > 0.7:
             confidence = "tenho bastante confianca"
@@ -412,10 +455,13 @@ def chat_with_sextafeira(body: dict):
         else:
             confidence = "nao estou muito segura"
 
+        response = f"Analisando... {confidence} que isso seria **{ml_cat}** com prioridade **{ml_pri}** (score: {score*100:.0f}%)."
+        response += claude_insight
+
         return {
-            "response": f"Hmm, analisando... {confidence} que isso seria **{result['categoria']}** com prioridade **{result['prioridade']}** (score: {score*100:.0f}%).\n\nQuer que eu explique por que classifiquei assim?",
+            "response": response,
             "type": "classification",
-            "data": result
+            "data": {"categoria": ml_cat, "prioridade": ml_pri, "score": result.get("score", 0)}
         }
     except Exception:
         return {
