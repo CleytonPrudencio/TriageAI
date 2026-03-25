@@ -152,9 +152,17 @@ def get_config():
 @app.post("/config")
 def save_config(body: dict):
     """Save configuration"""
+    global LEARNING_INTERVAL, SAMPLES_PER_CYCLE
     config = load_config()
     if "anthropic_api_key" in body and body["anthropic_api_key"]:
         config["anthropic_api_key"] = body["anthropic_api_key"]
+    for key in ["learning_interval", "learning_samples", "learning_retrain_threshold", "auto_learning_enabled"]:
+        if key in body:
+            config[key] = body[key]
+    if "learning_interval" in body:
+        LEARNING_INTERVAL = int(body["learning_interval"]) * 60
+    if "learning_samples" in body:
+        SAMPLES_PER_CYCLE = int(body["learning_samples"])
     save_config_file(config)
     return {"message": "Configuration saved", "anthropic_key_set": bool(config.get("anthropic_api_key", ""))}
 

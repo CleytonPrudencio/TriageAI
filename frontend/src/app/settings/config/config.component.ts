@@ -11,6 +11,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-config',
@@ -27,6 +28,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatExpansionModule,
     MatSelectModule,
     MatSnackBarModule,
+    MatTooltipModule,
   ],
   template: `
     <div class="config-page">
@@ -156,6 +158,126 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
         </mat-card-content>
       </mat-card>
 
+      <!-- Autonomous Learning -->
+      <mat-card class="config-card learning-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="config-icon learning-icon">auto_awesome</mat-icon>
+          <mat-card-title>Aprendizado Autonomo</mat-card-title>
+          <mat-card-subtitle>ML e Claude conversam para melhorar o modelo continuamente</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <!-- Toggle + Status -->
+          <div class="learning-header">
+            <div class="learning-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" [checked]="learningRunning" (change)="toggleLearning($event)">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">{{ learningRunning ? 'Ativo' : 'Pausado' }}</span>
+            </div>
+            <button mat-stroked-button (click)="runLearningNow()" [disabled]="learningCycleRunning" class="run-now-btn">
+              <mat-icon>{{ learningCycleRunning ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
+              {{ learningCycleRunning ? 'Executando...' : 'Executar Agora' }}
+            </button>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="learning-stats" *ngIf="learningStatus">
+            <div class="stat-mini">
+              <span class="stat-value">{{ learningStatus.total_cycles || 0 }}</span>
+              <span class="stat-label">Ciclos</span>
+            </div>
+            <div class="stat-mini">
+              <span class="stat-value">{{ learningStatus.total_evaluated || 0 }}</span>
+              <span class="stat-label">Avaliados</span>
+            </div>
+            <div class="stat-mini">
+              <span class="stat-value">{{ learningStatus.total_corrections || 0 }}</span>
+              <span class="stat-label">Correcoes</span>
+            </div>
+            <div class="stat-mini">
+              <span class="stat-value">{{ learningStatus.stats?.last_accuracy || 0 }}%</span>
+              <span class="stat-label">Ultima Precisao</span>
+            </div>
+          </div>
+
+          <!-- Config -->
+          <mat-divider></mat-divider>
+          <div class="learning-config">
+            <h4><mat-icon>tune</mat-icon> Configuracoes do Ciclo</h4>
+            <div class="config-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Intervalo (minutos)</mat-label>
+                <mat-select [(ngModel)]="learningInterval" (selectionChange)="saveLearningConfig()">
+                  <mat-option [value]="15">15 min</mat-option>
+                  <mat-option [value]="30">30 min</mat-option>
+                  <mat-option [value]="60">1 hora</mat-option>
+                  <mat-option [value]="120">2 horas</mat-option>
+                  <mat-option [value]="360">6 horas</mat-option>
+                  <mat-option [value]="720">12 horas</mat-option>
+                  <mat-option [value]="1440">24 horas</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Amostras por ciclo</mat-label>
+                <mat-select [(ngModel)]="learningSamples" (selectionChange)="saveLearningConfig()">
+                  <mat-option [value]="20">20</mat-option>
+                  <mat-option [value]="50">50</mat-option>
+                  <mat-option [value]="100">100</mat-option>
+                  <mat-option [value]="200">200</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Re-treinar apos X correcoes</mat-label>
+                <mat-select [(ngModel)]="learningRetrainThreshold" (selectionChange)="saveLearningConfig()">
+                  <mat-option [value]="3">3</mat-option>
+                  <mat-option [value]="5">5</mat-option>
+                  <mat-option [value]="10">10</mat-option>
+                  <mat-option [value]="20">20</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Recent Cycles -->
+          <mat-divider></mat-divider>
+          <div class="learning-history" *ngIf="learningStatus?.recent_cycles?.length">
+            <h4><mat-icon>history</mat-icon> Ciclos Recentes</h4>
+            <div class="cycle-list">
+              <div class="cycle-item" *ngFor="let cycle of learningStatus.recent_cycles">
+                <div class="cycle-time">{{ cycle.timestamp | date:'dd/MM HH:mm' }}</div>
+                <div class="cycle-bar">
+                  <div class="bar-agree" [style.width.%]="(cycle.agreements / cycle.evaluated) * 100"></div>
+                </div>
+                <div class="cycle-info">
+                  <span class="agree-count">{{ cycle.agreements }}/{{ cycle.evaluated }}</span>
+                  <span class="accuracy-badge" [class.high]="cycle.accuracy_vs_claude >= 85" [class.medium]="cycle.accuracy_vs_claude >= 70 && cycle.accuracy_vs_claude < 85" [class.low]="cycle.accuracy_vs_claude < 70">
+                    {{ cycle.accuracy_vs_claude }}%
+                  </span>
+                  <mat-icon *ngIf="cycle.retrained" class="retrained-icon" matTooltip="Modelo re-treinado">model_training</mat-icon>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- How it works -->
+          <mat-expansion-panel class="help-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title><mat-icon>help_outline</mat-icon> Como funciona</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="help-content">
+              <ol>
+                <li><strong>Claude gera chamados</strong> — cria textos realistas de suporte e os classifica</li>
+                <li><strong>ML classifica</strong> — o modelo local classifica os mesmos textos</li>
+                <li><strong>Compara</strong> — onde divergirem; a resposta do Claude vira dado de treino</li>
+                <li><strong>Re-treina</strong> — se teve correcoes suficientes; o modelo e atualizado automaticamente</li>
+              </ol>
+              <p class="help-note">Quanto mais ciclos rodam; mais o modelo ML se aproxima da qualidade do Claude; reduzindo custos de API.</p>
+            </div>
+          </mat-expansion-panel>
+        </mat-card-content>
+      </mat-card>
+
       <!-- API Documentation -->
       <mat-card class="config-card">
         <mat-card-header>
@@ -271,6 +393,39 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     .api-method.delete { background: #ef4444; }
     .api-count { color: #64748b; font-size: 13px; }
 
+    .learning-icon { color: #8b5cf6; }
+    .learning-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .learning-toggle { display: flex; align-items: center; gap: 12px; }
+    .toggle-switch { position: relative; display: inline-block; width: 48px; height: 26px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; border-radius: 26px; transition: .3s; }
+    .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
+    .toggle-switch input:checked + .toggle-slider { background: #8b5cf6; }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(22px); }
+    .toggle-label { font-weight: 600; font-size: 14px; }
+    .run-now-btn { border-color: #8b5cf6 !important; color: #8b5cf6 !important; }
+    .learning-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-mini { text-align: center; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .stat-mini .stat-value { display: block; font-size: 24px; font-weight: 700; color: #1e293b; }
+    .stat-mini .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .learning-config h4 { display: flex; align-items: center; gap: 8px; margin: 16px 0 12px; color: #475569; font-size: 14px; }
+    .config-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .learning-history h4 { display: flex; align-items: center; gap: 8px; margin: 16px 0 12px; color: #475569; font-size: 14px; }
+    .cycle-list { display: flex; flex-direction: column; gap: 6px; }
+    .cycle-item { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; font-size: 13px; }
+    .cycle-time { color: #64748b; min-width: 80px; font-family: monospace; }
+    .cycle-bar { flex: 1; height: 8px; background: #fee2e2; border-radius: 4px; overflow: hidden; }
+    .bar-agree { height: 100%; background: #22c55e; border-radius: 4px; transition: width 0.3s; }
+    .cycle-info { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+    .agree-count { color: #64748b; font-family: monospace; }
+    .accuracy-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+    .accuracy-badge.high { background: #dcfce7; color: #16a34a; }
+    .accuracy-badge.medium { background: #fef3c7; color: #d97706; }
+    .accuracy-badge.low { background: #fee2e2; color: #dc2626; }
+    .retrained-icon { font-size: 16px; width: 16px; height: 16px; color: #8b5cf6; }
+    .help-content ol { padding-left: 20px; line-height: 2; }
+    .help-note { background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 8px 12px; margin-top: 12px; font-size: 13px; color: #475569; }
+
     mat-card-content { padding: 16px !important; }
   `]
 })
@@ -287,12 +442,21 @@ export class ConfigComponent implements OnInit {
   newKeyName = '';
   generatedKey = '';
 
+  // Learning
+  learningRunning = false;
+  learningCycleRunning = false;
+  learningStatus: any = null;
+  learningInterval = 60;
+  learningSamples = 50;
+  learningRetrainThreshold = 5;
+
   constructor(private http: HttpClient, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
     this.loadConfig();
     this.loadApiKeys();
     this.checkAiService();
+    this.loadLearningStatus();
   }
 
   loadConfig(): void {
@@ -379,5 +543,66 @@ export class ConfigComponent implements OnInit {
         },
         error: () => this.snackBar.open('Erro ao exportar', 'OK', { duration: 3000 })
       });
+  }
+
+  // --- Learning ---
+  loadLearningStatus(): void {
+    this.http.get<any>('http://localhost:8000/learning/status').subscribe({
+      next: (data) => {
+        this.learningStatus = data;
+        this.learningRunning = data.running;
+      },
+      error: () => {}
+    });
+    // Load config for interval/samples
+    this.http.get<any>('http://localhost:8000/config').subscribe({
+      next: (cfg) => {
+        if (cfg.learning_interval) this.learningInterval = cfg.learning_interval;
+        if (cfg.learning_samples) this.learningSamples = cfg.learning_samples;
+        if (cfg.learning_retrain_threshold) this.learningRetrainThreshold = cfg.learning_retrain_threshold;
+      },
+      error: () => {}
+    });
+  }
+
+  toggleLearning(event: any): void {
+    const enabled = event.target.checked;
+    this.http.post<any>('http://localhost:8000/learning/toggle', { enabled }).subscribe({
+      next: (res) => {
+        this.learningRunning = res.running;
+        this.snackBar.open(res.message, 'OK', { duration: 3000 });
+      },
+      error: () => this.snackBar.open('Erro ao alterar aprendizado', 'OK', { duration: 3000 })
+    });
+  }
+
+  runLearningNow(): void {
+    this.learningCycleRunning = true;
+    this.snackBar.open('Ciclo de aprendizado iniciado...', 'OK', { duration: 2000 });
+    this.http.post<any>('http://localhost:8000/learning/run-now', {}).subscribe({
+      next: (res) => {
+        this.learningCycleRunning = false;
+        this.loadLearningStatus();
+        const msg = res.status === 'skipped'
+          ? `Pulado: ${res.reason}`
+          : `Concluido! ${res.agreements || 0}/${res.evaluated || 0} concordaram (${res.accuracy_vs_claude || 0}%). ${res.corrections || 0} correcoes. Re-treinou: ${res.retrained ? 'Sim' : 'Nao'}`;
+        this.snackBar.open(msg, 'OK', { duration: 8000 });
+      },
+      error: () => {
+        this.learningCycleRunning = false;
+        this.snackBar.open('Erro no ciclo de aprendizado', 'OK', { duration: 3000 });
+      }
+    });
+  }
+
+  saveLearningConfig(): void {
+    this.http.post<any>('http://localhost:8000/config', {
+      learning_interval: this.learningInterval,
+      learning_samples: this.learningSamples,
+      learning_retrain_threshold: this.learningRetrainThreshold
+    }).subscribe({
+      next: () => this.snackBar.open('Configuracao salva', 'OK', { duration: 2000 }),
+      error: () => {}
+    });
   }
 }
