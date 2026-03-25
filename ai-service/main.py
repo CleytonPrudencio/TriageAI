@@ -155,6 +155,11 @@ def get_config():
     return {
         "anthropic_key_set": bool(config.get("anthropic_api_key", "")),
         "anthropic_key_preview": config.get("anthropic_api_key", "")[:12] + "..." if config.get("anthropic_api_key", "") else "",
+        "auto_learning_enabled": config.get("auto_learning_enabled", True),
+        "learning_interval": config.get("learning_interval", 60),
+        "learning_samples": config.get("learning_samples", 50),
+        "learning_retrain_threshold": config.get("learning_retrain_threshold", 5),
+        "sexta_feira_use_claude": config.get("sexta_feira_use_claude", False),
     }
 
 

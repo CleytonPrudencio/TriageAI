@@ -578,6 +578,8 @@ export class ConfigComponent implements OnInit {
         if (cfg.learning_samples) this.learningSamples = cfg.learning_samples;
         if (cfg.learning_retrain_threshold) this.learningRetrainThreshold = cfg.learning_retrain_threshold;
         if (cfg.sexta_feira_use_claude !== undefined) this.sextaFeiraUseClaude = cfg.sexta_feira_use_claude;
+        // Config é a fonte de verdade para o toggle
+        if (cfg.auto_learning_enabled !== undefined) this.learningRunning = cfg.auto_learning_enabled;
       },
       error: () => {}
     });
